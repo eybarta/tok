@@ -1,0 +1,28 @@
+<head>
+  <title>Tree Of Knowledge</title>
+  <link rel="stylesheet" href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css">
+</head>
+
+<body>
+  {{> quizzzler }}
+</body>
+
+
+<template name="quizzzler">
+  {{> account }}
+
+  <app></app>
+</template>
+
+
+<template name="account">
+ {{#if unsigned}}
+    <div class="login-wrap">
+      {{> atForm }}
+    </div>
+{{else}}
+	<div class="profile">
+		<span class="user">{{ currentUser.profile.name }}</span><button class="logout-btn">LOG OUT</button>
+	</div>
+{{/if }}
+</template>

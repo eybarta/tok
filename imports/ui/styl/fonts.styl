@@ -1,0 +1,57 @@
+@font-face {
+  font-family: 'Alef Regular';
+  font-path: '/fonts/Alef-regular';
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Alef Bold';
+  font-path: '/fonts/Alef-bold';
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-path: '/fonts/HelveticaNeueLTStd-Lt';
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Helvetica Md';
+  font-path: '/fonts/HelveticaNeueLTStd-Md';
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Helvetica Thin';
+  font-path: '/fonts/NeueHaasUnicaW1G-Thin';
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica Thin txt';
+  font-path: '/fonts/helveticaneue-thin';
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+fontsizer(min = 12px,max = 18px)
+	font-size responsive min max;
+	
+	
+for name, size in fontsize
+	.txt-{name}
+		font-size responsive unit(size/16, 'rem') unit(size/16*1.4, 'rem')
+		font-range 768px 1600px
+h2
+	fontsizer(32px, 44px)
+h3
+	fontsizer(22px, 34px)
+h4
+	fontsizer(14px, 26px)
+	
+.big-icon
+	fontsizer(18px, 54px)
+

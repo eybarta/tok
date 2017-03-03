@@ -1,0 +1,39 @@
+{
+  "name": "quizzzler",
+  "private": true,
+  "scripts": {
+    "start": "meteor run"
+  },
+  "dependencies": {
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-runtime": "^6.23.0",
+    "bcrypt": "^1.0.2",
+    "linearicons": "^1.0.0",
+    "meteor-node-stubs": "^0.2.5",
+    "swiper": "^3.4.1",
+    "velocity-animate": "^1.4.3",
+    "vue": "^2.1.10",
+    "vue-awesome-swiper": "^2.3.2",
+    "vue-paginate": "^3.4.0",
+    "vue-router": "^2.2.1",
+    "vuex": "^2.1.2",
+    "vuex-router-sync": "^4.1.2"
+  },
+  "devDependencies": {
+    "kouto-swiss": "^1.1.0",
+    "lost": "^8.0.0",
+    "rucksack-css": "^0.9.1",
+    "shortid": "^2.2.6"
+  },
+  "postcss": {
+    "plugins": {
+      "rucksack-css": {},
+      "lost": {},
+      "autoprefixer": {
+        "browsers": [
+          "last 2 versions"
+        ]
+      }
+    }
+  }
+}

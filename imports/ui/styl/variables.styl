@@ -6,4 +6,86 @@ blue = #b0fcff;
 darkblue = #3c6c79;
 gray = #202020;
 green = #86d040;
+bluegreen = #0bddbe;
 darktint = rgba(#20242f,0.67);
+
+// margins + padding aliases
+$space = {
+	mt: margin-top,
+	mb: margin-bottom,
+	ml: margin-left,
+	mr: margin-right,
+	pt: padding-top,
+	pb: padding-bottom,
+	pl: padding-left,
+	pr: padding-right,
+}
+// ALIAS
+@alias {
+	mt: margin-top;
+	mb: margin-bottom;
+	ml: margin-left;
+	mr: margin-right;
+	pt: padding-top;
+	pb: padding-bottom;
+	pl: padding-left;
+	pr: padding-right;
+}
+
+$cross
+	&:before, &:after
+		content ''
+		display block
+		position absolute  
+		transform-origin 50%
+		top 50%
+		left 50%
+		height 1px
+		width 100%
+		background linkblue
+	&:before
+		transform translate(-50%, -1px) rotate(-45deg)
+	&:after
+		transform translate(-50%, 0) rotate(45deg)
+
+cure-me()
+	-webkit-backface-visibility hidden
+	-webkit-perspective 1000
+	-webkit-transform translate3d(0,0,0)
+	-webkit-transform translateZ(0)
+	backface-visibility hidden
+	perspective 1000
+	transform translate3d(0,0,0)
+	transform translateZ(0)
+
+blur-me(pixels = 5px)
+	filter url("data:image/svg+xml;utf9,<svg%20version='1.1'%20xmlns='http://www.w3.org/2000/svg'><filter%20id='blur'><feGaussianBlur%20stdDeviation='10'%20/></filter></svg>#blur")
+	-webkit-filter blur(pixels)
+	-ms-filter blur(pixels)
+	-o-filter blur(pixels)
+	filter blur(pixels)
+
+// CENTERING
+centered(width = 1200px)
+	lost-center unit(width, 'px')
+
+// breakpoints
+breaks = {
+	mobile: 640px,
+	mid: 570px,
+	tablet: 769px,
+	base: 1025px,
+	big: 1200px,
+	bigger: 1600px,
+	max: 1880px
+}
+
+margins = {
+	min:10px,
+	small:20px,
+	med:30px,
+	big:50px,
+	bigger:70px,
+	max:100px,
+	maxx: 160px
+}

@@ -1,0 +1,29 @@
+self-center(dir=both)
+	position absolute
+	if (dir==vertical)
+		top 50%
+		transform translateY(-50%)
+	else if (dir==horizontal)
+		left 50%
+		transform translateX(-50%)
+	else
+		top 50%
+		left 50%
+		transform translate(-50%,-50%)
+
+corner(ver=top, hor=left) {
+    position absolute
+    if (hor==left) {
+        left: 1%
+    }
+    else {
+        right: 1%
+    }
+    if (ver==top) {
+        top: 1%
+    }
+    else {
+        bottom: 1%
+    }
+}
+    

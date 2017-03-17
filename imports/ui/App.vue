@@ -1,33 +1,54 @@
 <template>
-	<div v-show="!!loggedIn" class="app-wrap">
-        <h1>Quizzzler</h1>
-
+	<div :class="['app-wrap', lang]">
+		<div class="logo right"><span>Q</span>uizzzler</div>
+		<side-menu></side-menu>
         <!--<add-question></add-question>-->
-		<series-test></series-test>
+		<!--<series-test></series-test>-->
+		<router-view></router-view>
+
+		<popup v-if="popup.active">
+			<!--<component  :is="popup.type"></component>-->
+		</popup>
 	</div>
 </template>
 <script>
-import AddQuestion from './components/AddQuestion.vue'
-import SeriesTest from './components/series/SeriesTest.vue'
+import SideMenu from './components/SideMenu.vue'
+// import AddQuestion from './components/AddQuestion.vue'
+// import SeriesTest from './components/series/SeriesTest.vue'
+import Popup from './components/Popup.vue'
+import { mapActions, mapState } from 'vuex'
 export default {
+	data() {
+		return {
+			lang: 'heb'
+		}
+	},
 	created() {
 		console.log('app was created successfuly');
+		this.initUser();
+		this.initUsers();
 	},
     components: {
-        AddQuestion,
-		SeriesTest
+		SideMenu,
+        // AddQuestion,
+		// SeriesTest,
+		Popup
     },
 	methods: {
-		
+		...mapActions([
+			'initUser',
+			'initUsers'
+		]),
 	},
 	computed: {
-		loggedIn() {
-            return Accounts.userId()
-        }
+		...mapState([
+			'popup'
+		])
 	}
 }
 </script>
 <style lang="stylus">
+@import '~imports/ui/styl/settings'
 .app-wrap
 	width 100%
 	height 100%

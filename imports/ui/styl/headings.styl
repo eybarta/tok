@@ -1,0 +1,18 @@
+@import './variables'
+.logo
+    direction ltr !important
+    color bluegreen
+    font-family "Varela Round"
+    font-size 33px
+    position absolute 11px 22px false false
+    opacity 0.2
+    transition opacity 400ms ease
+    span
+        display inline-block
+        position relative
+        transform rotate(0deg)
+        transition transform 400ms ease-out-back
+    &:hover
+        opacity 0.6
+        span
+            transform rotate(-22deg)

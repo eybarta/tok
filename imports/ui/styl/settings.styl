@@ -1,6 +1,27 @@
-html, body
-    font-family 'Helvetica Thin'
-    *
-        box-sizing border-box
-    a, a:visited, a:active
-        text-decoration none
+@import './lib/rupture'
+@import './variables'
+@import './mixins'
+
+
+.center
+    margin 0 auto
+.tcenter
+    text-align center
+.right
+    float right
+.left
+    float left
+
+.topleft
+    corner()
+.topright
+    corner(top, right)
+// margin 
+for alias, prop in $space
+    for size,value in margins
+        .{alias}-{size}
+            {prop} value
+            +below(breaks.tablet)
+                {prop} round((value/1.8))
+            +below(breaks.mobile)
+                {prop} round((value/2))

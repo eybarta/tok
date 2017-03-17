@@ -1,15 +1,12 @@
 import shortid from 'shortid'
-export function questionGenerator(category, type, amount) {
+export function questionGenerator(category, type, amount, range) {
     if (category=='series') {
-        let seriesQuestionList = []
-        if (type=='add') {
-            return generateAddition(amount, type);
-        }
+        return getQuestions(amount, type, range);
     }
 }
 
-function generateAddition(amount, type) {
-    console.log('generate addition.. ', amount);
+function getQuestions(amount, type, range) {
+    console.log('generate question.. type: ',type, ' amount: ', amount);
     let questionList = [],
         questionObj = {
             id: null,
@@ -19,7 +16,7 @@ function generateAddition(amount, type) {
                 list:[]
             },
             control: null,
-            operation: 'add',
+            // operation: 'add',
             chosenAnswer: null
 
         },
@@ -27,34 +24,56 @@ function generateAddition(amount, type) {
         controlList = [],
         wrongControls = []
 
-    // Control number to operate on
+    /*
+        Create Control number list >>
+        for the operations
+    */
+    
     while (controlList.length<amount) {
-        let control = _.random(-20,20)
+        let control = _.random(...range)
         controlList.push(control);
-        controlList = _.uniq(_.compact(controlList));
+        
+        // Not Allow same values
+        // *Make sure to have more range then amount to avoid infinite loop
+        // controlList = _.uniq(_.compact(controlList));
+
+        // Allow same values
+        controlList = _.compact(controlList);
     }
     while(wrongControls.length<3) {
         wrongControls.push(_.random(-3,3));
         wrongControls = _.uniq(_.compact(wrongControls));
     }
     for (var i=0;i<amount;i++) {
-
         // Populate the question object
         let obj = _.cloneDeep(questionObj);
         obj.id = shortid.generate();
-        let primary = _.random(0,9);
         obj.control = controlList[i];
+
+        // PARTS        
+        let primary = _.random(0,9);
+        obj.parts.push(primary);
         for (var k = 0;k<5;k++) {
-            obj.parts.push(_[type](primary, (obj.control*(k+1))))
+            obj.parts.push(_[type](_.last(obj.parts), obj.control))
         }
-        
+
+        // ANSWERS
         obj.answers.correct = _[type](_.last(obj.parts), obj.control);
         obj.answers.list.push(obj.answers.correct)
         for (var j=0;j<3;j++) {
-            obj.answers.list.push(_[type](_.last(obj.parts), obj.control+wrongControls[j])); 
+
+            /*
+                One way of wrong answers:
+                (-3 -- 3 from obj.control)
+            */
+            // obj.answers.list.push(_[type](_.last(obj.parts), obj.control+wrongControls[j])); 
+
+            /*
+                Second way of wrong answers: 
+                (-3 -- 3 from correct answer)
+            */
+            obj.answers.list.push(_.add(obj.answers.correct, wrongControls[j]))
         }
-        
-        console.log("obj >> ", obj);
         questionList.push(obj);
     }
     return questionList;

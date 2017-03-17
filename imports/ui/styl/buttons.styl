@@ -1,0 +1,19 @@
+@import './variables'
+.btn
+    cursor pointer
+    font-family 'Varela Round'
+    display inline-block
+    padding 4px 18px
+    background none
+    outline none
+    border 1px solid transparent
+    border-radius 9px
+    transition color 400ms ease, background 400ms ease
+    &-big
+        font-size 40px
+    &-success
+        border-color darken(bluegreen, 5)
+        color darken(bluegreen, 5)
+        &:hover
+            color darken(bluegreen, 1)
+            background rgba(darken(bluegreen, 5), 0.05)

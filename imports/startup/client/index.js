@@ -3,4 +3,4 @@
 
 // import './routes';
 import './helpers/accounts.helper'
-import './account-config';
+// import './account-config';

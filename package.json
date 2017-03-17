@@ -23,6 +23,7 @@
     "kouto-swiss": "^1.1.0",
     "lost": "^8.0.0",
     "rucksack-css": "^0.9.1",
+    "rupture": "^0.6.2",
     "shortid": "^2.2.6"
   },
   "postcss": {

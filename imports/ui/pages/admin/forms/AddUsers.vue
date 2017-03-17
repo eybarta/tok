@@ -1,0 +1,69 @@
+<template>
+<div class="add-users-form">
+    <div class="form">
+        <input placeholder="הזן תאריך" ref="datepicker" v-model="date" @change="dateChange($event)" type="text">
+        <textarea v-model="rawStringIds" cols="30" rows="10"></textarea>
+    </div>
+    <div class="tleft mtbase">
+        <button @click="saveUsers({ date, userIds})" class="btn btn-success">לשמור
+        </button>
+    </div>
+</div>
+</template>
+<script>
+import { mapActions } from 'vuex'
+import Pikaday from 'pikaday'
+    export default {
+        data() {
+            return {
+                date: null,
+                rawStringIds: '',
+            }
+        },
+        mounted() {
+            let ref = this;
+            new Pikaday({ 
+                field: ref.$refs.datepicker,
+                format: 'D/M/YYYY' 
+                });
+        },
+        methods: {
+            ...mapActions([
+                'saveUsers'
+            ]),
+            dateChange(e) {
+                this.$set(this, 'date', e.target.value)
+            }
+        },
+        computed: {
+            userIds() {
+                let string = this.rawStringIds.replace(/\s/g, '');
+                return string.split(',')
+            }
+        }
+    }
+</script>
+<style lang="sass">
+@import '~node_modules/pikaday/scss/pikaday.scss'
+</style>
+<style lang="stylus">
+@import '~imports/ui/styl/variables.styl'
+.form
+    padding 30px 0
+    input,textarea
+        font-family 'Alef Regular'
+        width 100%
+        height 40px
+        border-radius 7px
+        border 1px solid bluegreen
+        outline 0
+        box-shadow none
+        padding 0 2%
+        font-size 18px
+        color darken(darkgray, 25)
+    textarea
+        height auto
+        min-height 80px
+        padding 2%
+        margin 20px 0
+</style>

@@ -71,20 +71,24 @@
 	.at-link
 		color darken(blue, 55)
 .profile
-	absolute 0 0 false false 
-	padding-top 15px
+	relative 0 0 false false 
+	margin-top -20px
+	margin-right 5px
+	margin -20px 5px 0
 	z-index 1001
+	text-align right
 	span
-		display inline-block
-		color darken(#fff, 10)
+		float right
+		color #fff
 		font-size 14px
-		margin-right 10px
 	.logout-btn
+		float left
 		background none
 		border 0
-		padding 3px 6px
+		padding 0
 		border-radius 6px
 		color lighten(#67777b, 10)
+		cursor pointer
 		transition background 200ms ease-out
 		&:active, &:focus
 			outline 0

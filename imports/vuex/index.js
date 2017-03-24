@@ -1,36 +1,34 @@
-
+import { categories } from '/imports/api/categories'
 import * as actions from './actions'
+
+
 
 const state = {
     user: {
         roles:[]
     },
     users: [],
+    userLogins: null,
     popup: {
         active:false,
         type: null,
         data: null,
         title:null
     },
-    testMenu: {
-        category: null, // ['מטריצות', 'סדרות'...]
-        type: [
-                {
-                    label:'תרגול',
-                    value: 'practice'
-                },
-                {
-                    label: 'מבחן',
-                    value: 'test'
-                },
-                {
-                    label: 'מכינה',
-                    value: 'prepare'
-
-                }
-            ],
-        subcategory: null, //['חיסור', 'חיבור'...]
-    }
+    testTypes:  [
+        {
+            label:'תרגול',
+            value: 'practice'
+        },
+        {
+            label: 'מבחן',
+            value: 'test'
+        },
+        {
+            label: 'מכינה',
+            value: 'prepare'
+        }
+    ]
 }
 
 const mutations = {
@@ -39,6 +37,9 @@ const mutations = {
     },
     INIT_USERS (state, users) {
         state.users = users
+    },
+    USER_LOGINS (state, users) {
+        state.userLogins = users;
     },
      // MISC
     CLOSE_POPUP (state) {
@@ -70,20 +71,79 @@ const getters = {
         return false;
     },
     currentMenuItems: (state) => {
-        // state.route.params
+        let params = state.route.params;
+        let category = params.category;
+        console.log("currentmenuItems >> ");
+        console.log("params >> ", params);
+        console.log("category >> ", category);
+        if (!!params.subcategory) {
+            return state.testTypes;
+        }
+        else if (!!params.category) {
+            let cat = _.find(categories, { value: category})
+            return cat.children;
+        }
+        else {
+            return categories
+        }
+
     },
-    breadCrumbs: state => {
+    activeUser: (state) => {
+        // let user = Meteor.user();
+        
+        Tracker.autorun((c) => {
+            let userId = Meteor.userId();
+            if (!!userId) {
+                let user = Meteor.user();
+                console.log('USER GET ', user);
+                return user;
+                // Meteor.setTimeout(function() {
+                //     c.stop();
+                // }, 3000)
+            } else {
+                return null;
+            }
+        })
+    },
+    activeCategory: state => {
+        let params = state.route.params;
+        if (!!params.category) {
+            return _.find(categories, {value:params.category});
+        }
+        return null
+    },
+    breadCrumbs: (state, getters) => {
 		// return Array to render for breadCrumbs
-		let params = {};
-		let bc = _.map(state.route.params, function(value,key, obj){
-			params[key] = value;
-			return {
-				name: 'results-'+_.split(key, "Filter")[0],
-				params: _.clone(params),
-				label: value
-			}
-		})
-		return bc;
+        let cat = getters.activeCategory;
+        let label, name, order;
+		    bc = _.map(state.route.params, function(value,key, obj){
+                console.log("bc>>>>> ", value, " :: ", key, " :: ", obj);
+                if (key=='id') {
+                    label = '<i class="fa fa-home"></i>';
+                    name = 'userhome';
+                    order = 0;
+                }
+                if (!!cat && key=='category') {
+                    // cat = _.find(categories, {value});
+                    label = _.get(cat, 'label')
+                    name = key;
+                    order = 1;
+                }
+                if (!!cat && key=='subcategory') {
+                    let subcat = _.find(cat.children, {value});
+                    console.log('subcat >> ', subcat)
+                    label = _.get(subcat, 'label')
+                    name = key;
+                    order = 2;
+                }
+                return {
+                    name,
+                    params: { [key]: value },
+                    label,
+                    order
+                }
+		    })
+		return _.orderBy(bc, 'order');
 	},
 }
 

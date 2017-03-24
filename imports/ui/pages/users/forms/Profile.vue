@@ -2,38 +2,57 @@
 <div class="profile-form">
     <ul class="form">
         <li>
-            <input required v-model="name" type="text" id="name">
+            <input required v-model="profile.name" type="text" id="name">
             <label for="name">שם מלא</label>
         </li>
         <li>
-            <input required v-model="email" type="text" id="email">
+            <input required v-model="profile.email" type="text" id="email">
             <label for="email">כתובת אימייל</label>
         </li>
         <li>
-            <input required v-model="phone" type="text" id="phone">
+            <input required v-model="profile.phone" type="text" id="phone">
             <label for="phone">מספר טלפון</label>
         </li>
         <li>
-            <input required v-model="city" type="text" id="city">
+            <input required v-model="profile.city" type="text" id="city">
             <label for="city">אזור מגורים</label>
         </li>
         <li>
-            <input required v-model="dob" type="text" id="dob">
+            <input required v-model="profile.dob" ref="datepicker" @change="profile.dob = $event.target.value" type="text" id="dob">
             <label for="dob">תאריך לידה</label>
         </li>
         <li>
-            <select name="" id="yearsOfEducation" v-model="education.years">
-                <option v-for="i in 13" :value="i">{{i}}</option>
-            </select>
             <label for="yearsOfEducation">שנות לימוד</label>
+            <select name="" id="yearsOfEducation" v-model="profile.education.years">
+                <option v-for="i in 12" :value="i">{{i}}</option>
+            </select>
+        </li>
+        <li v-if="isAdmin">
+            <label for="status">סטטוס</label>
+            <!--
+            <multiselect v-model="profile.status" track-by="value" label="label" placeholder="מה הסטטוס?"
+                    :options="userOptions.status"
+                    :searchable="false"
+                    :close-on-select="true"
+                    :allow-empty="false"></multiselect>
+                    -->
         </li>
     </ul>
+    <button @click="saveUserProfile({profile, userId})" class="btn btn-success">שמור</button>
 </div>
 </template>
 <script>
-    export default {
-        data() {
-            return {
+import { userOptions } from '/imports/api/userConstants'
+
+// import Multiselect from 'vue-multiselect'
+import { mapActions, mapState, mapGetters } from 'vuex'
+export default {
+    props: ['moredata'],
+    data() {
+        return {
+            userOptions,
+            userId: null,
+            profile: {
                 name: null,
                 email: null,
                 phone: null,
@@ -42,11 +61,49 @@
                 education: {
                     years: null,
                     higher: null
+                },
+                status: {
+                    label: null,
+                    value: null
                 }
-
             }
         }
+    },
+    mounted() {
+        let ref = this;
+        new Pikaday({ 
+            field: ref.$refs.datepicker,
+            format: 'D/M/YYYY',
+            yearRange: [1900,2005]
+        });
+        if (!!this.moredata && _.has(this.moredata, 'profile')) {
+            // Admin is editing user
+            this.$set(this, 'userId', this.moredata._id)
+            _.merge(this.profile, this.moredata.profile)
+        }
+        else {
+            // User is editing himself
+            
+            _.merge(this.profile, this.user.profile)
+        }
+    },
+    components: {
+        // MultiSelect
+    },
+    methods: {
+        ...mapActions([
+            'saveUserProfile'
+        ])
+    },
+    computed: {
+        ...mapState([
+            'user'
+        ]),
+        ...mapGetters([
+            'isAdmin'
+        ])
     }
+}
 </script>
 <style lang="stylus">
 .form

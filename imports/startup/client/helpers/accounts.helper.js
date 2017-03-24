@@ -1,3 +1,5 @@
+
+
 Template.login.helpers({
 	currentUser() {
 		return Meteor.user()
@@ -16,8 +18,7 @@ Template.login.helpers({
 
 Template.profile.events({
  'click .logout-btn' (event) {
-	AccountsTemplates.logout(function(res) {
-		console.log('log out callback >> ', res)
-	});
+	AccountsTemplates.logout();
+	
   }
 })

@@ -49,8 +49,6 @@
     </div>
 </template>
 <script>
-import Velocity from 'velocity-animate';
-import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import { questionGenerator } from '/imports/api/questionGenerator'
     export default {
         data() {
@@ -69,10 +67,6 @@ import { questionGenerator } from '/imports/api/questionGenerator'
         mounted() {
             document.body.addEventListener('keyup', this.keyupHandler)
         },
-        components: {
-		    swiper,
-		    swiperSlide
-	    },
         methods: {
             keyupHandler(e) {
                 (e.keyCode==37) 

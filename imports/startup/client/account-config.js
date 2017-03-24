@@ -1,4 +1,6 @@
-// import { Accounts } from 'meteor/accounts-base';
+import { router } from '/imports/startup/client/router'
+
+console.log('Router ?? ', router)
 
 var email = AccountsTemplates.removeField('email');
 var pwd = AccountsTemplates.removeField('password');
@@ -14,6 +16,17 @@ Accounts.config({
 Accounts.ui.config({
   passwordSignupFields: 'USERNAME_ONLY',
 });
+
+AccountsTemplates.configure({
+  texts: {
+      button: {
+          signUp: "Register Now!",
+          signIn: 'התחבר'
+      },
+      signUpLink_pre: '',
+      signUpLink_link: 'צריך להירשם?'
+    },
+})
 
 AccountsTemplates.addFields([
     {
@@ -42,3 +55,38 @@ AccountsTemplates.addFields([
 
 // AccountsTemplates.addField(email);
 // AccountsTemplates.addField(pwd);
+const userId = Meteor.userId()
+// CALLBACKS
+Accounts.onLogin(() => {
+  console.log('login callback');
+  let interval = Meteor.setInterval(function() {
+      let userId = Meteor.userId()
+      console.log('useriddd ', userId);
+      
+      if (!!userId) {
+        Meteor.clearInterval(interval)
+        console.log('finally logged in >> ', router, );
+        if (router.currentRoute.path=="/") {
+          router.push({ name: 'adminhome'})
+        }
+      }
+      
+    }, 100)
+
+})
+
+Accounts.onLogout(() => {
+    console.log('logout callback');
+    let interval = Meteor.setInterval(function() {
+      let userId = Meteor.userId()
+      console.log('useriddd ', userId);
+      
+      if (!userId) {
+        console.log('finally logged out');
+        clearInterval(interval)
+        router.push('/')
+      }
+      
+    }, 100)
+
+})

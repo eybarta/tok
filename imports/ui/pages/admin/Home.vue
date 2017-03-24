@@ -1,15 +1,28 @@
 <template>
-<div class="admin-home">
+<main class="admin-home">
     <h2>מה נשמע בוס?</h2>
-    <ul>
-        <li>
-       		<router-link :to="{ name:'manageUsers', exact: true }" class="btn btn-success">ניהול משתמשים</router-link>
-        </li>
-        <li></li>
-        <li></li>
-        <li></li>
+    <ul class="admin-tabs pt-bigger">
+        <router-link :to="{ name:'manageUsers', exact: true }" tag="li">
+            <a href="#p">ניהול משתמשים</a>
+        </router-link>
+        <li><a href="">יצירת שאלה</a></li>
+        <li><a href="">יצירת מבחן</a></li>
+        <li><a href="">סטטיסטיקות</a></li>
+        <!--
+        <router-link tag="li">
+            <a href="#p" class="tab-link">יצירת שאלה</a>
+        </router-link>
+        <router-link tag="li">
+            <a href="#p" class="tab-link">יצירת מבחן</a>
+        </router-link>
+        <router-link tag="li">
+            <a href="#p" class="tab-link">סטטיסטיקות</a>            
+        </router-link>
+        -->
     </ul>
-</div>
+
+    <router-view></router-view>
+</main>
 </template>
 <script>
 import { mapActions } from 'vuex'
@@ -18,6 +31,26 @@ import { mapActions } from 'vuex'
     }
 </script>
 <style lang="stylus">
+@import '~imports/ui/styl/variables'
+
+.admin-tabs
+    text-align center
+    word-spacing -4px   
+    li
+        display inline-block
+        padding 0 20px 5px
+        margin 0
+        word-spacing normal
+        transition border 400ms ease-out, color 200ms ease-out
+        a
+            color gray
+        &.router-link-active
+            border-bottom 1px solid bluegreen
+            a
+                color darken(bluegreen, 8)
+        &:hover a
+            color darken(bluegreen, 8)
+            
 h2
     text-align center
 </style>

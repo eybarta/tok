@@ -3,7 +3,7 @@
     <div class="popup-content">
         <i @click="closePopup" class="lnr lnr-cross topleft"></i>
         <h4 v-if="!!popup.title" v-text="popup.title"></h4>
-        <component :is="popup.type"></component>
+        <component :is="popup.type" :moredata="popup.data"></component>
     </div>
 </div>
 </template>

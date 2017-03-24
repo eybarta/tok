@@ -17,11 +17,19 @@
 
 if (Meteor.isServer) {
     // This code only runs on the server
-    Meteor.publish('users', function() {
+    Meteor.publish('allusers', function() {
         var self = this;
-         if (Roles.userIsInRole(this.userId, 'admin')) {
-            return Meteor.users.find({});
+        console.log("PUBLISH USERS>> ID== ", this.userId);
+        let userId = this.userId
+         if (Roles.userIsInRole(userId, 'admin')) {
+            //  console.log(Meteor.users.find({ '_id': { $ne: "hCLiQhsujWEWpB3RN" }}));
+            return Meteor.users.find({
+                _id: { $ne: this.userId }
+            });
         } 
+        else {
+            return null
+        }
         // self.added('users');
         self.ready();
        

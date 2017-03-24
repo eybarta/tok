@@ -11,9 +11,12 @@
     transition color 400ms ease, background 400ms ease
     &-big
         font-size 40px
-    &-success
-        border-color darken(bluegreen, 5)
-        color darken(bluegreen, 5)
-        &:hover
-            color darken(bluegreen, 1)
-            background rgba(darken(bluegreen, 5), 0.05)
+    for color, value in colormap
+        &-{color}
+            border-color darken(value, 5)
+            color darken(value, 5)
+            &:hover, &.router-link-active
+                color darken(value, 1)
+                background rgba(darken(value, 5), 0.05)
+        
+        

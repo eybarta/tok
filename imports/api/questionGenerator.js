@@ -1,4 +1,8 @@
-import shortid from 'shortid'
+
+if (Meteor.isClient) {
+    import shortid from 'shortid'
+
+}
 export function questionGenerator(category, type, amount, range) {
     if (category=='series') {
         return getQuestions(amount, type, range);

@@ -1,7 +1,8 @@
 <template> 
 <main>
     <div v-if="!user" v-blaze="'login'"></div>
-    <component v-else :is="currentView"></component>
+    <router-view></router-view>
+    <!--<component v-else :is="currentView"></component>-->
 </main>
 </template>
 <script>
@@ -27,6 +28,9 @@ import { mapState, mapGetters } from 'vuex'
             ...mapGetters([
                 'isAdmin'
             ]),
+            loggedIn() {
+
+            },
             currentView() {
                 return !!this.isAdmin ? 'AdminHome' : 'UsersHome'
             }

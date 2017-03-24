@@ -14,7 +14,8 @@
             return {
                 menuActive: false
             }
-        }
+        },
+        
     }
 </script>
 <style lang="stylus">
@@ -28,13 +29,13 @@
     //     primary-corner(heb)
     position fixed
     top 0
-    left 0
+    right 0
     width 30vw
     height 100vh
-    border-right 1px solid bluegreen
+    border-left 1px solid bluegreen
     background #fff
     z-index 11
-    transform translate(-100%, 0)
+    transform translate(100%, 0)
     transition transform 400ms ease
     .brand
         width 100%
@@ -56,7 +57,7 @@
         cursor pointer
         position absolute
         top 20px
-        right -60px
+        left -60px
         font-size 40px
         color darkgray
         transition color 400ms ease

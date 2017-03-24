@@ -1,49 +1,63 @@
 import { Meteor } from 'meteor/meteor'
 import { Tracker }from 'meteor/tracker'
+import { Session } from 'meteor/session'
 import * as types from './mutation-types';
 
 import { Users } from '/imports/api/collections/users'
 
 // USER ID
-export const initUser = ({ commit }) => {
-    console.log("initUser");
+export const initUser = async ({ commit }) => {
+    console.log("initUser to vuex");
     let user = Meteor.user();
     commit('INIT_USER', user);
-    
-    Tracker.autorun((c) => {
-        let userId = Meteor.userId();
-        if (!!userId) {
-            let user = Meteor.user();
-            commit('INIT_USER', user);
-            Meteor.setTimeout(function() {
-                c.stop();
-            }, 3000)
-        }
-    })
 }
 
 // ALL USERS DATA ( Admin only subscription)
 export const initUsers = ({ commit }) => {
     Tracker.autorun((c) => {
-        let users = Meteor.subscribe('users', null, (err, res) => {
-            console.log(err, " :: ", res);
-        });
-        // let users = Users.find({}).fetch();
-        console.log('init users vuex ', users)
+        Meteor.subscribe('allusers');
+        let users = Meteor.users.find({ '_id': { $ne: Meteor.userId() }}).fetch();
+
+        /*  Add 'selected' attribute for 
+            client reactive Vue manipulations
+        */
+        _.each(users, obj => { obj.selected = false;})
+
         if (!!users) {
             commit('INIT_USERS', users)
-            // stop();
+            stop();
         }
     })
 }
 
-export const saveUsers = ({ commit }, data) => {
-    return new Promise((resolve, reject) => {
-        Meteor.call('users.save', data, result => {
-            console.log('saved users?', result);
-            resolve();
+export const saveUsers = async ({ commit, dispatch }, data) => {
+        let get_users = Meteor.call('users.save', data, async (error, result) => {
+            console.log('saved users?', error, result);
+            _.each(result.users, user => {
+                delete user.profile
+            })
+            if (!!result && !!result.users) {
+                console.log("!!result.users", !!result.users);
+                let csvContent = Papa.unparse(result.users);
+                commit('USER_LOGINS', result.users)
+                console.log('csvContent.. ', csvContent);
+                await dispatch('downloadCSV', csvContent)
+                dispatch('closePopup')
+            } else {
+                dispatch('closePopup')
+            }
         })
-    });
+}
+
+// USER
+export const saveUserProfile = ({ commit, state, dispatch}, data) => {
+    console.log("user profile >> ", state.user, " :: ", data);
+    let profile = { 'profile': _.pickBy(data.profile)}
+    let userId = data.userId || state.user._id;
+    console.log('PROFILE', profile);
+    console.log('USERID', userId);
+    Meteor.call('user.saveprofile', userId, profile);
+    dispatch('closePopup')
 }
 export const dirtifyUser = ({ commit, state }) => {
     return new Promise((resolve, reject) => {
@@ -52,6 +66,21 @@ export const dirtifyUser = ({ commit, state }) => {
         })
     });
 }
+
+// UTIL
+export const downloadCSV = async ({commit}, csv) => {
+    console.log("IN DOWNLOAD CSV >> ", csv)
+    return new Promise((resolve, reject) => {
+        let blob = new Blob([csv]), a = window.document.createElement("a");
+        a.href = window.URL.createObjectURL(blob, {type: "text/plain"});
+        a.download = "users.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        resolve();
+    });
+}
+
 // POPUP
 export const closePopup = ({commit}) => {
     commit('CLOSE_POPUP')

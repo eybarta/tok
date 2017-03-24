@@ -1,70 +1,61 @@
 <template>
 <div class="users-home">
     <main>
-        <ul class="local-breadcrumbs">
-            <li v-for="crumb in breadcrumbs"><a v-text="crumb.label" @click.prevent="itemClickHandler(item.value, $index)" href="#p"></a></li>
+       <ul class="breadcrumbs">
+            <li v-for="crumb in breadCrumbs">
+                <router-link :key="crumb" :to="{ name: crumb.name, params:crumb.params}"><span v-html="crumb.label"></span></router-link>
+            </li>
         </ul>
-        <h2>באיזה נושא תרצו לתרגל?</h2>
+        <h2 v-text="title"></h2>
         <div class="block block-60">
-                <transition-group name="list-complete" class="waffle" tag="div"  appear>
-                    <a :key="item" v-for="item in menuitems" class="item" href="#p" @click.prevent="itemClickHandler(item.value)"><span v-text="item.label">  </span></a>
-                </transition-group>
+            <transition-group name="list-complete" class="waffle" tag="div"  appear>
+<!--                    <a :key="item" v-for="item in menuitems" class="item" href="#p" @click.prevent="itemClickHandler(item.value)"><span v-text="item.label">  </span></a>-->
+                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span v-text="item.label">  </span></router-link>
+            </transition-group>
         </div>
     </main>
 </div>
 </template>
 <script>
 import { categories } from '/imports/api/categories'
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import Popup from '../../components/Popup.vue'
     export default {
         data() {
             return {
                 categories,
                 menuTypes: ['category', 'subcategory', 'type'],
-                currentMenuType: 'category'
             }
         },
         computed: {
             ...mapState([
                 'user',
                 'users',
-                'testMenu'
+                'testMenu',
+                'route'
             ]),
-            breadcrumbs() {
-                let crumbs = [];
-                let menu = this.testMenu;
-                console.log('bd ', this.testMenu);
-                if (!!menu.category) {
-                    let category = _.find(this.categories, {value:menu.category});
-                    crumbs.push(category)
-                }
-                if (!!menu.subcategory) {
-                    let subcat = _.find(category.children, { value: menu.subcategory})
-                    crumbs.push(subcat)
+            ...mapGetters([
+                'currentMenuItems',
+                'breadCrumbs',
+                'activeCategory'
+            ]),
+            currentMenuType() {
+                let types = this.menuTypes,
+                    type = this.route.name,
+                    index = _.indexOf(types, type);
+
+                return types[(index==types.length-1) ? 0 : ++index];
+            },
+            title() {
+                let label,
+                    title = "באיזה נושא תרצו לתרגל?";
+
+                if (!!this.activeCategory) {
+                    label = this.activeCategory.label;
+                    title = "נא לבחור מה"+ label;
                 }
 
-                return crumbs;
-            },
-            category() {
-                let cat = this.testMenu.category;
-                if (!!this.testMenu.category) {
-                    return _.find(this.categories, {value:cat});
-                }
-                return { children:[]};
-            },
-            menuitems() {
-                let testMenu = this.testMenu;
-                if (!!testMenu.subcategory) {
-                    return testMenu.type;
-                }
-                else if (!!testMenu.category) {
-                    let cat = _.find(this.categories, {value:testMenu.category});
-                    console.log('cat > ', cat);
-                    return cat.children
-                }
-                return this.categories
-                //testMenu.subcategory || testMenu.type || testMenu.category || []
+                return title
             }
         },
         mounted() {
@@ -74,6 +65,7 @@ import Popup from '../../components/Popup.vue'
                 this.dirtifyUser();
             }
             console.log("categories >> ", this.categories);
+            console.log("currentMenuItems >> ", this.currentMenuItems);
         },
         methods: {
             ...mapActions([
@@ -147,5 +139,26 @@ import Popup from '../../components/Popup.vue'
         border-radius 360px
         background #fff
 
-    
+.breadcrumbs
+    text-align center
+    margin 5vmin auto
+
+    li
+        display inline-block
+        margin 0 0 0 15px
+        a
+            color darken(blue, 45)
+            font-size 3vmin
+            &:after
+                content: '>'
+                display inline-block
+                margin-right 15px
+        &:first-child a
+            font-size 3.5vmin
+        &:last-child a
+            pointer-events none
+            color darken(blue, 65)
+            &:after
+                display none
+
 </style>

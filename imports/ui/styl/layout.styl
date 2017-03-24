@@ -15,10 +15,11 @@ html, body
         text-decoration none
 
 .block
-    padding 10%
+    padding 5vmin
 .block-60
     width 60vmax
     height @width
+    margin 0 auto
 
 .waffle
     width 100%
@@ -28,3 +29,19 @@ html, body
         box-sizing border-box
         lost-waffle 1/3 3 15px
         lost-align center
+
+
+main
+    min-height 95vh
+footer
+    position relative
+    height 5vh
+    width 100%
+    background rgba(#000, 0.8) url('img/congruent_pentagon.png') repeat
+    &:before
+        content ''
+        position absolute 0 0 0 0
+        background rgba(bluegreen, 0.45)
+    small
+        self-center()
+        color #fff

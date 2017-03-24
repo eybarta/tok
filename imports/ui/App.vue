@@ -1,7 +1,7 @@
 <template>
 	<div :class="['app-wrap', lang]">
-		<div class="logo right"><span>Q</span>uizzzler</div>
-		<side-menu></side-menu>
+		<div class="logo"><span>Q</span>uizzzler</div>
+		<side-menu v-if="!!user"></side-menu>
         <!--<add-question></add-question>-->
 		<!--<series-test></series-test>-->
 		<router-view></router-view>
@@ -9,6 +9,10 @@
 		<popup v-if="popup.active">
 			<!--<component  :is="popup.type"></component>-->
 		</popup>
+
+		<footer>
+			<small>  &copy; כל הזכויות שמורות עץ הדעת 2017 </small>
+		</footer>
 	</div>
 </template>
 <script>
@@ -16,7 +20,8 @@ import SideMenu from './components/SideMenu.vue'
 // import AddQuestion from './components/AddQuestion.vue'
 // import SeriesTest from './components/series/SeriesTest.vue'
 import Popup from './components/Popup.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'	
+
 export default {
 	data() {
 		return {
@@ -25,7 +30,7 @@ export default {
 	},
 	created() {
 		console.log('app was created successfuly');
-		this.initUser();
+		// this.initUser();
 		this.initUsers();
 	},
     components: {
@@ -42,6 +47,7 @@ export default {
 	},
 	computed: {
 		...mapState([
+			'user',
 			'popup'
 		])
 	}
@@ -53,4 +59,5 @@ export default {
 	width 100%
 	height 100%
 	/*background url('/img/background_hp.jpg') no-repeat 50% 0 / cover*/
+	
 </style>

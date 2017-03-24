@@ -1,18 +1,23 @@
 <template>
 <div class="add-users-form">
-    <div class="form">
-        <input placeholder="הזן תאריך" ref="datepicker" v-model="date" @change="dateChange($event)" type="text">
-        <textarea v-model="rawStringIds" cols="30" rows="10"></textarea>
+    <div v-if="!userLogins">
+        <div class="form">
+            <input placeholder="הזן תאריך" ref="datepicker" v-model="date" @change="dateChange($event)" type="text">
+            <textarea v-model="rawStringIds" cols="30" rows="10"></textarea>
+        </div>
+        <div class="tleft mtbase">
+            <button @click="saveUsers({ date, userIds})" class="btn btn-success">לשמור
+            </button>
+        </div>
     </div>
-    <div class="tleft mtbase">
-        <button @click="saveUsers({ date, userIds})" class="btn btn-success">לשמור
-        </button>
+    <div v-else>
+
     </div>
+    
 </div>
 </template>
 <script>
-import { mapActions } from 'vuex'
-import Pikaday from 'pikaday'
+import { mapActions, mapState } from 'vuex'
     export default {
         data() {
             return {
@@ -25,7 +30,7 @@ import Pikaday from 'pikaday'
             new Pikaday({ 
                 field: ref.$refs.datepicker,
                 format: 'D/M/YYYY' 
-                });
+            });
         },
         methods: {
             ...mapActions([
@@ -39,13 +44,13 @@ import Pikaday from 'pikaday'
             userIds() {
                 let string = this.rawStringIds.replace(/\s/g, '');
                 return string.split(',')
-            }
+            },
+            ...mapState([
+                'userLogins'
+            ])
         }
     }
 </script>
-<style lang="sass">
-@import '~node_modules/pikaday/scss/pikaday.scss'
-</style>
 <style lang="stylus">
 @import '~imports/ui/styl/variables.styl'
 .form

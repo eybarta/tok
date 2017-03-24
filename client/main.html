@@ -8,17 +8,6 @@
   <app></app>
 </body>
 
-
-<!--<template name="account">
- {{#if unsigned}}
-    <div class="login-wrap">
-      {{> atForm }}
-    </div>
-{{else}}
-		<span class="user">{{ currentUser.profile.name }}</span><button class="logout-btn">LOG OUT</button>
-{{/if }}
-</template>-->
-
 <template name="login">
     <div class="login-wrap">
       {{> atForm }}
@@ -27,5 +16,5 @@
 </template>
 
 <template name="profile">
-		<span class="user">{{ currentUser.profile.name }}</span><button class="logout-btn">LOG OUT</button>
+		<span class="user">{{ currentUser.profile.name }}</span><button class="logout-btn">התנתק</button>
 </template>

@@ -29,13 +29,11 @@
         </li>
         <li v-if="isAdmin">
             <label for="status">סטטוס</label>
-            <!--
             <multiselect v-model="profile.status" track-by="value" label="label" placeholder="מה הסטטוס?"
                     :options="userOptions.status"
                     :searchable="false"
                     :close-on-select="true"
                     :allow-empty="false"></multiselect>
-                    -->
         </li>
     </ul>
     <button @click="saveUserProfile({profile, userId})" class="btn btn-success">שמור</button>
@@ -44,7 +42,7 @@
 <script>
 import { userOptions } from '/imports/api/userConstants'
 
-// import Multiselect from 'vue-multiselect'
+import Multiselect from '/imports/ui/components/vue-multiselect/src/Multiselect.vue'
 import { mapActions, mapState, mapGetters } from 'vuex'
 export default {
     props: ['moredata'],
@@ -88,7 +86,7 @@ export default {
         }
     },
     components: {
-        // MultiSelect
+        Multiselect
     },
     methods: {
         ...mapActions([
@@ -108,9 +106,9 @@ export default {
 <style lang="stylus">
 .form
     padding-top 60px
-    li
+    & > li
         display block
-        padding 0 0 40px
+        padding 0 0 22px
         input 
             transition background 400ms ease-out
             & + label

@@ -1,8 +1,4 @@
-
-if (Meteor.isClient) {
-    import shortid from 'shortid'
-
-}
+import { Random } from 'meteor/random'
 export function questionGenerator(category, type, amount, range) {
     if (category=='series') {
         return getQuestions(amount, type, range);
@@ -51,7 +47,7 @@ function getQuestions(amount, type, range) {
     for (var i=0;i<amount;i++) {
         // Populate the question object
         let obj = _.cloneDeep(questionObj);
-        obj.id = shortid.generate();
+        obj.id = Random.id(7);
         obj.control = controlList[i];
 
         // PARTS        

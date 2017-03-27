@@ -30,6 +30,13 @@ html, body
         lost-waffle 1/3 3 15px
         lost-align center
 
+for num in (1..12)
+	.col-{num}
+		lost-column num/12
+	.parent-{num}
+		& > *
+			lost-waffle 1/num num
+	
 
 main
     min-height 95vh

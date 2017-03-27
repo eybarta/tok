@@ -20,11 +20,13 @@ Accounts.ui.config({
 AccountsTemplates.configure({
   texts: {
       button: {
-          signUp: "Register Now!",
-          signIn: 'התחבר'
+          signIn: 'התחבר',
+          signUp: 'הירשם'
       },
       signUpLink_pre: '',
-      signUpLink_link: 'צריך להירשם?'
+      signUpLink_link: 'צריך להירשם?',
+      signInLink_pre: 'כבר רשום?',
+      signInLink_link: 'התחבר',
     },
 })
 

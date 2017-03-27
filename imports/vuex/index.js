@@ -21,12 +21,16 @@ const state = {
             value: 'practice'
         },
         {
-            label: 'מבחן',
-            value: 'test'
+            label: 'מבחנים',
+            value: 'autotest'
         },
         {
-            label: 'מכינה',
-            value: 'prepare'
+            label: 'מבחנים קבועים',
+            value: 'fixedtest'
+        },
+        {
+            label: 'מבחן אדפטיבי',
+            value: 'adaptivetest'
         }
     ]
 }
@@ -76,15 +80,19 @@ const getters = {
         console.log("currentmenuItems >> ");
         console.log("params >> ", params);
         console.log("category >> ", category);
-        if (!!params.subcategory) {
-            return state.testTypes;
+        if (!!params.activetest) {
+            // THIS WILL BE THE ACTUAL TEST...
+            return [];            
         }
-        else if (!!params.category) {
+        if (!!params.category) {
             let cat = _.find(categories, { value: category})
             return cat.children;
         }
+        else if (!!params.type) {
+            return categories;            
+        }
         else {
-            return categories
+            return state.testTypes
         }
 
     },
@@ -112,29 +120,43 @@ const getters = {
         }
         return null
     },
+    menuName: (state, getters) => {
+        let params = state.route.params;
+
+        return (_.has(params, 'category'))
+            ? 'activetest' : (_.has(params, 'type') ? 'category'
+            : _.has(params, 'id'))
+            ? 'type' : ''
+    },
     breadCrumbs: (state, getters) => {
 		// return Array to render for breadCrumbs
         let cat = getters.activeCategory;
-        let label, name, order;
+        let label, order, name = 'category';
 		    bc = _.map(state.route.params, function(value,key, obj){
                 console.log("bc>>>>> ", value, " :: ", key, " :: ", obj);
                 if (key=='id') {
                     label = '<i class="fa fa-home"></i>';
-                    name = 'userhome';
+                    name = 'type';
                     order = 0;
+                }
+                if (key=='type') {
+                    // cat = _.find(categories, {value});
+                    label = _.find(state.testTypes, {value}).label
+                    name = 'category' //key;
+                    order = 1;
                 }
                 if (!!cat && key=='category') {
                     // cat = _.find(categories, {value});
                     label = _.get(cat, 'label')
-                    name = key;
-                    order = 1;
-                }
-                if (!!cat && key=='subcategory') {
-                    let subcat = _.find(cat.children, {value});
-                    console.log('subcat >> ', subcat)
-                    label = _.get(subcat, 'label')
-                    name = key;
+                    // name = key;
                     order = 2;
+                }
+                if (!!cat && key=='activetest') {
+                    let tests = _.find(cat.children, {value});
+                    console.log('tests >> ', tests)
+                    label = _.get(tests, 'label')
+                    name = 'activetest';
+                    order = 3;
                 }
                 return {
                     name,

@@ -1,8 +1,20 @@
 <template>
 <div class="manage-users">
+<!--
     <h3>ניהול משתמשים</h3>
-
+-->
     <div v-if="!!users.length" class="user-list pt-med">
+        <div class="filters pb-big col-6">
+            <multiselect
+                    v-model="filters.group" 
+                    placeholder="פילטור לפי קבוצה"
+                    :multiple="true" 
+                    :options="groups"
+                    :searchable="true"
+                    :clearOnSelect="true"
+                    :ShowLabels="false"
+                    :allow-empty="true"></multiselect>
+        </div>
         <table class="user-table">
             <thead>
                 <th>שם משתמש  (ת.ז)</th>
@@ -20,7 +32,7 @@
                     <td v-html="user.profile.name"></td>
                     <td v-html="user.profile.group"></td>
                     <td v-html="user.profile.age"></td>
-                    <td v-html="user.profile.status.label" :class="[user.profile.status.value=='active' ? 'green' : '']"></td>
+                    <td v-html="user.profile.status.label" :class="[user.profile.status.value=='active' ? 'green' : 'red']"></td>
                     <td v-html="user.profile.city"></td>
                     <td v-html="user.profile.phone"></td>
                     <td v-html="user.profile.email"></td>
@@ -32,10 +44,23 @@
     <div :class="[!!users.length ? 'tright' : 'tcenter', 'mt-small']">
         <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="btn btn-success">הוסף משתמשים</button>
         <button @click="callPopup({ title:'פרטים אישיים', type:'UserProfile', data:selected[0]})" v-if="selected.length==1" class="btn btn-warning">עריכת משתמש</button>
+
+        <div class="changers" v-if="selected.length>1">
+            <label class="orange" for="">שינוי גורף:</label>
+             <multiselect
+                    placeholder="שינוי סטטוס"
+                    track-by="value" label="label"
+                    :options="userOptions.status"
+                    :ShowLabels="false"
+                    :searchable="false"
+                    :close-on-select="true"
+                    :allow-empty="false"></multiselect>
+        </div>
     </div>
 </div>
 </template>
 <script>
+import Multiselect from '/imports/ui/components/vue-multiselect/src/Multiselect.vue'
 import { userOptions } from '/imports/api/userConstants'
 import { mapState, mapActions } from 'vuex'
 export default {
@@ -45,8 +70,15 @@ export default {
             sortby: {
                 keys: [],
                 dir: []
+            },
+            filters: {
+                group: [],
+
             }
         }
+    },
+    components: {
+        Multiselect
     },
     methods: {
         ...mapActions([
@@ -116,31 +148,27 @@ export default {
         ...mapState([
             'users'
         ]),
+        groups() {
+            return _.uniq(_.map(this.users, 'profile.group'))
+        },
         selected() {
             let users = this.users
             return _.filter(users, 'selected');
         },
         parsedUsers() {
             let users = _.clone(this.users);
-            console.log('parsedusers > ', users);
             _.each(users, user => {
                 if (!!user.profile.dob) {
                     user.profile.age = this.userAge(user.profile.dob);
                 }
-                // console.log('!!user.profile.status > ', !!user.profile.status);
-                
-                // if (!!user.profile.status) {
-                //     let status = _.clone(user.profile.status);
-                //     user.profile.status  = {}
-                //     console.log('status > ', status);
-                    
-                //     user.profile.status.label = this.userStatusLabel(status)
-                //     user.profile.status.value = status;
-
-                // }
             })
 			let keys = this.sortby.keys; 
 			let dir = this.sortby.dir;
+            if (!!this.filters.group.length) {
+                users = _.filter(users, user => {
+                    return this.filters.group.indexOf(user.profile.group)>-1
+                })
+            }
 			if (keys.length>0) {
 				return _.orderBy(users, keys, dir)
 			}
@@ -152,8 +180,9 @@ export default {
 </script>
 <style lang="stylus">
 @import '~imports/ui/styl/variables'
+@import '~imports/ui/styl/mixins'
 .manage-users
-    margin-top 70px
+    margin-top 20px
 .user-table
     width 100%
     border-top 1px solid bluegreen
@@ -187,5 +216,18 @@ export default {
     tr.selected
         td
             background rgba(orange, 0.15)
-
+.filters
+    .multiselect
+        max-width 300px
+.changers
+    mid()
+    padding 0 10px
+    width 50%
+    label
+        mid()
+        padding-left 10px
+    .multiselect
+        mid()
+        width 30%
+    
 </style>

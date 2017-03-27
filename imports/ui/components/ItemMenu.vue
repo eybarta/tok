@@ -1,28 +1,13 @@
 <template>
-<div class="users-home">
-    <main>
-       <ul class="breadcrumbs">
-            <li v-for="crumb in breadCrumbs">
-                <router-link :key="crumb" :to="{ name: crumb.name, params:crumb.params}"><span v-html="crumb.label"></span></router-link>
-            </li>
-        </ul>
-        <h2 v-text="title"></h2>
-        <div class="block block-60">
-<!--                    <a :key="item" v-for="item in menuitems" class="item" href="#p" @click.prevent="itemClickHandler(item.value)"><span v-text="item.label">  </span></a>
-                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span v-text="item.label">  </span></router-link>
-                -->
-                    <router-view></router-view>
-                
-        </div>
+            <transition-group name="list-complete" class="waffle" tag="div"  appear>
 
-    </main>
-    
-</div>
+    <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{params: { [menuName]: item.value }}"><span v-text="item.label">  </span></router-link>
+    </transition-group>
 </template>
 <script>
 import { categories } from '/imports/api/categories'
 import { mapState, mapActions, mapGetters } from 'vuex';
-import Popup from '../../components/Popup.vue'
+import Popup from './Popup.vue'
     export default {
         data() {
             return {
@@ -39,16 +24,16 @@ import Popup from '../../components/Popup.vue'
             ]),
             ...mapGetters([
                 'currentMenuItems',
+                'menuName',
                 'breadCrumbs',
                 'activeCategory'
             ]),
             currentMenuType() {
-                console.log('current menu > ', this.route, " :: ", this.route.name);
                 let types = this.menuTypes,
                     type = this.route.name,
                     index = _.indexOf(types, type);
 
-                return types[(index==types.length-1) ? 0 : ++index];
+                return types[(index==types.length-1) ? 0 : index++];
             },
             title() {
                 let label,

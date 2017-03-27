@@ -1,8 +1,21 @@
 <template>
+<main>
+<ul class="breadcrumbs">
+            <li v-for="crumb in breadCrumbs">
+                <router-link :key="crumb" :to="{ name: crumb.name, params:crumb.params}"><span v-html="crumb.label"></span></router-link>
+            </li>
+        </ul>
+        <h2 v-text="title"></h2>
+        <div class="block block-60">
+<!--                    <a :key="item" v-for="item in menuitems" class="item" href="#p" @click.prevent="itemClickHandler(item.value)"><span v-text="item.label">  </span></a>
+                    <router-view></router-view>
+                -->
             <transition-group name="list-complete" class="waffle" tag="div"  appear>
-
-    <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{params: { [menuName]: item.value }}"><span v-text="item.label">  </span></router-link>
-    </transition-group>
+                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span v-text="item.label">  </span></router-link>
+            </transition-group>                
+        </div>
+</main>
+           
 </template>
 <script>
 import { categories } from '/imports/api/categories'

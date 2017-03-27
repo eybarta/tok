@@ -4,7 +4,7 @@
                 <router-link  :to="{ name: 'home'}">תרגול</router-link>
 			</li>
 			<li v-for="crumb in breadCrumbs">
-				<router-link :to="{ params: crumb.params }"><span>></span> <span>{{ crumb.label }}</span></router-link>
+				<router-link :to="{ name: menuName, params: crumb.params }"><span>></span> <span>{{ crumb.label }}</span></router-link>
 			</li>
 		</ul>
 </template>

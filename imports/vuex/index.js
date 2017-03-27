@@ -120,42 +120,34 @@ const getters = {
         }
         return null
     },
-    menuName: (state, getters) => {
-        let params = state.route.params;
-
-        return (_.has(params, 'category'))
-            ? 'activetest' : (_.has(params, 'type') ? 'category'
-            : _.has(params, 'id'))
-            ? 'type' : ''
-    },
     breadCrumbs: (state, getters) => {
 		// return Array to render for breadCrumbs
         let cat = getters.activeCategory;
-        let label, order, name = 'category';
+        let label, name, order;
 		    bc = _.map(state.route.params, function(value,key, obj){
                 console.log("bc>>>>> ", value, " :: ", key, " :: ", obj);
                 if (key=='id') {
                     label = '<i class="fa fa-home"></i>';
-                    name = 'type';
+                    name = 'userhome';
                     order = 0;
                 }
                 if (key=='type') {
                     // cat = _.find(categories, {value});
                     label = _.find(state.testTypes, {value}).label
-                    name = 'category' //key;
+                    name = key;
                     order = 1;
                 }
                 if (!!cat && key=='category') {
                     // cat = _.find(categories, {value});
                     label = _.get(cat, 'label')
-                    // name = key;
+                    name = key;
                     order = 2;
                 }
                 if (!!cat && key=='activetest') {
                     let tests = _.find(cat.children, {value});
                     console.log('tests >> ', tests)
                     label = _.get(tests, 'label')
-                    name = 'activetest';
+                    name = key;
                     order = 3;
                 }
                 return {

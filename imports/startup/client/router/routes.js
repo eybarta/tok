@@ -9,7 +9,6 @@ import ManageUsers from '/imports/ui/pages/admin/ManageUsers.vue';
 // User
 import UserHome from '/imports/ui/pages/users/Home.vue';
 import ActiveTest from '/imports/ui/user/partials/ActiveTest.vue'
-
 // components
 import ItemMenu from '/imports/ui/components/ItemMenu.vue'
 
@@ -71,7 +70,7 @@ export const routes = [
 		},	
 	},
 	{
-		path: '/user',
+		path: '/user/:id',
 		name: 'userhome',
 		component: UserHome,
 		beforeEnter: (to, from, next) => {
@@ -92,22 +91,16 @@ export const routes = [
 		},		
 		children: [
 			{
-				path: ':id',
+				path: ':type',
 				name: 'type',
 				component: ItemMenu,
 				
-			},
-			{
-				path: ':id/:type',
-				name: 'category',
-				component: ItemMenu,
-				
-			},
-			{
-				path: ':id/:type/:category',
-				name: 'subcategory',
-				component: ItemMenu,
-				
+				children: [
+					{
+						path: ':category',
+						name: 'category',
+					}
+				]
 			},
 			{
 				path: ':type/:category/:activetest',

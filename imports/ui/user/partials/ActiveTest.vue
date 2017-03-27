@@ -1,4 +1,5 @@
 <template>
+    <main>
     <div class="series-wrap">
         <div class="series-test">
             <h2>מבחן סדרות</h2>
@@ -47,6 +48,7 @@
             </div>
         </div>
     </div>
+    </main>
 </template>
 <script>
 import { questionGenerator } from '/imports/api/questionGenerator'

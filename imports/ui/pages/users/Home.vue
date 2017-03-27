@@ -1,20 +1,8 @@
 <template>
 <div class="users-home">
     <main>
-       <ul class="breadcrumbs">
-            <li v-for="crumb in breadCrumbs">
-                <router-link :key="crumb" :to="{ name: crumb.name, params:crumb.params}"><span v-html="crumb.label"></span></router-link>
-            </li>
-        </ul>
-        <h2 v-text="title"></h2>
-        <div class="block block-60">
-<!--                    <a :key="item" v-for="item in menuitems" class="item" href="#p" @click.prevent="itemClickHandler(item.value)"><span v-text="item.label">  </span></a>
-                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span v-text="item.label">  </span></router-link>
-                -->
-                    <router-view></router-view>
-                
-        </div>
-
+       
+        <router-view></router-view>
     </main>
     
 </div>

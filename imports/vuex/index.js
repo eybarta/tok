@@ -45,6 +45,9 @@ const mutations = {
     USER_LOGINS (state, users) {
         state.userLogins = users;
     },
+    SAVE_TEST_TO_USER (state, user) {
+
+    },
      // MISC
     CLOSE_POPUP (state) {
         state.popup.active = false //!state.popup.active
@@ -96,6 +99,9 @@ const getters = {
         }
 
     },
+    currentCategory: (state) => {
+        return state.route.params.category;
+    },
     activeUser: (state) => {
         // let user = Meteor.user();
         
@@ -126,7 +132,7 @@ const getters = {
         let label, name, order;
 		    bc = _.map(state.route.params, function(value,key, obj){
                 console.log("bc>>>>> ", value, " :: ", key, " :: ", obj);
-                if (key=='id') {
+                if (key=='username') {
                     label = '<i class="fa fa-home"></i>';
                     name = 'userhome';
                     order = 0;

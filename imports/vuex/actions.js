@@ -66,7 +66,13 @@ export const dirtifyUser = ({ commit, state }) => {
         })
     });
 }
-
+export const saveTestToUser = ({ commit, state}, testinfo) => {
+    return new Promise((resolve, reject) => {
+        Meteor.call('user.savetest', testinfo, result => {
+            resolve();
+        })
+    });
+}
 // UTIL
 export const downloadCSV = async ({commit}, csv) => {
     console.log("IN DOWNLOAD CSV >> ", csv)

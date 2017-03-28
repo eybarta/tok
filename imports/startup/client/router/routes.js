@@ -31,7 +31,7 @@ export const routes = [
 				} else {
 					console.log('User user');
 					let user = Meteor.user();
-					next({ name: 'userhome', params: { id: user.username }})
+					next({ name: 'user', params: { username: user.username }})
 					// { name: 'cart', params: { cartId: cart._id }}
 				}
 			}
@@ -55,10 +55,10 @@ export const routes = [
 		beforeEnter: (to, from, next) => {
 			console.log("ADMINHOME BEFORE ENTER");
 			let userId = Meteor.userId();
-			
 			if (!!userId && Roles.userIsInRole(userId, 'user')) {
 				console.log('is user');
-				next({ name: 'userhome', params: { id: userId }})
+				let username = Meteor.user().username;
+				next({ name: 'user', params: { username }})
 			}
 			else if (!!userId && Roles.userIsInRole(userId, 'admin')) {
 				console.log(' admin?');
@@ -70,7 +70,7 @@ export const routes = [
 		},	
 	},
 	{
-		path: '/user/:id',
+		path: '/user/:username',
 		name: 'userhome',
 		component: UserHome,
 		beforeEnter: (to, from, next) => {
@@ -91,7 +91,7 @@ export const routes = [
 		},		
 		children: [
 			{
-				path: '/user/:id',
+				path: '/user/:username',
 				name: 'user',
 				component: ItemMenu,
 				children: [
@@ -110,7 +110,7 @@ export const routes = [
 				
 			},
 			{
-				path: ':id/:type/:category/:activetest',
+				path: ':type/:category/:activetest',
 				name: 'activetest',
 				component: ActiveTest
 			}

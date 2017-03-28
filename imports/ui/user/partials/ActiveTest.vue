@@ -5,20 +5,25 @@
             <div v-if="!goodluck" key="0">
                 <h2 class="pb-big">יש לך 14 דקות לסיים.</h2>
                 <button @click="starttest" class="btn btn-success btn-big">התחל</button>
+                <router-link to="/" class="back-btn btn btn-warning">חזרה</router-link>
             </div>
-            <h2 v-else class="green" key="1"> בהצלחה !!</h2>
+            <h2 v-else class="primary" key="1"> בהצלחה !!</h2>
         </transition-group>
     </transition>
     <div class="countdown" v-text="countdown"></div>
-    <div class="series-wrap">
-        <div class="series-test">
+    <div class="test-wrap">
+        <div class="test">
             <h2 v-text="testTitle"></h2>
-            <h4>מה הספרה הבאה בסדרה?</h4>
-            <div class="test-questions ltr">
+            
+            <!--
+            <component :is="currentCategory"></component>
+            -->
                 <div @click="prevSlide" :class="['slide-btn', 'slide-prev', currentQuestionIndex==0?'disabled': '']"></div>
                 <div @click="nextSlide" :class="['slide-btn', 'slide-next', currentQuestionIndex==questions.length-1?'disabled': '']"></div>
+            <div class="test-questions ltr">
+                <h4>מה הספרה הבאה בסדרה?</h4>
                 <ul :style="sliderTransform">
-                    <li v-for="(question, index) in questions" :key="question.answers.correct" :data-index="index" class="list-item">
+                    <li v-for="(question, index) in questions" :key="question" :data-index="index" class="list-item">
                         <div class="question">
                             <div class="parts ltr">
                                 <span v-for="part in question.parts">{{ part }}</span>
@@ -50,18 +55,20 @@
         </div>
         </div>
 
-        <div v-if="!!score" class="popup">
+        <div v-if="!!testinfo.score" class="popup">
             <div class="popup-content">
                 <i class="lnr lnr-close"></i>
                 <h4>הציון שלך:</h4>
-                <div class="big score">{{ score }} <span>/ 100</span></div>
+                <div class="big score">{{ testinfo.score }} <span>/ 100</span></div>
+
+                <router-link class="link" :to="{ name: 'user'}">חזרה לעמוד הבית</router-link>
             </div>
         </div>
     </div>
     </main>
 </template>
 <script>
-import { mapState} from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import { categories } from '/imports/api/categories'
 
 import { questionGenerator } from '/imports/api/questionGenerator'
@@ -78,10 +85,13 @@ import { questionGenerator } from '/imports/api/questionGenerator'
                     timer: 60000
                 },
                 testinfo: {
-                    userId: Accounts.userId(),
+                    score: null,
+                    meta: null, 
+                    percentComplete: 0,
+                    timeToComplete: 0,
+                    averageTimeOnQuestion: 0,
                     questions: []
                 },
-                score: null
             }
         },
         created() {
@@ -98,6 +108,9 @@ import { questionGenerator } from '/imports/api/questionGenerator'
             }
         },
         methods: {
+            ...mapActions([
+                'saveTestToUser'
+            ]),
             starttest() {
                 let ref = this;
                 this.$set(this, 'goodluck', true)
@@ -150,22 +163,37 @@ import { questionGenerator } from '/imports/api/questionGenerator'
                 ? this.currentQuestionIndex++
                 : this.currentQuestionIndex=0
             },
+            getAverageTimeOnQuestion() {
+                let answered = _.filter(this.questions, 'chosenAnswer');
+                let sum = _.sumBy(_.map(answered, 'timer'));
+                let averageInSeconds = sum / answered.length;
+                return averageInSeconds;
+                // return moment(averageInSeconds, 's').format('m:ss');
+            },
             finish() {
                 let correctAnswers = _.filter(this.questions, question => {
                     return question.chosenAnswer == question.answers.correct;
                 })
-                this.score = (correctAnswers.length/this.questions.length)*100;
+                this.$set(this.testinfo, 'score', (correctAnswers.length/this.questions.length)*100);
+                this.$set(this.testinfo, 'meta', this.route.params)
+                this.$set(this.testinfo, 'percentComplete', (this.answeredSoFar/20)*100)
+                this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer).asSeconds()))
+                this.$set(this.testinfo, 'averageTimeOnQuestion', this.getAverageTimeOnQuestion())
                 console.log(correctAnswers.length, " questions were answered correctly");
                 console.log((correctAnswers.length/this.questions.length)*100, " is your score");
 
                 // TODO:: save testInfo to user.
                 // Allow viewing of test with correct answers.
+                this.saveTestToUser(this.testinfo)
             }
         },
         computed: {
             ...mapState([
                 'testTypes',
                 'route'
+            ]),
+            ...mapGetters([
+                'currentCategory'
             ]),
             countdown() {
                 return moment(this.timer).format('m:ss');
@@ -251,7 +279,7 @@ import { questionGenerator } from '/imports/api/questionGenerator'
     
 
 
-.series-test
+.test
     position absolute
     top 40%
     left 0
@@ -263,80 +291,8 @@ import { questionGenerator } from '/imports/api/questionGenerator'
         color lighten(darkblue, 10)
         padding 40px 0
         font-weight normal
-    h4
-        padding 0 0 2%
-        font-size 25px
-        letter-spacing 1px
-        direction rtl
-        text-align center
-    .test-questions
-        position relative
-        overflow hidden
-        padding 0 
-        margin 0
-        width 100%
-        border-top 1px solid #0bddbe
-        border-bottom 1px solid #0bddbe
-        
-        & > ul
-            width 100%
-            word-spacing 0
-            white-space nowrap
-            position relative
-            transition transform 400ms ease
-            & > li
-                display inline-block
-                width 100%
-                vertical-align top
-                padding 6% 14% 2%
-                margin 0
-                .question
-                    text-align center
-                    h4
-                        padding 0 0 2%
-                        font-size 25px
-                        letter-spacing 1px
-                        direction rtl
-                        text-align center
-                    .parts
-                        padding 2% 0
-                        border-top 1px dashed rgba(darken(#0bddbe, 60), 0.2)
-                        border-bottom 1px dashed rgba(darken(#0bddbe, 60), 0.4)
-                        span
-                            display inline-block
-                            margin 0 30px
-                            font-size 40px
-                            font-family 'Helvetica Thin'
-                            &.next
-                                border-radius 4px
-                                border 1px solid lighten(red, 15)
-                                padding 1% 2%
-                                color lighten(red, 15)
-            .answer
-                text-align center
-                padding 8% 0 6% 0
-                li
-                    display inline-block
-                    margin 0 30px
-                li a
-                    font-family 'Helvetica Thin'
-                    display inline-block
-                    padding 10px
-                    border-radius 9px
-                    box-sizing border-box
-                    text-decoration none
-                    color lighten(darkblue, 20)
-                    font-size 40px
-                    border 1px solid transparent
-                    background transparent
-                    transition border 400ms ease, background 400ms ease, color 400ms ease
-                    &:hover
-                        border 1px solid lighten(#0bddbe, 25)
-                        color darken(#0bddbe, 10)
-                    &.chosen
-                        border 1px solid darken(#0bddbe, 5)
-                        background rgba(#0bddbe, 0.02)
-                        color darken(#0bddbe, 5)
+    
+
                 
 .actions
     padding 30px 0          
@@ -464,7 +420,7 @@ import { questionGenerator } from '/imports/api/questionGenerator'
     left 0
     right 0
     bottom 0
-    background rgba(255,255,255,0.98)
+    background rgba(255,255,255,0.999)
     z-index 999
     text-align center
     overflow hidden
@@ -473,4 +429,10 @@ import { questionGenerator } from '/imports/api/questionGenerator'
         top 50%
         left 50%
         transform translate(-50%,-50%)
+    .back-btn
+        display block
+        width 120px
+        padding 10px 20px
+        margin 40px auto
+        
 </style>

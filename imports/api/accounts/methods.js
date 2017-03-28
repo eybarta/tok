@@ -37,5 +37,14 @@ Meteor.methods({
                 'profile.dirty': true
             }
         });
+    },
+    'user.savetest'(testinfo) {
+        let userId = Meteor.userId();
+        console.log('savetest method >> ', testinfo);
+        Meteor.users.update(userId, {
+            $push: {
+                'profile.tests': testinfo
+            }
+        });
     }
 });

@@ -1,5 +1,5 @@
 <template>
-<main>
+<div>
 <ul class="breadcrumbs">
             <li v-for="crumb in breadCrumbs">
                 <router-link :key="crumb" :to="{ name: crumb.name, params:crumb.params}"><span v-html="crumb.label"></span></router-link>
@@ -14,7 +14,7 @@
                 <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span v-text="item.label">  </span></router-link>
             </transition-group>                
         </div>
-</main>
+</div>
            
 </template>
 <script>
@@ -25,7 +25,7 @@ import Popup from './Popup.vue'
         data() {
             return {
                 categories,
-                menuTypes: ['type', 'category', 'activetest'],
+                menuTypes: ['user', 'type', 'category', 'activetest'],
             }
         },
         computed: {
@@ -37,16 +37,17 @@ import Popup from './Popup.vue'
             ]),
             ...mapGetters([
                 'currentMenuItems',
-                'menuName',
                 'breadCrumbs',
                 'activeCategory'
             ]),
             currentMenuType() {
+                                console.log('current menu > ', this.route, " :: ", this.route.name);
+
                 let types = this.menuTypes,
                     type = this.route.name,
                     index = _.indexOf(types, type);
 
-                return types[(index==types.length-1) ? 0 : index++];
+                return types[(index==types.length-1) ? 0 : ++index];
             },
             title() {
                 let label,

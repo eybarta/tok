@@ -91,19 +91,26 @@ export const routes = [
 		},		
 		children: [
 			{
-				path: ':type',
-				name: 'type',
+				path: '/user/:id',
+				name: 'user',
 				component: ItemMenu,
-				
 				children: [
 					{
-						path: ':category',
-						name: 'category',
+						path: ':type',
+						name: 'type',
+						children: [
+						{
+							path: ':category',
+							name: 'category',
+						}
+						]
 					}
 				]
+				
+				
 			},
 			{
-				path: ':type/:category/:activetest',
+				path: ':id/:type/:category/:activetest',
 				name: 'activetest',
 				component: ActiveTest
 			}

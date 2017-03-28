@@ -12,8 +12,8 @@
     "meteor-node-stubs": "^0.2.6",
     "mongo-dot-notation": "^1.0.7",
     "swiper": "^3.4.1",
-    "velocity-animate": "^1.4.3",
-    "vue": "^2.2.4",
+    "velocity-animate": "^1.5.0",
+    "vue": "^2.2.6",
     "vue-router": "^2.2.1",
     "vuex": "^2.1.2",
     "vuex-router-sync": "^4.1.2"

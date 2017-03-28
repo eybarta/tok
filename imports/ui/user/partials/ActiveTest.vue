@@ -1,31 +1,41 @@
 <template>
     <main>
+    <transition name="fade">
+        <transition-group  v-if="!started" class="welcome" name="fade-slide" tag="div">
+            <div v-if="!goodluck" key="0">
+                <h2 class="pb-big">יש לך 14 דקות לסיים.</h2>
+                <button @click="starttest" class="btn btn-success btn-big">התחל</button>
+            </div>
+            <h2 v-else class="green" key="1"> בהצלחה !!</h2>
+        </transition-group>
+    </transition>
+    <div class="countdown" v-text="countdown"></div>
     <div class="series-wrap">
         <div class="series-test">
-            <h2>מבחן סדרות</h2>
-            <div class="test-questions">
+            <h2 v-text="testTitle"></h2>
+            <h4>מה הספרה הבאה בסדרה?</h4>
+            <div class="test-questions ltr">
                 <div @click="prevSlide" :class="['slide-btn', 'slide-prev', currentQuestionIndex==0?'disabled': '']"></div>
                 <div @click="nextSlide" :class="['slide-btn', 'slide-next', currentQuestionIndex==questions.length-1?'disabled': '']"></div>
                 <ul :style="sliderTransform">
                     <li v-for="(question, index) in questions" :key="question.answers.correct" :data-index="index" class="list-item">
                         <div class="question">
-                            <h4>מה הספרה הבאה בסדרה?</h4>
-                            <div class="parts">
+                            <div class="parts ltr">
                                 <span v-for="part in question.parts">{{ part }}</span>
                                 <span class="next">?</span>
                             </div>
                         </div>
                         <div class="answer">
-                            <ul>
+                            <ul class="ltr">
                                 <li v-for="answer in question.answers.list">
-                                    <a href="#p"  @click.prevent="question.chosenAnswer=answer" :class="[question.chosenAnswer==answer ? 'chosen' : '']" v-text="answer"></a>
+                                    <a href="#p" @click.prevent="question.chosenAnswer=answer" :class="[question.chosenAnswer==answer ? 'chosen' : '']" v-text="answer"></a>
                                 </li>
                             </ul>
                         </div>
                     </li>
                 </ul>
             </div>
-        <div class="pager-progress">
+        <div class="pager-progress ltr">
 	        <ul>
                 <li @click.prevent="currentQuestionIndex=index" v-for="(question, index) in questions" :class="[!!question.chosenAnswer ? 'answered' : '', index==currentQuestionIndex ? 'active' : '']" >
                    <span>{{ index+1 }}</span>
@@ -33,7 +43,7 @@
             </ul>
         </div>
         <div class="tcenter actions">
-            <button class="center btn btn-success btn-big" @click="calculateScore">סיימתי</button>
+            <button class="center btn btn-success btn-big" @click="finish">סיימתי</button>
         </div>
         <div class="status">
             <h4>ענית עד כה על <span v-text="answeredSoFar"  :class="[!!answeredSoFar? '' : 'red']"></span><span>/{{ questions.length}}</span></h4>
@@ -51,11 +61,22 @@
     </main>
 </template>
 <script>
+import { mapState} from 'vuex'
+import { categories } from '/imports/api/categories'
+
 import { questionGenerator } from '/imports/api/questionGenerator'
     export default {
         data() {
             return {
+                started: false,
+                goodluck: false,
+                timer: 840000,
                 currentQuestionIndex: 0,
+                questiontimer: null,
+                idle: {
+                    flag: false,
+                    timer: 60000
+                },
                 testinfo: {
                     userId: Accounts.userId(),
                     questions: []
@@ -66,17 +87,58 @@ import { questionGenerator } from '/imports/api/questionGenerator'
         created() {
             console.log("active test created");
             this.testinfo.questions = this.questions;
+            // this.countdownobj.start();
         },
         mounted() {
-            document.body.addEventListener('keyup', this.keyupHandler)
+            
+        },
+        watch: {
+            'currentQuestionIndex'() {
+                this.timeQuestion(this.currentQuestionIndex)
+            }
         },
         methods: {
+            starttest() {
+                let ref = this;
+                this.$set(this, 'goodluck', true)
+                Meteor.setTimeout(function() {
+                    this.$set(this, 'started', true)
+                    document.body.addEventListener('keyup', this.keyupHandler);
+                    document.body.addEventListener('mousemove', this.mousemoveHandler);
+                    Meteor.setInterval(function() {
+                        this.$set(this, 'timer', this.timer-1000)
+                        this.$set(this.idle, 'timer', this.idle.timer-1000)
+                        if (this.idle.timer<=0) {
+                            this.flagIdle();
+                        }
+                    }.bind(this),1000)
+                    this.timeQuestion(0)
+                }.bind(this), 1000)
+                
+            },
+            timeQuestion(index) {
+                Meteor.clearInterval(this.questiontimer)
+                let question = this.testinfo.questions[index];
+                question.timer = question.timer || 0;
+                this.questiontimer = Meteor.setInterval(function() {
+                    question.timer++;
+                }, 1000)
+            },
             keyupHandler(e) {
                 (e.keyCode==37) 
                 ?   this.prevSlide()  // left 
                 :   (e.keyCode==39)
                 ?   this.nextSlide()  // right
                 :   ''
+                if (!!this.$set) {
+                    this.$set(this.idle, 'timer', 60000)
+                }
+            },
+            mousemoveHandler(e) {
+                this.$set(this.idle, 'timer', 60000)
+            },
+            flagIdle() {
+                console.log('User has been idle for 2 minutes')
             },
             prevSlide() {
                 this.currentQuestionIndex != 0
@@ -88,16 +150,27 @@ import { questionGenerator } from '/imports/api/questionGenerator'
                 ? this.currentQuestionIndex++
                 : this.currentQuestionIndex=0
             },
-            calculateScore() {
+            finish() {
                 let correctAnswers = _.filter(this.questions, question => {
                     return question.chosenAnswer == question.answers.correct;
                 })
                 this.score = (correctAnswers.length/this.questions.length)*100;
                 console.log(correctAnswers.length, " questions were answered correctly");
                 console.log((correctAnswers.length/this.questions.length)*100, " is your score");
+
+                // TODO:: save testInfo to user.
+                // Allow viewing of test with correct answers.
             }
         },
         computed: {
+            ...mapState([
+                'testTypes',
+                'route'
+            ]),
+            countdown() {
+                return moment(this.timer).format('m:ss');
+
+            },
             questions() {
 //                return questionGenerator('series', 'add', 20, [-20,20]);
                 return questionGenerator('series', 'add', 20, [-20,20]);
@@ -108,6 +181,13 @@ import { questionGenerator } from '/imports/api/questionGenerator'
             sliderTransform() {
                 let percentageX = -(this.currentQuestionIndex*100) + "%";
                 return `transform: translate3d(${percentageX}, 0, 0)`
+            },
+            testTitle() {
+                let params = this.route.params,
+                    type = _.find(this.testTypes, {value: params.type}),
+                    category = _.find(categories, { value: params.category});
+                    test = _.find(category.children, { value: params.activetest})
+                return type.label + " : " + category.label + " : " + test.label;
             }
         }
     }
@@ -116,6 +196,8 @@ import { questionGenerator } from '/imports/api/questionGenerator'
 @import '~imports/ui/styl/variables.styl'
 @import '~imports/ui/styl/mixins'
 
+.fade-slide
+    transition all 400ms ease
 .popup
     position fixed
     top 0
@@ -181,6 +263,12 @@ import { questionGenerator } from '/imports/api/questionGenerator'
         color lighten(darkblue, 10)
         padding 40px 0
         font-weight normal
+    h4
+        padding 0 0 2%
+        font-size 25px
+        letter-spacing 1px
+        direction rtl
+        text-align center
     .test-questions
         position relative
         overflow hidden
@@ -200,7 +288,7 @@ import { questionGenerator } from '/imports/api/questionGenerator'
                 display inline-block
                 width 100%
                 vertical-align top
-                padding 2% 14%
+                padding 6% 14% 2%
                 margin 0
                 .question
                     text-align center
@@ -227,9 +315,11 @@ import { questionGenerator } from '/imports/api/questionGenerator'
             .answer
                 text-align center
                 padding 8% 0 6% 0
+                li
+                    display inline-block
+                    margin 0 30px
                 li a
                     font-family 'Helvetica Thin'
-                    margin 0 30px
                     display inline-block
                     padding 10px
                     border-radius 9px
@@ -337,10 +427,12 @@ import { questionGenerator } from '/imports/api/questionGenerator'
                     transform translateX(-50%)
             &.active
                 transform rotate(-20deg) scale(1.5)
+                margin 0 1% 1.5%
             &.answered
                 border-color darken(#0bddbe, 15)
                 background rgba(#0bddbe, 0.05)
                 transform scale(0.82)
+                margin 0 0.2% 1.5%
                 span
                     transform translate(-50%,-50%) rotate(0deg)
                     color darken(#0bddbe, 15)
@@ -357,5 +449,28 @@ import { questionGenerator } from '/imports/api/questionGenerator'
         &:first-child
             color darken(#0bddbe, 10)
 
+.countdown
+    position absolute
+    left 50%
+    transform translate(-50%)
+    top 10%
+    color red
+    font-size 6vmin
+    letter-spacing 10px
 
+.welcome
+    position fixed
+    top 0
+    left 0
+    right 0
+    bottom 0
+    background rgba(255,255,255,0.98)
+    z-index 999
+    text-align center
+    overflow hidden
+    & > div, & > h2
+        position absolute
+        top 50%
+        left 50%
+        transform translate(-50%,-50%)
 </style>

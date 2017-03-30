@@ -21,12 +21,12 @@ export default {
         UserProfile
     },
     methods: {
-        ...mapActions([
+        ...mapActions('globalStore', [
             'closePopup'
         ])
     },
     computed: {
-        ...mapState([
+        ...mapState('globalStore', [
             'popup'
         ])
     }

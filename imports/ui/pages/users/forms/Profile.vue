@@ -90,14 +90,14 @@ export default {
     },
     methods: {
         ...mapActions([
-            'saveUserProfile'
+            'usersModule/saveUserProfile'
         ])
     },
     computed: {
-        ...mapState([
+        ...mapState('usersModule', [
             'user'
         ]),
-        ...mapGetters([
+        ...mapGetters('globalStore', [
             'isAdmin'
         ])
     }

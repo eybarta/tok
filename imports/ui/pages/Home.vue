@@ -22,10 +22,10 @@ import { mapState, mapGetters } from 'vuex'
             UsersHome
         },
         computed: {
-            ...mapState([
+            ...mapState('usersModule', [
                 'user'
             ]),
-            ...mapGetters([
+            ...mapGetters('globalStore', [
                 'isAdmin'
             ]),
             loggedIn() {

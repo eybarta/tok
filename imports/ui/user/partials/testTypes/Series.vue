@@ -21,8 +21,20 @@
 </div>
 </template>
 <script>
+import { mapState, mapGetters } from 'vuex'
 export default {
-
+    computed: {
+        ...mapState('testsModule', [
+            'questionIndex'
+        ]),
+        ...mapGetters('testsModule', [
+            'questions'
+        ]),
+        sliderTransform() {
+            let percentageX = -(this.questionIndex*100) + "%";
+            return `transform: translate3d(${percentageX}, 0, 0)`
+        }
+    }
 }
 </script>
 <style lang="stylus">

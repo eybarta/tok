@@ -1,7 +1,6 @@
 <template>
 <div class="users-home">
     <main>
-       
         <router-view></router-view>
     </main>
     
@@ -18,14 +17,28 @@ import Popup from '../../components/Popup.vue'
                 menuTypes: ['type', 'category', 'activetest'],
             }
         },
+        mounted() {
+            let user = this.user;
+            console.log("FROM USER HOME >> ", this.user)
+            if (!user.profile.dirty) {
+                this.callPopup({ title:'פרטים אישיים', type:'UserProfile'})
+                this.dirtifyUser();
+            }
+            console.log("categories >> ", this.categories);
+            console.log("currentMenuItems >> ", this.currentMenuItems);
+        },
         computed: {
-            ...mapState([
+            ...mapState('usersModule', [
                 'user',
-                'users',
-                'testMenu',
+                'users'
+            ]),
+            ...mapState([
                 'route'
             ]),
-            ...mapGetters([
+            ...mapState('testsModule', [
+                'testMenu'
+            ]),
+            ...mapGetters('testsModule', [
                 'currentMenuItems',
                 'breadCrumbs',
                 'activeCategory'
@@ -50,20 +63,11 @@ import Popup from '../../components/Popup.vue'
                 return title
             }
         },
-        mounted() {
-            let user = this.user;
-            if (!user.profile.dirty) {
-                this.callPopup({ title:'פרטים אישיים', type:'UserProfile'})
-                this.dirtifyUser();
-            }
-            console.log("categories >> ", this.categories);
-            console.log("currentMenuItems >> ", this.currentMenuItems);
-        },
         methods: {
             ...mapActions([
-                'callPopup',
-                'dirtifyUser',
-                'updateTestMenu'
+                'globalStore/callPopup',
+                'usersModule/dirtifyUser',
+                'testsModule/updateTestMenu'
             ]),
             nextMenu() {
                 let types = this.menuTypes,
@@ -104,32 +108,7 @@ import Popup from '../../components/Popup.vue'
 .list-complete-leave-active {
   position: absolute;
 }
-.item
-    background linear-gradient(145deg, bluegreen 0%, bluegreen 50%, darken(bluegreen, 50) 90%)
-    box-shadow 4px 4px 12px rgba(darken(bluegreen, 75), 0.02)
-    // border 1px solid bluegreen
-    text-align center
-    position relative
-    border-radius 360px
-    transition all 0.8s ease
-    overflow hidden
-    &:hover
-        background-position 100px
-    span
-        box-shadow 1px 1px 2px rgba(#fff, 0.5)
-        &:before
-            display inline-block
-            content ''
-            height 100%
-            vertical-align middle
-        self-center()
 
-        color darken(bluegreen, 1)
-        font-size 22px
-        width 99%
-        height @width
-        border-radius 360px
-        background #fff
 
 .breadcrumbs
     text-align center

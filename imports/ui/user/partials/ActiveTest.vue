@@ -15,34 +15,13 @@
         <div class="test">
             <h2 v-text="testTitle"></h2>
             
-            <!--
             <component :is="currentCategory"></component>
-            -->
-                <div @click="prevSlide" :class="['slide-btn', 'slide-prev', currentQuestionIndex==0?'disabled': '']"></div>
-                <div @click="nextSlide" :class="['slide-btn', 'slide-next', currentQuestionIndex==questions.length-1?'disabled': '']"></div>
-            <div class="test-questions ltr">
-                <h4>מה הספרה הבאה בסדרה?</h4>
-                <ul :style="sliderTransform">
-                    <li v-for="(question, index) in questions" :key="question" :data-index="index" class="list-item">
-                        <div class="question">
-                            <div class="parts ltr">
-                                <span v-for="part in question.parts">{{ part }}</span>
-                                <span class="next">?</span>
-                            </div>
-                        </div>
-                        <div class="answer">
-                            <ul class="ltr">
-                                <li v-for="answer in question.answers.list">
-                                    <a href="#p" @click.prevent="question.chosenAnswer=answer" :class="[question.chosenAnswer==answer ? 'chosen' : '']" v-text="answer"></a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+                <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
+                <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==questions.length-1?'disabled': '']"></div>
+            
         <div class="pager-progress ltr">
 	        <ul>
-                <li @click.prevent="currentQuestionIndex=index" v-for="(question, index) in questions" :class="[!!question.chosenAnswer ? 'answered' : '', index==currentQuestionIndex ? 'active' : '']" >
+                <li @click.prevent="updateQuestionIndex(index)" v-for="(question, index) in questions" :class="[!!question.chosenAnswer ? 'answered' : '', index==questionIndex ? 'active' : '']" >
                    <span>{{ index+1 }}</span>
                 </li>
             </ul>
@@ -70,15 +49,13 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { categories } from '/imports/api/categories'
-
-import { questionGenerator } from '/imports/api/questionGenerator'
+import Series from './testTypes/Series.vue'
     export default {
         data() {
             return {
                 started: false,
                 goodluck: false,
                 timer: 840000,
-                currentQuestionIndex: 0,
                 questiontimer: null,
                 idle: {
                     flag: false,
@@ -99,20 +76,22 @@ import { questionGenerator } from '/imports/api/questionGenerator'
             this.testinfo.questions = this.questions;
             // this.countdownobj.start();
         },
-        mounted() {
-            
+        components: {
+            Series
         },
         watch: {
-            'currentQuestionIndex'() {
-                this.timeQuestion(this.currentQuestionIndex)
+            'questionIndex'() {
+                this.timeQuestion(this.questionIndex)
             }
         },
         methods: {
-            ...mapActions([
-                'saveTestToUser'
+            ...mapActions('testsModule', [
+                'saveTestToUser',
+                'updateQuestionIndex'
             ]),
             starttest() {
                 let ref = this;
+                this.updateQuestionIndex(0)
                 this.$set(this, 'goodluck', true)
                 Meteor.setTimeout(function() {
                     this.$set(this, 'started', true)
@@ -129,19 +108,12 @@ import { questionGenerator } from '/imports/api/questionGenerator'
                 }.bind(this), 1000)
                 
             },
-            timeQuestion(index) {
-                Meteor.clearInterval(this.questiontimer)
-                let question = this.testinfo.questions[index];
-                question.timer = question.timer || 0;
-                this.questiontimer = Meteor.setInterval(function() {
-                    question.timer++;
-                }, 1000)
-            },
             keyupHandler(e) {
+                console.log("key up handler < ", e.keyCode);
                 (e.keyCode==37) 
-                ?   this.prevSlide()  // left 
+                ?   this.updateQuestionIndex('prev')
                 :   (e.keyCode==39)
-                ?   this.nextSlide()  // right
+                ?   this.updateQuestionIndex('next')  // right
                 :   ''
                 if (!!this.$set) {
                     this.$set(this.idle, 'timer', 60000)
@@ -150,18 +122,16 @@ import { questionGenerator } from '/imports/api/questionGenerator'
             mousemoveHandler(e) {
                 this.$set(this.idle, 'timer', 60000)
             },
+            timeQuestion(index) {
+                Meteor.clearInterval(this.questiontimer)
+                let question = this.testinfo.questions[index];
+                question.timer = question.timer || 0;
+                this.questiontimer = Meteor.setInterval(function() {
+                    question.timer++;
+                }, 1000)
+            },
             flagIdle() {
                 console.log('User has been idle for 2 minutes')
-            },
-            prevSlide() {
-                this.currentQuestionIndex != 0
-                ? this.currentQuestionIndex-- 
-                : this.currentQuestionIndex=this.questions.length-1
-            },
-            nextSlide() {
-                this.currentQuestionIndex != this.questions.length-1
-                ? this.currentQuestionIndex++
-                : this.currentQuestionIndex=0
             },
             getAverageTimeOnQuestion() {
                 let answered = _.filter(this.questions, 'chosenAnswer');
@@ -177,39 +147,35 @@ import { questionGenerator } from '/imports/api/questionGenerator'
                 this.$set(this.testinfo, 'score', (correctAnswers.length/this.questions.length)*100);
                 this.$set(this.testinfo, 'meta', this.route.params)
                 this.$set(this.testinfo, 'percentComplete', (this.answeredSoFar/20)*100)
-                this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer).asSeconds()))
+                this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer)).asSeconds())
                 this.$set(this.testinfo, 'averageTimeOnQuestion', this.getAverageTimeOnQuestion())
                 console.log(correctAnswers.length, " questions were answered correctly");
                 console.log((correctAnswers.length/this.questions.length)*100, " is your score");
 
-                // TODO:: save testInfo to user.
                 // Allow viewing of test with correct answers.
                 this.saveTestToUser(this.testinfo)
             }
         },
         computed: {
-            ...mapState([
+            ...mapState('testsModule', [
                 'testTypes',
+                'questionIndex'
+            ]),
+            ...mapState([
                 'route'
             ]),
-            ...mapGetters([
-                'currentCategory'
+            ...mapGetters('testsModule', [
+                'currentCategory',
+                'questions'
             ]),
             countdown() {
                 return moment(this.timer).format('m:ss');
 
             },
-            questions() {
-//                return questionGenerator('series', 'add', 20, [-20,20]);
-                return questionGenerator('series', 'add', 20, [-20,20]);
-            },
             answeredSoFar() {
                 return _.filter(this.questions, 'chosenAnswer').length
             },
-            sliderTransform() {
-                let percentageX = -(this.currentQuestionIndex*100) + "%";
-                return `transform: translate3d(${percentageX}, 0, 0)`
-            },
+            
             testTitle() {
                 let params = this.route.params,
                     type = _.find(this.testTypes, {value: params.type}),

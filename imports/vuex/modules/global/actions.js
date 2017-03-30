@@ -1,7 +1,4 @@
-import { Meteor } from 'meteor/meteor'
-import { Tracker }from 'meteor/tracker'
-import { Session } from 'meteor/session'
-import * as types from './mutation-types';
+import * as types from './mutation-types.js';
 
 
 // UTIL

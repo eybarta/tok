@@ -81,7 +81,7 @@ export default {
         Multiselect
     },
     methods: {
-        ...mapActions([
+        ...mapActions('globalStore', [
             'callPopup'
         ]),
         toggleSelect(user, e) {
@@ -145,7 +145,7 @@ export default {
 		},
     },
     computed: {
-        ...mapState([
+        ...mapState('usersModule', [
             'users'
         ]),
         groups() {

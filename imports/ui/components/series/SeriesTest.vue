@@ -53,7 +53,6 @@ import { questionGenerator } from '/imports/api/questionGenerator'
     export default {
         data() {
             return {
-                currentQuestionIndex: 0,
                 testinfo: {
                     userId: Accounts.userId(),
                     questions: []
@@ -68,23 +67,6 @@ import { questionGenerator } from '/imports/api/questionGenerator'
             document.body.addEventListener('keyup', this.keyupHandler)
         },
         methods: {
-            keyupHandler(e) {
-                (e.keyCode==37) 
-                ?   this.prevSlide()  // left 
-                :   (e.keyCode==39)
-                ?   this.nextSlide()  // right
-                :   ''
-            },
-            prevSlide() {
-                this.currentQuestionIndex != 0
-                ? this.currentQuestionIndex-- 
-                : this.currentQuestionIndex=this.questions.length-1
-            },
-            nextSlide() {
-                this.currentQuestionIndex != this.questions.length-1
-                ? this.currentQuestionIndex++
-                : this.currentQuestionIndex=0
-            },
             calculateScore() {
                 let correctAnswers = _.filter(this.questions, question => {
                     return question.chosenAnswer == question.answers.correct;

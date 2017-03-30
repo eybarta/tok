@@ -7,11 +7,8 @@
         </ul>
         <h2 v-text="title"></h2>
         <div class="block block-60">
-<!--                    <a :key="item" v-for="item in menuitems" class="item" href="#p" @click.prevent="itemClickHandler(item.value)"><span v-text="item.label">  </span></a>
-                    <router-view></router-view>
-                -->
             <transition-group name="list-complete" class="waffle" tag="div"  appear>
-                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span v-text="item.label">  </span></router-link>
+                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span><span v-html="item.label">  </span></span></router-link>
             </transition-group>                
         </div>
 </div>
@@ -29,24 +26,22 @@ import Popup from './Popup.vue'
             }
         },
         computed: {
-            ...mapState([
-                'user',
-                'users',
-                'testMenu',
-                'route'
-            ]),
-            ...mapGetters([
+            ...mapState({
+                user: state => state.usersModule.user,
+                users: state => state.usersModule.users,
+                popup: state => state.globalStore.popup,
+                route:state => state.route
+            }),
+            ...mapGetters('testsModule', [
                 'currentMenuItems',
                 'breadCrumbs',
                 'activeCategory'
             ]),
             currentMenuType() {
-                                console.log('current menu > ', this.route, " :: ", this.route.name);
-
+                console.log('current menu > ', this.route, " :: ", this.route.name);
                 let types = this.menuTypes,
                     type = this.route.name,
                     index = _.indexOf(types, type);
-
                 return types[(index==types.length-1) ? 0 : ++index];
             },
             title() {
@@ -63,6 +58,7 @@ import Popup from './Popup.vue'
         },
         mounted() {
             let user = this.user;
+            console.log(">> THIS USER? ", this.user);
             if (!user.profile.dirty) {
                 this.callPopup({ title:'פרטים אישיים', type:'UserProfile'})
                 this.dirtifyUser();
@@ -72,9 +68,9 @@ import Popup from './Popup.vue'
         },
         methods: {
             ...mapActions([
-                'callPopup',
-                'dirtifyUser',
-                'updateTestMenu'
+                'globalStore/callPopup',
+                'usersModule/dirtifyUser',
+                'testsModule/updateTestMenu'
             ]),
             nextMenu() {
                 let types = this.menuTypes,
@@ -126,7 +122,7 @@ import Popup from './Popup.vue'
     overflow hidden
     &:hover
         background-position 100px
-    span
+    & > span
         box-shadow 1px 1px 2px rgba(#fff, 0.5)
         &:before
             display inline-block
@@ -134,14 +130,18 @@ import Popup from './Popup.vue'
             height 100%
             vertical-align middle
         self-center()
-
         color darken(bluegreen, 1)
         font-size 22px
         width 99%
         height @width
         border-radius 360px
         background #fff
-
+        & > span
+            position absolute
+            top 50%
+            left 50%
+            transform translate(-50%, -50%)
+            text-align right
 .breadcrumbs
     text-align center
     margin 5vmin auto

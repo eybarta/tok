@@ -34,7 +34,7 @@ import { mapActions, mapState } from 'vuex'
         },
         methods: {
             ...mapActions([
-                'saveUsers'
+                'usersModule/saveUsers'
             ]),
             dateChange(e) {
                 this.$set(this, 'date', e.target.value)
@@ -45,7 +45,7 @@ import { mapActions, mapState } from 'vuex'
                 let string = this.rawStringIds.replace(/\s/g, '');
                 return string.split(',')
             },
-            ...mapState([
+            ...mapState('usersModule', [
                 'userLogins'
             ])
         }

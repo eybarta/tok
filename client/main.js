@@ -10,21 +10,21 @@ Vue.use(Vuex);
 
 
 // PLUGINS
-import {storeconfig} from '/imports/vuex/';
 
 import { sync } from 'vuex-router-sync';
 import '/imports/startup/client';
 import '/imports/startup/client/account-config.js';
 
-const store = new Vuex.Store(storeconfig);
-
+import {storeconfig} from '/imports/vuex/';
 import { router } from '/imports/startup/client/router'
 
+console.log('storeconfig  ', storeconfig)
+const store = new Vuex.Store(storeconfig);
 
 
 
 sync(store, router);
-
+console.log("*****STORE >> ", store);
 // Global Guard
 router.beforeEach((to,from,next) => {
   console.log("TO:", to);
@@ -41,7 +41,7 @@ router.beforeEach((to,from,next) => {
           stop()
         }        
       }
-      store.dispatch('initUser');
+      store.dispatch('usersModule/initUser');
     })
   }
   else {
@@ -52,7 +52,7 @@ router.beforeEach((to,from,next) => {
       next()
     }
   }
-  store.dispatch('initUser');
+  store.dispatch('usersModule/initUser');
 })
 // Libs
 _ = lodash;

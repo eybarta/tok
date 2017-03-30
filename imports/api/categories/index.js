@@ -18,6 +18,14 @@ export const categories = [
             {
                 label: 'חילוק',
                 value: 'divide'
+            },
+            {
+                label: 'חיבור הפרש משתנה',
+                value: 'add_changingSpread'
+            },
+            {
+                label: 'חיסור הפרש משתנה',
+                value: 'subtract_changingSpread'
             }
         ]
     },
@@ -40,5 +48,24 @@ export const categories = [
     {
         label: 'מבחן מלא',
         value: 'fulltest'
+    }
+]
+
+export const testTypes = [
+    {
+        label:'תרגול',
+        value: 'practice'
+    },
+    {
+        label: 'מבחנים',
+        value: 'autotest'
+    },
+    {
+        label: 'מבחנים קבועים',
+        value: 'fixedtest'
+    },
+    {
+        label: 'מבחן אדפטיבי',
+        value: 'adaptivetest'
     }
 ]

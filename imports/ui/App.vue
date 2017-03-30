@@ -40,15 +40,18 @@ export default {
 		Popup
     },
 	methods: {
-		...mapActions([
+		...mapActions('usersModule', [
 			'initUser',
 			'initUsers'
-		]),
+			
+		])
 	},
 	computed: {
-		...mapState([
+		...mapState('usersModule', [
 			'user',
-			'popup'
+		]),
+		...mapState('globalStore', [
+			'popup',
 		])
 	}
 }

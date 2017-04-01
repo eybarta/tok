@@ -2,14 +2,6 @@ import { Random } from 'meteor/random'
 export function questionGenerator(category, type, amount) {
     if (category=='series') {
         return getQuestions(amount, type);
-        // if (['add', 'subtract', 'multiply','divide', 'add_changingSpread'].indexOf(type)>-1) {
-        //     return getQuestions(amount, type);
-        // }
-        // else {
-        //     if (type=='add_changingSpread') {
-        //         return getChangingSpreadQuestions(amount, type);
-        //     }
-        // }
     }
 }
 
@@ -33,48 +25,6 @@ var questionObject =  {
     chosenAnswer: null
 }
 
-// function getQuestions(amount, type) {
-//     console.log('generate question.. type: ',type, ' amount: ', amount);
-
-//     let questionList = [],  // Final questions list,
-//         operation = type.split("_")[0],
-//         _amount = parseInt(_amount), // Amount of questions
-//         controlList = [], // Array of controls, 1 for each question
-//         changingControl = null,  // Control iterator (-10,10)
-//         wrongControls = [], // Array of 'wrong controls' for wrong answers
-//         primaryRange = getPrimaryRange(type),    // First part ([RANGE] number to start with)
-//         secondaryRange = getSecondaryRange(type) // Second Constant (if exists)
-//     /*
-//         Create Control number list >>
-//         for the operations
-//     */
-//     controlList = generateControlList([], amount, type);
-//     wrongControls = generateWrongControls([]);
-//     for (var i=0;i<amount;i++) {
-//         // Populate the question object
-//         let obj = _.cloneDeep(questionObject);
-//         obj.id = Random.id(7);
-//         obj.control = controlList[i];
-
-//         // PARTS        
-//         let primary = _.random(...primaryRange);
-//         obj.parts.push(primary);
-//         for (var k = 0;k<5;k++) {
-//             obj.parts.push(_[type](_.last(obj.parts), obj.control))
-//         }
-//         // ANSWERS
-//         obj.answers.correct = _[type](_.last(obj.parts), obj.control);
-//         obj.answers.list.push(obj.answers.correct)
-//         for (var j=0;j<3;j++) {
-//             // -3 -- 3 from correct answer
-//             obj.answers.list.push(_.add(obj.answers.correct, wrongControls[j]))
-//         }
-//         questionList.push(obj);
-//     }
-//     return questionList;
-// }
-
-
 function getQuestions(amount, type) {
     console.log('generate question.. type: ',type, ' amount: ', amount);
     let hasChanger =  /changing/gi.test(type);
@@ -82,8 +32,7 @@ function getQuestions(amount, type) {
         operation = type.split("_")[0],
         _amount = parseInt(_amount), // Amount of questions
         controlList = [], // Array of controls, 1 for each question
-        changingControl = null,  // Control iterator (-10,10)
-        wrongControls = [], // Array of 'wrong controls' for wrong answers
+        changingControl = 0,  // Control iterator (-10,10)
         primaryRange = getPrimaryRange(type),    // First part ([RANGE] number to start with)
         secondaryRange = getSecondaryRange(type) // Second Constant (if exists)
     /*
@@ -91,7 +40,7 @@ function getQuestions(amount, type) {
         for the operations
     */
     controlList = generateControlList([], amount, type);
-    wrongControls = generateWrongControls([]);
+
     for (var i=0;i<amount;i++) {
         // Populate the question object
         let obj = _.cloneDeep(questionObject);
@@ -99,36 +48,49 @@ function getQuestions(amount, type) {
         obj.control = controlList[i];
         if (hasChanger)
             changingControl = _.random(-10,10);
-        // PARTS        
-        let primary = _.random(...primaryRange);
-        obj.parts.push(primary);
-        console.log('obj.control >> ', obj.control);
-        // console.log('changingControl >> ', changingControl);
-        let control = null;
-        for (var k = 0;k<6;k++) {
-            let iter = !!changingControl ? k * changingControl : 0;
-            control = _[operation](obj.control, iter);
-            console.log('iter >> ', iter);
-            console.log('control >> ', control);
-            obj.parts.push(_[operation](_.last(obj.parts), control))
-        }
+        
+        // SERIES PARTS        
+        let primary = _.random(...primaryRange);        
+        obj.parts = createParts(6, primary, changingControl, obj.control, operation);
+        
         // ANSWERS
-        // take last part as the answer
-        // And remove it from parts array
-        obj.answers.correct = _.last(obj.parts);
+        let correctAnswer = _.last(obj.parts)
+        obj.answers = createAnswersList(3, correctAnswer);
         obj.parts.pop();
-        obj.answers.list.push(obj.answers.correct)
-        for (var j=0;j<3;j++) {
-            // -3 -- 3 from correct answer
-            obj.answers.list.push(_.add(obj.answers.correct, wrongControls[j]))
-        }
+
+        
         questionList.push(obj);
     }
     return questionList;
 }
 
+function createParts(amount, primary, changer, control, operation) {
+    let _control = null,
+        parts = [];
+    for (var k = 0;k<amount;k++) {
+        let iter = k * changingControl;
+        _control = _[operation](control, iter);
+        parts.push(_[operation](_.last(parts), _control))
+    }
+    return parts;
+}
+
+function createAnswersList(amount, correct, controls) {
+    let list = [];
+    list.push(correct)
+    for (var j=0;j<3;j++) {
+        // -3 -- 3 from correct answer
+        list.push(_.add(correct, wrongControls[j]))
+    }   
+    return {
+        correct,
+        list
+    }
+}
+
 
 function generateWrongControls(controls) {
+    let wrongControls = generateWrongControls([]);
     while(controls.length<3) {
         controls.push(_.random(-3,3));
         controls = _.uniq(_.compact(controls));

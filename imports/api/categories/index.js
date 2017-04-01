@@ -26,6 +26,10 @@ export const categories = [
             {
                 label: 'חיסור הפרש משתנה',
                 value: 'subtract_changingSpread'
+            },
+            {
+                label: 'חיבור כל זוג',
+                value: 'add_everyOther'
             }
         ]
     },

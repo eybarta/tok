@@ -20,7 +20,7 @@ import Popup from '../../components/Popup.vue'
         mounted() {
             let user = this.user;
             console.log("FROM USER HOME >> ", this.user)
-            if (!user.profile.dirty) {
+            if (!!user && !user.profile.dirty) {
                 this.callPopup({ title:'פרטים אישיים', type:'UserProfile'})
                 this.dirtifyUser();
             }

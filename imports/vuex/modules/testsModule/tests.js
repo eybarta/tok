@@ -94,7 +94,8 @@ const getters = {
 
     questions: (state, getters, rootState) => {
         let params = rootState.route.params;
-        return questionGenerator(params.category, params.activetest, 20);
+        console.log("question tests getter >> params: ", params);
+        return !!params.activetest ? questionGenerator(params.category, params.activetest, 20) : [];
     }
 }
 

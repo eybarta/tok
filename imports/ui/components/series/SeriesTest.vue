@@ -49,7 +49,6 @@
     </div>
 </template>
 <script>
-import { questionGenerator } from '/imports/api/questionGenerator'
     export default {
         data() {
             return {
@@ -78,8 +77,6 @@ import { questionGenerator } from '/imports/api/questionGenerator'
         },
         computed: {
             questions() {
-//                return questionGenerator('series', 'add', 20, [-20,20]);
-                return questionGenerator('series', 'add', 20, [-20,20]);
             },
             answeredSoFar() {
                 return _.filter(this.questions, 'chosenAnswer').length

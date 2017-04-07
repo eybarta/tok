@@ -79,3 +79,10 @@ Meteor.startup(() => {
 l = (...args) => {
   console.log("DEBUG|| ", args);
 }
+
+cl = (...args) => {
+  _.each(args, obj => {
+    for(key in obj)
+      console.info(key + ': ' + obj[key]);
+  })
+}

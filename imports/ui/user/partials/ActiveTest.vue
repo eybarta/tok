@@ -3,6 +3,7 @@
     <transition name="fade">
         <transition-group  v-if="!started" class="welcome" name="fade-slide" tag="div">
             <div v-if="!goodluck" key="0">
+                <h2 class="pb-big" v-text="'מולך מבחן 20 שאלות ב' + categoryName"></h2>
                 <h2 class="pb-big">יש לך 14 דקות לסיים.</h2>
                 <button @click="starttest" class="btn btn-success btn-big">התחל</button>
                 <router-link to="/" class="back-btn btn btn-warning">חזרה</router-link>
@@ -94,9 +95,9 @@ import Series from './testTypes/Series.vue'
                 this.updateQuestionIndex(0)
                 this.$set(this, 'goodluck', true)
                 Meteor.setTimeout(function() {
-                    this.$set(this, 'started', true)
-                    document.body.addEventListener('keyup', this.keyupHandler);
-                    document.body.addEventListener('mousemove', this.mousemoveHandler);
+                    this.$set(this, 'started', true);
+                    this.bindEvents();
+                    
                     Meteor.setInterval(function() {
                         this.$set(this, 'timer', this.timer-1000)
                         this.$set(this.idle, 'timer', this.idle.timer-1000)
@@ -107,6 +108,12 @@ import Series from './testTypes/Series.vue'
                     this.timeQuestion(0)
                 }.bind(this), 1000)
                 
+            },
+            bindEvents() {
+                    console.log("BIND EVENTS");
+                    $(document.body).off('keyup mousemove')
+                    $(document.body).on('keyup', this.keyupHandler)
+                    $(document.body).on('mousemove', this.mousemoveHandler)
             },
             keyupHandler(e) {
                 console.log("key up handler < ", e.keyCode);
@@ -175,7 +182,11 @@ import Series from './testTypes/Series.vue'
             answeredSoFar() {
                 return _.filter(this.questions, 'chosenAnswer').length
             },
-            
+            categoryName() {
+                let params = this.route.params;
+                
+                return (!!params && params.category) ? _.find(categories, { value: params.category}).label : '';
+            },
             testTitle() {
                 let params = this.route.params,
                     type = _.find(this.testTypes, {value: params.type}),
@@ -190,8 +201,15 @@ import Series from './testTypes/Series.vue'
 @import '~imports/ui/styl/variables.styl'
 @import '~imports/ui/styl/mixins'
 
-.fade-slide
-    transition all 400ms ease
+
+.fade-enter-active, .fade-leave-active {
+  transition: all .5s
+  transform: scale(1) rotate(0)
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0
+  transform: scale(4) rotate(-720deg)
+}
 .popup
     position fixed
     top 0
@@ -323,7 +341,7 @@ import Series from './testTypes/Series.vue'
             border-radius 20px
             cursor pointer
             transform rotate(-45deg)
-            transition border 400ms ease, background 400ms ease, transform 200ms ease
+            transition border 400ms ease, background 400ms ease, transform 400ms ease
             span
                 self-center()
                 display block
@@ -395,6 +413,7 @@ import Series from './testTypes/Series.vue'
         top 50%
         left 50%
         transform translate(-50%,-50%)
+        min-width 65%
     .back-btn
         display block
         width 120px

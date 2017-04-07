@@ -7,7 +7,7 @@
         </ul>
         <h2 v-text="title"></h2>
         <div class="block block-60">
-            <transition-group name="list-complete" class="waffle" tag="div"  appear>
+            <transition-group name="list-complete" class="waffle waffle-4" tag="div"  appear>
                 <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span><span v-html="item.label">  </span></span></router-link>
             </transition-group>                
         </div>

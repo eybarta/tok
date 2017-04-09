@@ -70,7 +70,7 @@ export const routes = [
 		},	
 	},
 	{
-		path: '/user/:username',
+		path: '/user',
 		name: 'userhome',
 		component: UserHome,
 		beforeEnter: (to, from, next) => {
@@ -91,7 +91,7 @@ export const routes = [
 		},		
 		children: [
 			{
-				path: '/user/:username',
+				path: ':username',
 				name: 'user',
 				component: ItemMenu,
 				children: [

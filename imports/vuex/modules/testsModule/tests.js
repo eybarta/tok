@@ -60,7 +60,7 @@ const getters = {
                 console.log("bc>>>>> ", value, " :: ", key, " :: ", obj);
                 if (key=='username') {
                     label = '<i class="fa fa-home"></i>';
-                    name = 'userhome';
+                    name = 'user';
                     order = 0;
                 }
                 if (key=='type') {

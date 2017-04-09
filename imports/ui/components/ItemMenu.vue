@@ -45,10 +45,15 @@ import Popup from './Popup.vue'
                 return types[(index==types.length-1) ? 0 : ++index];
             },
             title() {
-                let label,
-                    title = "באיזה נושא תרצו לתרגל?";
+                let menutype = this.currentMenuType,
+                label,
+                title = "כיצד ברצונך להתרגל?";
 
-                if (!!this.activeCategory) {
+
+                if (menutype==='category') {
+                    title = "באיזה נושא תרצו לתרגל?";
+                }
+                else if (menutype==='activetest') {
                     label = this.activeCategory.label;
                     title = "נא לבחור מה"+ label;
                 }

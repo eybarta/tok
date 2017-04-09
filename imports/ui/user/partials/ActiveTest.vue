@@ -4,21 +4,37 @@
         <transition-group  v-if="!started" class="welcome" name="fade-slide" tag="div">
             <div v-if="!goodluck" key="0">
                 <h2 class="pb-big" v-text="'מולך מבחן 20 שאלות ב' + categoryName"></h2>
+                <!--
                 <h2 class="pb-big">יש לך 14 דקות לסיים.</h2>
+                -->
+                <div class="radio-group">
+                    <h4>האם תרצה לתרגל על זמן?</h4>
+                    <div class="radio">
+                        <label for="yes">   
+                            <input hidden type="radio" name="timedtest" id="yes" :value="true" v-model="withtimer">
+                            <span class="yes">כן</span>
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label for="no">
+                        <input hidden type="radio" name="timedtest" id="no" :value="false" v-model="withtimer">
+                            <span class="no">לא</span>
+                        </label>
+                    </div>
+                </div>
                 <button @click="starttest" class="btn btn-success btn-big">התחל</button>
                 <router-link to="/" class="back-btn btn btn-warning">חזרה</router-link>
             </div>
             <h2 v-else class="primary" key="1"> בהצלחה !!</h2>
         </transition-group>
     </transition>
-    <div class="countdown" v-text="countdown"></div>
+    <div class="countdown" v-if="withtimer" v-text="countdown"></div>
     <div class="test-wrap">
         <div class="test">
             <h2 v-text="testTitle"></h2>
-            
             <component :is="currentCategory"></component>
-                <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
-                <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==questions.length-1?'disabled': '']"></div>
+            <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
+            <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==questions.length-1?'disabled': '']"></div>
             
         <div class="pager-progress ltr">
 	        <ul>
@@ -41,7 +57,9 @@
                 <h4>הציון שלך:</h4>
                 <div class="big score">{{ testinfo.score }} <span>/ 100</span></div>
 
-                <router-link class="link" :to="{ name: 'user'}">חזרה לעמוד הבית</router-link>
+                <div class="links">
+                    <router-link class="link btn btn-warning" :to="{ name: 'user'}">חזרה לעמוד הבית</router-link>
+                </div>
             </div>
         </div>
     </div>
@@ -54,6 +72,7 @@ import Series from './testTypes/Series.vue'
     export default {
         data() {
             return {
+                withtimer: true,
                 started: false,
                 goodluck: false,
                 timer: 840000,
@@ -99,7 +118,9 @@ import Series from './testTypes/Series.vue'
                     this.bindEvents();
                     
                     Meteor.setInterval(function() {
-                        this.$set(this, 'timer', this.timer-1000)
+                        if (this.withtimer) {
+                            this.$set(this, 'timer', this.timer-1000)
+                        }
                         this.$set(this.idle, 'timer', this.idle.timer-1000)
                         if (this.idle.timer<=0) {
                             this.flagIdle();
@@ -140,12 +161,17 @@ import Series from './testTypes/Series.vue'
             flagIdle() {
                 console.log('User has been idle for 2 minutes')
             },
+            timedQuestions() {
+                return _.filter(this.questions, 'timer');
+            },
+            totalTime() {
+                return _.sumBy(_.map(this.timedQuestions(), 'timer'));;
+            },
             getAverageTimeOnQuestion() {
-                let answered = _.filter(this.questions, 'chosenAnswer');
-                let sum = _.sumBy(_.map(answered, 'timer'));
-                let averageInSeconds = sum / answered.length;
+                let sum = this.totalTime();
+                let timedQuestions = this.timedQuestions();
+                let averageInSeconds = sum / timedQuestions.length;
                 return averageInSeconds;
-                // return moment(averageInSeconds, 's').format('m:ss');
             },
             finish() {
                 let correctAnswers = _.filter(this.questions, question => {
@@ -216,29 +242,36 @@ import Series from './testTypes/Series.vue'
     left 0
     right 0
     bottom 0
-    background rgba(0,0,0,0.7)
+    background rgba(0,0,0,0.96)
     z-index 99999999
 .popup-content
     position absolute
     top 50%
     left 50%
-    border-radius 150px
-    width 300px
-    height 300px
+    border-radius 34vmin
+    width 68vmin
+    height 68vmin
     border 5px solid rgba(#212121, 0.2)
     background #fff
-    padding 5%
+    padding 5vmin
     transform translate(-50%,-50%)
     h4
         font-size 30px
+        text-align center
     .score
         self-center()
-        font-size 40px
+        font-size 10vmin
         padding 5% 0
         text-align center
         color darken(bluegreen, 10)
+        direction ltr
         span
-            font-size 20px
+            font-size 5vmin
+    .links
+        position absolute
+        bottom 10vmin
+        left 50%
+        transform translateX(-50%)
 .green
     color green !important
 .red
@@ -340,6 +373,10 @@ import Series from './testTypes/Series.vue'
             height 32px
             border-radius 20px
             cursor pointer
+            backface-visibility hidden
+            -webkit-backface-visibility hidden
+            -webkit-transform translate3d(0,0,0);
+            transform translateZ(0)
             transform rotate(-45deg)
             transition border 400ms ease, background 400ms ease, transform 400ms ease
             span
@@ -361,18 +398,20 @@ import Series from './testTypes/Series.vue'
                     position absolute
                     height 7px
                     width 1px
-                    background darken(#0bddbe, 40)
-                    top 105%
+                    background darken(#f3fefc, 60)
+                    top 103%
                     left 50%
                     transform translateX(-50%)
             &.active
-                transform rotate(-20deg) scale(1.5)
-                margin 0 1% 1.5%
+                transform rotate(-20deg) scale(2)
+                background #f3fefc
+                z-index 9
+                
+                
             &.answered
                 border-color darken(#0bddbe, 15)
                 background rgba(#0bddbe, 0.05)
-                transform scale(0.82)
-                margin 0 0.2% 1.5%
+                transform scale(1.20)
                 span
                     transform translate(-50%,-50%) rotate(0deg)
                     color darken(#0bddbe, 15)
@@ -419,5 +458,34 @@ import Series from './testTypes/Series.vue'
         width 120px
         padding 10px 20px
         margin 40px auto
-        
+.radio-group
+    padding 20px 0 50px
+    h4
+        padding-bottom 20px
+        font-size 26px
+    .radio
+        display inline-block
+        vertical-align middle
+        padding 0 1vmin        
+        label
+            font-size 18px
+            cursor pointer
+            span
+                display inline-block
+                border 1px solid gray
+                width 5vmin
+                height @width
+                text-align center
+                border-radius @width
+                line-height @width
+                transition border 300ms ease-out, color 300ms ease-out
+            input:checked + span.yes
+                border-color darken(green, 15)
+                color @border-color
+            input:checked + span.no
+                border-color red
+                color red
+                
+                
+
 </style>

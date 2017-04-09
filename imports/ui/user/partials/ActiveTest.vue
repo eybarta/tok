@@ -23,7 +23,7 @@
                     </div>
                 </div>
                 <button @click="starttest" class="btn btn-success btn-big">התחל</button>
-                <router-link to="/" class="back-btn btn btn-warning">חזרה</router-link>
+                <router-link to="/" class="back-btn btn btn-primary" exact>חזרה <i class="fa fa-chevron-left"></i></router-link>
             </div>
             <h2 v-else class="primary" key="1"> בהצלחה !!</h2>
         </transition-group>
@@ -62,6 +62,14 @@
                 </div>
             </div>
         </div>
+
+        <transition name="fade">
+            <div v-if="!!idle.flag" class="modal idle-modal">
+                <div class="inner">
+                    <h4>הלו תעורר!</h4>
+                </div>
+            </div>
+        </transition>
     </div>
     </main>
 </template>
@@ -134,7 +142,7 @@ import Series from './testTypes/Series.vue'
                     console.log("BIND EVENTS");
                     $(document.body).off('keyup mousemove')
                     $(document.body).on('keyup', this.keyupHandler)
-                    $(document.body).on('mousemove', this.mousemoveHandler)
+                    $(document.body).on('mousemove', this.notIdle)
             },
             keyupHandler(e) {
                 console.log("key up handler < ", e.keyCode);
@@ -143,12 +151,13 @@ import Series from './testTypes/Series.vue'
                 :   (e.keyCode==39)
                 ?   this.updateQuestionIndex('next')  // right
                 :   ''
+                this.notIdle();
+            },
+            notIdle() {
                 if (!!this.$set) {
                     this.$set(this.idle, 'timer', 60000)
+                    this.$set(this.idle, 'flag', false)
                 }
-            },
-            mousemoveHandler(e) {
-                this.$set(this.idle, 'timer', 60000)
             },
             timeQuestion(index) {
                 Meteor.clearInterval(this.questiontimer)
@@ -159,7 +168,11 @@ import Series from './testTypes/Series.vue'
                 }, 1000)
             },
             flagIdle() {
-                console.log('User has been idle for 2 minutes')
+                console.log('User has been idle for 2 minutes');
+                this.$set(this.idle, 'flag', true);
+                $('body').on('mousemove', this.notIdle)
+                $('body').on('keyuo', this.notIdle)
+
             },
             timedQuestions() {
                 return _.filter(this.questions, 'timer');
@@ -458,10 +471,14 @@ import Series from './testTypes/Series.vue'
         width 120px
         padding 10px 20px
         margin 40px auto
+        i
+            vertical-align middle
+            display inline-block
+            padding-right 8px
 .radio-group
     padding 20px 0 50px
     h4
-        padding-bottom 20px
+        padding-bottom 40px
         font-size 26px
     .radio
         display inline-block
@@ -471,6 +488,7 @@ import Series from './testTypes/Series.vue'
             font-size 18px
             cursor pointer
             span
+                position relative
                 display inline-block
                 border 1px solid gray
                 width 5vmin
@@ -479,13 +497,40 @@ import Series from './testTypes/Series.vue'
                 border-radius @width
                 line-height @width
                 transition border 300ms ease-out, color 300ms ease-out
+                &:after
+                    content ''
+                    width 0
+                    border-bottom 1px solid #000
+                    position absolute
+                    bottom -10px
+                    left 50%
+                    transform translateX(-50%)
+                    transition width 200ms ease
+                &:hover:after
+                    width 20%
             input:checked + span.yes
-                border-color darken(green, 15)
-                color @border-color
+                border-color darken(bluegreen, 18)
+                color darken(bluegreen, 18)
+                &:after
+                    width 100%
+                    border-color darken(bluegreen, 18)
             input:checked + span.no
                 border-color red
                 color red
+                &:after
+                    width 100%
+                    border-color red
                 
-                
+.modal
+    background rgba(#fff, 0.8)
+    position fixed
+    top 0
+    left 0
+    right 0
+    bottom 0 
+    .inner
+        self-center()
+        h4
+            color danger
 
 </style>

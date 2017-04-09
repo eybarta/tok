@@ -57,7 +57,10 @@ const getters = {
         let cat = getters.activeCategory;
         let label, name, order;
 		    bc = _.map(rootState.route.params, function(value,key, obj){
-                console.log("bc>>>>> ", value, " :: ", key, " :: ", obj);
+                console.log("bc>>>>> ");
+                cl({value});
+                cl({key});
+                // , , " :: ", key, " :: ", obj);
                 if (key=='username') {
                     label = '<i class="fa fa-home"></i>';
                     name = 'user';

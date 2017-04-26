@@ -54,11 +54,51 @@
         <div v-if="!!testinfo.score" class="popup">
             <div class="popup-content">
                 <i class="lnr lnr-close"></i>
-                <h4>הציון שלך:</h4>
-                <div class="big score">{{ testinfo.score }} <span>/ 100</span></div>
+                <!--
+                <ul>
+                    <li>
+                        <span class="label">ציון</span>
+                        <div class="big score">{{ testinfo.score }} <span>/ 100</span></div>
+                    </li>
 
+                </ul>
+                -->
+                <div class="review">
+                    <div class="ltr score">
+                        <h5 class="label">ציון יחיד</h5>
+                        <div class="ltr singlescore">{{ testinfo.score }} <span>/ 100</span></div>
+                    </div>
+                    <h5>סיכום תשובות</h5>
+                    <div class="review-bubble success">
+                        <span class="num">{{ testinfo.correct}}</span>
+                        <span>נכונות</span>
+                    </div>
+                    <div class="review-bubble danger">
+                        <span class="num">
+                            {{ testinfo.wrong}}
+                        </span>
+                        <span>שגיאות</span>
+                    </div>
+                    <div class="review-bubble info">
+                        <span class="num">
+                            {{ testinfo.unanswered}}
+                        </span>
+                        <span>לא נענו</span>
+                    </div>
+                   
+                </div>
+                <div class="centerize">
+                    <div class="regscore">
+                        <h4>ציון תקן</h4>
+                        <div class="big num">{{ testinfo.regulatoryScore }} <span>/ 100</span></div>
+                    </div>
+                    <div class="info">
+                        <h5 class="label">זמן ממוצע לשאלה</h5>
+                        <span>{{ formatAverageTimeOnQuestion }}</span>
+                    </div>
+                </div>
                 <div class="links">
-                    <router-link class="link btn btn-warning" :to="{ name: 'user'}">חזרה לעמוד הבית</router-link>
+                    <router-link to="/" class="back-btn btn btn-primary" exact>חזרה לעמוד הבית <i class="fa fa-chevron-left"></i></router-link>
                 </div>
             </div>
         </div>
@@ -90,7 +130,12 @@ import Series from './testTypes/Series.vue'
                     timer: 60000
                 },
                 testinfo: {
+                    type: null,
+                    correct: null,
+                    wrong: null,
+                    unanswered: null,
                     score: null,
+                    regulatoryScore: null,
                     meta: null, 
                     percentComplete: 0,
                     timeToComplete: 0,
@@ -100,8 +145,9 @@ import Series from './testTypes/Series.vue'
             }
         },
         created() {
-            console.log("active test created");
             this.testinfo.questions = this.questions;
+            console.log("active test created >> ", this.questions);
+            console.log("USER >> ", this.user);
             // this.countdownobj.start();
         },
         components: {
@@ -184,19 +230,28 @@ import Series from './testTypes/Series.vue'
                 let sum = this.totalTime();
                 let timedQuestions = this.timedQuestions();
                 let averageInSeconds = sum / timedQuestions.length;
-                return averageInSeconds;
+                return Math.round(averageInSeconds);
             },
             finish() {
-                let correctAnswers = _.filter(this.questions, question => {
+                let answered, correct, wrong;
+                answered = _.filter(this.questions, question => {
+                    return !!question.chosenAnswer;
+                })
+                correct = _.filter(answered, question => {
                     return question.chosenAnswer == question.answers.correct;
                 })
-                this.$set(this.testinfo, 'score', (correctAnswers.length/this.questions.length)*100);
+                this.$set(this.testinfo, 'type', this.$route.params.type);
+                this.$set(this.testinfo, 'correct', correct.length);
+                this.$set(this.testinfo, 'wrong', answered.length-correct.length);
+                this.$set(this.testinfo, 'unanswered', this.questions.length-answered.length);
+                this.$set(this.testinfo, 'score', Math.round((correct.length/this.questions.length)*100));
+                this.$set(this.testinfo, 'regulatoryScore',Math.round(((correct.length-(this.testinfo.wrong/3))/20)*100));
                 this.$set(this.testinfo, 'meta', this.route.params)
                 this.$set(this.testinfo, 'percentComplete', (this.answeredSoFar/20)*100)
                 this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer)).asSeconds())
                 this.$set(this.testinfo, 'averageTimeOnQuestion', this.getAverageTimeOnQuestion())
-                console.log(correctAnswers.length, " questions were answered correctly");
-                console.log((correctAnswers.length/this.questions.length)*100, " is your score");
+                console.log(correct.length, " questions were answered correctly");
+                console.log((correct.length/this.questions.length)*100, " is your score");
 
                 // Allow viewing of test with correct answers.
                 this.saveTestToUser(this.testinfo)
@@ -216,22 +271,34 @@ import Series from './testTypes/Series.vue'
             ]),
             countdown() {
                 return moment(this.timer).format('m:ss');
-
+            },
+            formatAverageTimeOnQuestion() {
+                let ref = this;
+                return moment.duration(ref.testinfo.averageTimeOnQuestion, 'seconds').format('m:ss', {trim:false})
             },
             answeredSoFar() {
                 return _.filter(this.questions, 'chosenAnswer').length
             },
             categoryName() {
                 let params = this.route.params;
-                
-                return (!!params && params.category) ? _.find(categories, { value: params.category}).label : '';
+                let name = params.category || params.activetest;
+                console.log("name > ", name);
+                return _.find(categories, { value: name}).label;
             },
             testTitle() {
-                let params = this.route.params,
-                    type = _.find(this.testTypes, {value: params.type}),
-                    category = _.find(categories, { value: params.category});
-                    test = _.find(category.children, { value: params.activetest})
-                return type.label + " : " + category.label + " : " + test.label;
+                console.log("params >>", this.route.params)
+                let params, type, category, name;
+                
+                params = this.route.params;
+                type = _.find(this.testTypes, {value: params.type});
+                if (!!params.category) {
+                    console.log(" >> ", params.category);
+                    category = _.find(categories, { value: params.category });
+                    name = _.find(category.children, { value: params.activepractice})
+                }
+                console.log(type.label);
+                return 'מבחן'
+                // return type.label + " : " + !!params.category ? category.label + " : " + name.label : '';
             }
         }
     }
@@ -271,15 +338,42 @@ import Series from './testTypes/Series.vue'
     h4
         font-size 30px
         text-align center
-    .score
+    .centerize
         self-center()
-        font-size 10vmin
-        padding 5% 0
-        text-align center
-        color darken(bluegreen, 10)
-        direction ltr
-        span
-            font-size 5vmin
+        width 100%
+        .info
+            padding-top 15px
+            text-align center
+            .label
+                display inline-block
+                padding-left 5px
+            span
+                color gray
+
+        .regscore
+            padding 4% 0
+            border-top 1px dotted bluegreen
+            border-bottom 1px dotted bluegreen
+            text-align center
+        h4
+            padding-bottom 2%
+        .num
+            color darken(bluegreen, 10)
+            direction ltr
+            font-size 4vmin
+            span
+                font-size 2vmin
+    .score
+        padding 0 0 4%
+        .singlescore
+            border-top 1px dotted bluegreen
+            border-bottom 1px dotted bluegreen
+            padding 5px 0
+            width 20%
+            margin 0 auto
+        .label
+            display inline-block
+            padding-bottom 5px
     .links
         position absolute
         bottom 10vmin
@@ -424,7 +518,7 @@ import Series from './testTypes/Series.vue'
             &.answered
                 border-color darken(#0bddbe, 15)
                 background rgba(#0bddbe, 0.05)
-                transform scale(1.20)
+                transform rotate(360deg) scale(1.20)
                 span
                     transform translate(-50%,-50%) rotate(0deg)
                     color darken(#0bddbe, 15)
@@ -533,4 +627,37 @@ import Series from './testTypes/Series.vue'
         h4
             color danger
 
+.review
+    padding 0 0 30px
+    text-align center
+    h5
+        padding-bottom 10px 
+        font-size 18px
+    .review-bubble
+        position relative
+        display inline-block
+        margin 0 5px
+        width 60px
+        height 60px
+        border 1px solid gray
+        border-radius 30px
+        text-align center
+        border-color inherit
+        span
+            position absolute
+            top 105%
+            left 50%
+            transform translateX(-50%)
+            font-size 16px
+            width 100%
+            &.num
+                top 50%
+                transform translate(-50%,-50%)
+                font-size 30px
+        &:before
+            content ''
+            height 100%
+            display inline-block
+            vertical-align middle
+        
 </style>

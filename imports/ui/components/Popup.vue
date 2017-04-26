@@ -1,5 +1,5 @@
 <template>
-<div class="popup-wrap">
+<div class="popup-wrap" @click="popClickHandler($event)">
     <div class="popup-content">
         <i @click="closePopup" class="lnr lnr-cross topleft"></i>
         <h4 v-if="!!popup.title" v-text="popup.title"></h4>
@@ -20,10 +20,24 @@ export default {
         AddUsers,
         UserProfile
     },
+    created() {
+        $('body').on('keyup', this.popKeyupHandler)
+    },
     methods: {
         ...mapActions('globalStore', [
             'closePopup'
-        ])
+        ]),
+        popClickHandler(e) {
+            console.log("E>>", e);
+            if ($(e.target).parents(".popup-wrap").length<1) {
+                this.closePopup();
+            }
+        },
+        popKeyupHandler(e) {
+            if (e.keyCode===27) {
+                this.closePopup();
+            }
+        }
     },
     computed: {
         ...mapState('globalStore', [
@@ -41,6 +55,7 @@ export default {
     bottom 0
     right 0
     background rgba(0,0,0,0.7)
+    z-index 11
     .popup-content
         self-center()
         padding 4%

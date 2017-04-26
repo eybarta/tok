@@ -14,7 +14,7 @@ import Popup from '../../components/Popup.vue'
         data() {
             return {
                 categories,
-                menuTypes: ['type', 'category', 'activetest'],
+                menuTypes: ['type', 'category', 'activepractice'],
             }
         },
         mounted() {
@@ -64,10 +64,14 @@ import Popup from '../../components/Popup.vue'
             }
         },
         methods: {
-            ...mapActions([
-                'globalStore/callPopup',
-                'usersModule/dirtifyUser',
-                'testsModule/updateTestMenu'
+            ...mapActions('globalStore', [
+                'callPopup'
+            ]),
+            ...mapActions('usersModule', [
+                'dirtifyUser'
+            ]),
+            ...mapActions('testsModule', [
+                'updateTestMenu'
             ]),
             nextMenu() {
                 let types = this.menuTypes,

@@ -1,33 +1,29 @@
 <template>
 <div class="manage-users">
-<!--
-    <h3>ניהול משתמשים</h3>
--->
     <div v-if="!!users.length" class="user-list pt-med">
-        <div class="filters pb-big col-6">
-            <multiselect
-                    v-model="filters.group" 
-                    placeholder="פילטור לפי קבוצה"
-                    :multiple="true" 
-                    :options="groups"
-                    :searchable="true"
-                    :clearOnSelect="true"
-                    :ShowLabels="false"
-                    :allow-empty="true"></multiselect>
+        <div class="filters mb-med clearfix">
+            <div class="date-range right ">
+                <h5 class="label">פילטור לפי תאריך</h5>
+                <date-range v-model="filters.date"></date-range>
+            </div>
+            <div class="free-search">
+                <h5 class="label inline">חיפוש:</h5>
+                <input-field class="search" v-model="filters.search"></input-field>
+            </div>
         </div>
-        <table class="user-table">
+        <table class="user-table" v-if="parsedUsers.length>0">
             <thead>
                 <th>שם משתמש  (ת.ז)</th>
                 <th>שם מלא</th>
                 <th>קבוצה</th>
-                <th @click="sort('profile.dob')"> <i :class="['fa', sortClass('profile.dob')]"></i> גיל</th>
-                <th>סטטוס</th>
+                <th class="sortable" @click="sort('profile.dob')"> <i :class="['fa', sortClass('profile.dob')]"></i> גיל</th>
+                <th class="sortable" @click="sort('profile.status.label')"><i :class="['fa', sortClass('profile.status.label')]"></i> סטטוס</th>
                 <th>יישוב</th>
                 <th>טלפון</th>
                 <th>מייל</th>
             </thead>
-            <tbody>
-                <tr v-for="user in parsedUsers" :class="[!!user.selected ? 'selected' : '']" @click="user.selected=!user.selected">
+            <tbody name="table-row" is="transition-group">
+                <tr v-for="user in parsedUsers" :key="user.username" :class="[!!user.selected ? 'selected' : '', 'table-row-item']" @click="user.selected=!user.selected">
                     <td v-html="user.username"></td>
                     <td v-html="user.profile.name"></td>
                     <td v-html="user.profile.group"></td>
@@ -39,30 +35,57 @@
                 </tr>
             </tbody>
         </table>
+        <h4 v-else>לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
     </div>
     <p class="tcenter mt-big" v-else>אין משתמשים רשומים במערכת.. כדאי להוסיף!</p>
     <div :class="[!!users.length ? 'tright' : 'tcenter', 'mt-small']">
-        <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="btn btn-success">הוסף משתמשים</button>
+        <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="btn btn-success right">הוסף משתמשים</button>
         <button @click="callPopup({ title:'פרטים אישיים', type:'UserProfile', data:selected[0]})" v-if="selected.length==1" class="btn btn-warning">עריכת משתמש</button>
-
         <div class="changers" v-if="selected.length>1">
             <label class="orange" for="">שינוי גורף:</label>
-             <multiselect
-                    placeholder="שינוי סטטוס"
-                    track-by="value" label="label"
-                    :options="userOptions.status"
-                    :ShowLabels="false"
+            <multiselect
+                    class="dropdown"
+                    v-model="multichange.selected"
+                    placeholder="תבחר"
+                    track-by="value"
+                    label="label"
+                    :options="multichange.options"
+                    :show-labels="false"
                     :searchable="false"
                     :close-on-select="true"
                     :allow-empty="false"></multiselect>
+             <multiselect
+                    class="dropdown"
+                    v-if="multichange.selected.value==='status'"
+                    placeholder="שינוי סטטוס"
+                    track-by="value" 
+                    label="label"
+                    v-model="multichange.status"
+                    :options="userOptions.status"
+                    :show-labels="false"
+                    :searchable="false"
+                    :close-on-select="true"
+                    :allow-empty="false"></multiselect>
+                <input 
+                    class="field"
+                    ref="groupcal"
+                    v-if="multichange.selected.value==='group'"
+                    v-model="multichange.groupdate"
+                    type="text" >
+                <button class="btn btn-success-inverse mr-small" @click="saveToSelected">שמור</button>
         </div>
     </div>
 </div>
 </template>
 <script>
-import Multiselect from '/imports/ui/components/vue-multiselect/src/Multiselect.vue'
+console.log('Meteor.isClient > ', Meteor.isClient);
+if (Meteor.isClient) {
+    var Pikaday = require('pikaday');
+}
 import { userOptions } from '/imports/api/userConstants'
 import { mapState, mapActions } from 'vuex'
+import InputField from '/imports/ui/components/form/InputField.vue'
+import DateRange from '/imports/ui/components/form/DateRange.vue'
 export default {
     data() {
         return {
@@ -73,17 +96,127 @@ export default {
             },
             filters: {
                 group: [],
-
+                search: '',
+                date: {
+                    start: null,
+                    end: null
+                }
+            },
+            startPicker: null,
+            endPicker: null,
+            multichange:  {
+                selected: '',
+                options: [
+                    {
+                        label: 'סטטוס',
+                        value: 'status' 
+                    },
+                    {
+                        label: 'קבוצה',
+                        value: 'group' 
+                    }
+                ],
+                groupdate: null,
+                status:null
+            }
+            
+        }
+    },
+    mounted() {
+        // this.initFilterDatePickers();
+    },
+    watch: {
+        'multichange.selected'() {
+            let vm = this;
+            if (this.multichange.selected.value==='group') {
+                this.$nextTick(function() {
+                    console.log('init the datepicker for group cal');
+                    new Pikaday({
+                        field: vm.$refs.groupcal,
+                        format: "D/M/YYYY",
+                        onSelect: function() {
+                            vm.$set(vm.multichange, 'groupdate', this.toString("D/M/YYYY"))
+                        }
+                    })
+                })
             }
         }
     },
     components: {
-        Multiselect
+        InputField,
+        DateRange
     },
     methods: {
         ...mapActions('globalStore', [
             'callPopup'
         ]),
+         ...mapActions('usersModule', [
+            'updateMultipleUserProfiles'
+        ]),
+        updateStartDate(date) {
+            console.log('this.startPicker >> ', this.startPicker);
+            this.startPicker.setStartRange(date);
+            this.endPicker.setStartRange(date);
+            this.endPicker.setMinDate(date);
+        },
+        updateEndDate(date) {
+            this.startPicker.setEndRange(date);
+            this.startPicker.setMaxDate(date);
+            this.endPicker.setEndRange(date);
+        },
+        saveToSelected() {
+            let tochange = this.multichange;
+            let profile;
+            let ids = _.map(this.selected, '_id');
+            if (tochange.selected.value==='status') {
+                let status = tochange.status;
+                profile = { profile: { status }}
+            }
+            else if (tochange.selected.value==='group') {
+                let group = tochange.groupdate; 
+                profile = { profile: { group }}
+            }
+            this.updateMultipleUserProfiles([ids, profile]);
+        },
+        async promiseRefs(ms) {
+            let vm = this;
+            return new Promise(resolve => {
+                let int = Meteor.setInterval(function() {
+                    console.log('promise refs >> ', vm.$refs.start);
+                    if (!!vm.$refs.start) {
+                        Meteor.clearInterval(int);
+                        resolve(vm.$refs);
+                    }
+                }, 100)
+            })
+        },
+        async initFilterDatePickers() {
+            let vm = this;
+            let daterange = this.filters.date;
+            let refs = await this.promiseRefs();
+            if (!!refs) {
+                this.startPicker = new Pikaday({
+                    field: vm.$refs.start,
+                    format: "D/M/YYYY",
+                    onSelect: function() {
+                        let date = this.getDate();
+                        vm.$set(vm.filters.date, 'start', this.toString("D/M/YYYY"))
+                        vm.updateStartDate(date);
+                    }
+                    
+                })
+                this.endPicker = new Pikaday({
+                    field: vm.$refs.end,
+                    format: "D/M/YYYY",
+                    onSelect: function() {
+                        let date = this.getDate();
+                        vm.$set(vm.filters.date, 'end', this.toString("D/M/YYYY"))
+                        vm.updateEndDate(date);
+                    }
+                })
+                console.log("this.endPicker > ", this.endPicker);
+            }
+        },
         toggleSelect(user, e) {
             console.log('toggle user')
             let __id = {_id: user._id};
@@ -156,7 +289,10 @@ export default {
             return _.filter(users, 'selected');
         },
         parsedUsers() {
+            let dateformat = "D/M/YYYY"
             let users = _.clone(this.users);
+            let search = this.filters.search;
+            console.log("USERS >> ", users);
             _.each(users, user => {
                 if (!!user.profile.dob) {
                     user.profile.age = this.userAge(user.profile.dob);
@@ -164,12 +300,32 @@ export default {
             })
 			let keys = this.sortby.keys; 
 			let dir = this.sortby.dir;
-            if (!!this.filters.group.length) {
+            // if (!!this.filters.group.length) {
+            //     users = _.filter(users, user => {
+            //         return this.filters.group.indexOf(user.profile.group)>-1
+            //     })
+            // }
+            if (!!this.filters.date.start) {
+                let start = this.filters.date.start;
                 users = _.filter(users, user => {
-                    return this.filters.group.indexOf(user.profile.group)>-1
+                    return !moment(start, dateformat).isAfter(moment(user.profile.group, dateformat));
+                })
+            }
+            if (!!this.filters.date.end) {
+                let end = this.filters.date.end;
+                users = _.filter(users, user => {
+                    return !moment(end, dateformat).isBefore(moment(user.profile.group, dateformat));
+                })
+            }
+            if (!!search) {
+                users = _.filter(users, user => {
+                    let profilestring = _.values(_.pickBy(user.profile, _.isString));
+                    let userstring = user.username + ',' + profilestring;
+                    return userstring.indexOf(search)>-1
                 })
             }
 			if (keys.length>0) {
+                console.log("sort..", users, " :: ", keys, " :: ", dir);
 				return _.orderBy(users, keys, dir)
 			}
             return users;
@@ -196,6 +352,8 @@ export default {
         vertical-align middle
         white-space nowrap
         position relative
+        &.sortable
+            cursor pointer
         .fa
             position absolute
             top 50%
@@ -217,17 +375,41 @@ export default {
         td
             background rgba(orange, 0.15)
 .filters
+    width 100%
+    position relative
+    .free-search
+        position absolute
+        left 0
+        bottom 0
     .multiselect
         max-width 300px
 .changers
-    mid()
-    padding 0 10px
-    width 50%
+    overflow visible
+    padding 0
     label
         mid()
         padding-left 10px
     .multiselect
         mid()
-        width 30%
-    
+        width auto
+        &:last-child
+            min-width 145px
+.date-range
+    h5
+        padding-bottom 10px
+
+.btn
+    min-height 40px
+    margin-left 20px
+// input
+//     height 36px
+//     border-radius 4px
+//     border 1px solid lighten(gray, 70)
+//     padding 0 10px
+//     display inline-block
+
+.table-row-move
+    transition all .5s
+.table-row-item
+    backface-visibility hidden
 </style>

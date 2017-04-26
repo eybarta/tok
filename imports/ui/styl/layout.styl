@@ -9,12 +9,12 @@ html, body
         font-family 'Varela Round'
         *
             direction rtl
-    
+    .rtl
+        direction rtl !important
     .ltr
         direction ltr
         *
             direction ltr
-
     *
         box-sizing border-box
     a, a:visited, a:active
@@ -46,6 +46,9 @@ for num in (1..12)
 	.parent-{num}
 		& > *
 			lost-waffle 1/num num
+    .parent-col-{num}
+        & > *
+            lost-column 1/num num
 	
 
 main

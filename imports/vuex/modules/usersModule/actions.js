@@ -37,23 +37,28 @@ export const saveUsers = async ({ commit, dispatch }, data) => {
                 let csvContent = Papa.unparse(result.users);
                 commit('USER_LOGINS', result.users)
                 console.log('csvContent.. ', csvContent);
-                await dispatch('downloadCSV', csvContent)
-                dispatch('closePopup')
+                await dispatch('globalStore/downloadCSV', csvContent, {root:true})
+                dispatch('globalStore/closePopup', null, {root:true})
             } else {
-                dispatch('closePopup')
+                dispatch('globalStore/closePopup', null, {root:true})
+                
             }
         })
 }
 
 // USER
 export const saveUserProfile = ({ commit, state, dispatch}, data) => {
-    console.log("user profile >> ", state.user, " :: ", data);
     let profile = { 'profile': _.pickBy(data.profile)}
     let userId = data.userId || state.user._id;
-    console.log('PROFILE', profile);
-    console.log('USERID', userId);
     Meteor.call('user.saveprofile', userId, profile);
-    dispatch('closePopup')
+    dispatch('globalStore/closePopup', null, {root:true})
+}
+export const updateMultipleUserProfiles = ({ commit, state, dispatch}, data) => {
+    console.log('update users >> ', data);
+    let userIds = data[0];
+    let profile = data[1];
+    Meteor.call('users.updateprofiles', userIds, profile);
+    dispatch('globalStore/closePopup', null, {root:true})
 }
 export const dirtifyUser = ({ commit, state }) => {
     return new Promise((resolve, reject) => {

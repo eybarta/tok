@@ -10,9 +10,11 @@
                 </div>
             </div>
             <div class="answer">
-                <ul class="ltr">
-                    <li v-for="answer in question.answers.list">
+                <h5 class="rtl"> נא לבחור אחת התשובות:</h5>
+                <ul class="rtl">
+                    <li v-for="(answer, index) in question.answers.list">
                         <a href="#p" @click.prevent="question.chosenAnswer=answer" :class="[question.chosenAnswer==answer ? 'chosen' : '']" v-text="answer"></a>
+                        <span class="rtl" v-text="'.'+answerLabel[index]"></span>
                     </li>
                 </ul>
             </div>
@@ -23,6 +25,11 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 export default {
+    data() {
+        return {
+            answerLabel: ['א','ב','ג','ד']
+        }
+    },  
     computed: {
         ...mapState('testsModule', [
             'questionIndex'
@@ -90,6 +97,8 @@ export default {
         .answer
             text-align center
             padding 8% 0 6% 0
+            h5
+                padding-bottom 20px
             li
                 display inline-block
                 margin 0 30px
@@ -112,4 +121,6 @@ export default {
                     border 1px solid darken(#0bddbe, 5)
                     background rgba(#0bddbe, 0.02)
                     color darken(#0bddbe, 5)
+                    & + span
+                        color darken(#0bddbe, 5)
 </style>

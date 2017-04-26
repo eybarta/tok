@@ -39,6 +39,14 @@ const getters = {
             }
         })
     },
+     isAdmin: (state) => {
+        let user = state.user;
+        console.log('>> user >> ', user);
+        if (!!user && user.roles) {
+            return user.roles.indexOf('admin')>-1
+        }
+        return false;
+    }
 }
 
 

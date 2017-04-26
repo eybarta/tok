@@ -5,75 +5,95 @@ export const categories = [
         children: [
             {
                 label: 'חיבור',
-                value: 'add'
+                value: 'add',
+                level: 1
             },
             {
                 label: 'חיסור',
-                value: 'subtract'
+                value: 'subtract',
+                level: 1
             },
             {
                 label: 'כפל',
-                value: 'multiply'
+                value: 'multiply',
+                level:2
             },
             {
                 label: 'חילוק',
-                value: 'divide'
+                value: 'divide',
+                level:2
+                
             },
             {
                 label: 'חיבור הפרש משתנה',
-                value: 'add_shift'
+                value: 'add_shift',
+                level:3
             },
             {
                 label: 'חיסור הפרש משתנה',
-                value: 'subtract_shift'
+                value: 'subtract_shift',
+                level:3
             },
             {
                 label: 'כפל הפרש משתנה',
-                value: 'multiply_shift'
+                value: 'multiply_shift',
+                level:4
+                
             },
             {
                 label: 'חיבור כל זוג',
-                value: 'add_double'
+                value: 'add_double',
+                level:1
             },
             {
                 label: 'חיסור כל זוג',
-                value: 'subtract_double'
+                value: 'subtract_double',
+                level:1
             },
             {
                 label: 'כפל כל זוג',
-                value: 'multiply_double'
+                value: 'multiply_double',
+                level:4
             },
             {
                 label: 'חילוק כל זוג',
-                value: 'divide_double'
+                value: 'divide_double',
+                level:5
             },
             {
                 label: 'חיבור חיסור כפל כל זוג',
-                value: 'add_multiply_double'
+                value: 'add_multiply_double',
+                level: 3
             },
             {
                 label: 'חיבור כפל כל זוג משתנה',
-                value: 'add_multiply_shift_double'
+                value: 'add_multiply_shift_double',
+                level:6
             },
             {
                 label: 'כל שלישייה',
-                value: 'all_triple'
+                value: 'all_triple',
+                level: 4.5
             },
             {
                 label: 'כל רביעיה',
-                value: 'all_quad'
+                value: 'all_quad',
+                level: 6
             },
             {
                 label: 'הפרשי חזקות חיבור',
-                value: 'add_power_shift'
+                value: 'add_power_shift',
+                level: 7
             },
             {
                 label: 'הפרשי חזקות כפל',
-                value: 'multiply_power_shift'
+                value: 'multiply_power_shift',
+                level: 8
             },
              {
                 label: 'פיבונצ׳י',
-                value: 'fibonacci'
+                value: 'fibonacci',
+                level:3
             }
 
             
@@ -107,7 +127,7 @@ export const testTypes = [
         value: 'practice'
     },
     {
-        label: 'מבחנים',
+        label: 'מבחן',
         value: 'autotest'
     },
     {

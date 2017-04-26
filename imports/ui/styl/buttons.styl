@@ -15,6 +15,9 @@
         &-{color}
             border-color rgba(darken(value, 5), 0.7)
             color darken(value, 5)
+            &-inverse
+                color lighten(value, 95)
+                background-color darken(value, 5)
             &:hover, &.router-link-active
                 color darken(value, 1)
                 background rgba(darken(value, 5), 0.005)

@@ -1,6 +1,6 @@
 <template>
 <div class="profile-form">
-    <ul class="form">
+    <ul class="form parent-col-6">
         <li>
             <input required v-model="profile.name" type="text" id="name">
             <label for="name">שם מלא</label>
@@ -40,9 +40,10 @@
 </div>
 </template>
 <script>
+if (Meteor.isClient) {
+    var Pikaday = require('pikaday');
+}
 import { userOptions } from '/imports/api/userConstants'
-
-import Multiselect from '/imports/ui/components/vue-multiselect/src/Multiselect.vue'
 import { mapActions, mapState, mapGetters } from 'vuex'
 export default {
     props: ['moredata'],
@@ -84,44 +85,50 @@ export default {
             
             _.merge(this.profile, this.user.profile)
         }
-    },
-    components: {
-        Multiselect
+
+        console.log('isAdmin > ', this.isAdmin);
     },
     methods: {
-        ...mapActions([
-            'usersModule/saveUserProfile'
+        ...mapActions('usersModule', [
+            'saveUserProfile'
         ])
     },
     computed: {
         ...mapState('usersModule', [
             'user'
         ]),
-        ...mapGetters('globalStore', [
+        ...mapGetters('usersModule', [
             'isAdmin'
         ])
     }
 }
 </script>
+
 <style lang="stylus">
 .form
     padding-top 60px
     & > li
-        display block
-        padding 0 0 22px
+        display inline-block
+        padding 0 0 32px
+        width 49%
         input 
+            width 100%
             transition background 400ms ease-out
             & + label
                 display inline-block
-                position relative
+                position absolute
                 transform translate(-15%, -30px)
-                color gray
+                color lighten(gray, 30)
                 font-size 18px
-                transition transform 200ms ease-out, color 200ms ease-out
+                transition transform 200ms ease-out, color 200ms ease-out, font-size 200ms ease-out
             &:focus, &:valid
                 & + label
-                    transform translate(0, -65px)
-                    color darken(gray, 40)
+                    transform translate(0, -56px)
+                    font-size 12px
+                    color darken(gray, 10)
+                    &:after
+                        content ':'
+                        display inline-block
             &:valid
                 background rgba(#0bddbe, 0.02)
 </style>

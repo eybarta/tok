@@ -7,6 +7,7 @@ export function questionGenerator(category, type, amount) {
 
 const questionObject =  {
     id: null,
+    type: null,
     parts: [],
     answers: {
         correct: null,
@@ -24,7 +25,7 @@ function generate(amount, type) {
     // Create Questions <<<<<<<<
     for (var i=0;i<amount;i++) {
         // Init question object
-        let obj = generateQuestion(i, params); 
+        let obj = generateQuestion(i, type, params); 
         // console.log("GENERATED QUESTION >>> ", obj);
         // ANSWERS
         // console.log("1 OBJ PARTS >> ", obj.parts);
@@ -35,9 +36,10 @@ function generate(amount, type) {
     return questionList;
 }
 
-function generateQuestion(index, params) {
+function generateQuestion(index, type, params) {
     let question = _.cloneDeep(questionObject);
     question.id = Random.id(7);
+    question.type = type;
     question.parts = generateQuestionParts(question, params);
     return question;
 }
@@ -110,6 +112,7 @@ function generateSequence(shift, params) {
             }
             sequenceparts.push(nextValue);
             if (shift==='power') {
+                console.log(constants[operationIndex], " :: ", powconstant);
                 constants[operationIndex] = _.multiply(constants[operationIndex], powconstant)
             }
             else {
@@ -175,16 +178,20 @@ function generateShifts(params) {
     GENERATE NUMBER: returns Number
 */
 function generateNumber(range, exclude = [], amount, operation, constant) {
+    console.log('get number constant >> ', constant)
     let number = _.random(...range);
     while (exclude.indexOf(number)>-1) {
         number = _.random(...range);
     }
-    if (!!operation && operation==='divide') {
+        console.log("OPERATION >", operation);
+    
+    if (!!operation && operation.indexOf('divide')>-1) {
         // start from end.
         for (var i=0; i<amount; i++) {
             number = number*constant;
         }
     }
+    console.log('number: ', number);
     return number;
 }
 
@@ -208,6 +215,7 @@ function generateAnswers(parts, params) {
         for (var j=0;j<amount;j++) {
             list.push(_.add(correct, wrongControls[j]))
         }  
+        // list = _.shuffle(list)
     }
     return {
         correct,
@@ -445,7 +453,7 @@ function getParameters(amount, type) {
                 firstNumeric: () =>  generateNumber([2,9]),
                 controls: [],
                 get generateConstant() {
-                    return  constantGenerator(this.controls, [2,3], [], amount, type)
+                    return  constantGenerator(this.controls, [2,4], [], amount, type)
                 },
                 shift: () => {return 'power'},
                 partsAmount: 4,

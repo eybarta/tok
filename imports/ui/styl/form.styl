@@ -1,18 +1,64 @@
+@import './variables'
+
 .form
     padding 30px 0
-    input,textarea
-        font-family 'Alef Regular'
-        width 100%
-        height 40px
-        border-radius 7px
-        border 1px solid bluegreen
-        outline 0
-        box-shadow none
-        padding 0 2%
-        font-size 18px
-        color darken(darkgray, 25)
-    textarea
-        height auto
-        min-height 80px
-        padding 2%
-        margin 20px 0
+
+.field
+    position relative
+    display inline-block
+    &.date
+        fa(calendar)
+    &.search
+        fa(search)
+    &:after
+        position absolute
+        left 4%
+        top 50%
+        transform translateY(-50%)
+        color lighten(gray, 50)
+        transition all 200ms ease
+    &.valid:after
+        color bluegreen
+input,textarea
+    font-family 'Alef Regular'
+    height 40px
+    border-radius 7px
+    border 1px solid rgba(bluegreen, 0.3)
+    outline 0
+    box-shadow none
+    padding 0 4% 0 2%
+    font-size 18px
+    color darken(darkgray, 25)
+    box-sizing border-box
+    transition border 400ms ease-out
+    &::placeholder
+        font-size 14px
+        color lighten(gray, 70)
+    &:focus, &:valid
+        border 1px solid rgba(bluegreen, 0.9)
+        
+textarea
+    height auto
+    min-height 80px
+    padding 2%
+    margin 20px 0
+
+i.fa-close
+    position absolute
+    color lighten(gray, 50)
+    left -3%
+    top 0%
+    transform translate(0, -50%)
+    padding 2%
+    z-index 9
+    background #fff
+    border-radius 5px
+    cursor pointer
+
+.multiselect
+    text-align right
+    .multiselect__select
+        left 1px
+        right initial
+    .multiselect__tags
+        padding 8px 40px 0 8px

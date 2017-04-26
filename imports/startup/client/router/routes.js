@@ -18,9 +18,7 @@ export const routes = [
 		name: 'home',
 		component: Home,
 		beforeEnter: (to, from, next) => {
-			console.log('before enter home ****************');
 			let userId = Meteor.userId();
-
 			if (!!userId) {
 				// let roles = Roles.getRolesForUser(userId);
 				// console.log("ROLES FOR USER >> ", roles);
@@ -55,6 +53,7 @@ export const routes = [
 		beforeEnter: (to, from, next) => {
 			console.log("ADMINHOME BEFORE ENTER");
 			let userId = Meteor.userId();
+			console.log("userId >> ", userId);
 			if (!!userId && Roles.userIsInRole(userId, 'user')) {
 				console.log('is user');
 				let username = Meteor.user().username;
@@ -91,6 +90,16 @@ export const routes = [
 		},		
 		children: [
 			{
+				path: ':type/:category/:activepractice',
+				name: 'activepractice',
+				component: ActiveTest
+			},
+			{
+				path: ':type/:activetest',
+				name: 'activetest',
+				component: ActiveTest
+			},
+			{
 				path: '/user/:username',
 				name: 'user',
 				component: ItemMenu,
@@ -109,11 +118,8 @@ export const routes = [
 				
 				
 			},
-			{
-				path: ':type/:category/:activetest',
-				name: 'activetest',
-				component: ActiveTest
-			}
+			
+			
 			
 		]
 	},

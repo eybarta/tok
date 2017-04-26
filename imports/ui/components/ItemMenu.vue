@@ -22,7 +22,7 @@ import Popup from './Popup.vue'
         data() {
             return {
                 categories,
-                menuTypes: ['user', 'type', 'category', 'activetest'],
+                menuTypes: ['user', 'type', 'category', 'activepractice', 'activetest'],
             }
         },
         computed: {
@@ -42,6 +42,10 @@ import Popup from './Popup.vue'
                 let types = this.menuTypes,
                     type = this.route.name,
                     index = _.indexOf(types, type);
+
+                    if (!!this.route.params.type && /test/gi.test(this.route.params.type)) {
+                        return 'activetest'
+                    }
                 return types[(index==types.length-1) ? 0 : ++index];
             },
             title() {
@@ -53,7 +57,7 @@ import Popup from './Popup.vue'
                 if (menutype==='category') {
                     title = "באיזה נושא תרצו לתרגל?";
                 }
-                else if (menutype==='activetest') {
+                else if (menutype==='activepractice') {
                     label = this.activeCategory.label;
                     title = "נא לבחור מה"+ label;
                 }

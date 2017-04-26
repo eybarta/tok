@@ -1,3 +1,5 @@
+$fa-font-path = "http://netdna.bootstrapcdn.com/font-awesome/4.7.0/fonts"
+@import "../node_modules/font-awesome-stylus/index"
 @import './lib/rupture'
 @import './variables'
 @import './mixins'
@@ -16,11 +18,20 @@
     float right
 .left
     float left
-
+.clearfix
+    &:after
+        content ''
+        display table
+        clear both
+        visibility hidden
 .topleft
     corner()
 .topright
     corner(top, right)
+
+
+.inline
+    display inline-block
 // margin 
 for alias, prop in $space
     for size,value in margins
@@ -40,3 +51,11 @@ for alias, prop in $space
     color red
 .orange
     color orange
+
+for color, value in colormap
+        .{color}
+            border-color rgba(darken(value, 5), 0.7)
+            color darken(value, 5)
+            &:hover
+                color darken(value, 1)
+                background rgba(darken(value, 5), 0.005)    

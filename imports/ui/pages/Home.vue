@@ -1,6 +1,6 @@
 <template> 
 <main>
-    <div v-if="!user" v-blaze="'login'"></div>
+    <div v-if="!user._id" v-blaze="'login'"></div>
     <router-view></router-view>
     <!--<component v-else :is="currentView"></component>-->
 </main>
@@ -25,7 +25,7 @@ import { mapState, mapGetters } from 'vuex'
             ...mapState('usersModule', [
                 'user'
             ]),
-            ...mapGetters('globalStore', [
+            ...mapGetters('usersModule', [
                 'isAdmin'
             ]),
             loggedIn() {

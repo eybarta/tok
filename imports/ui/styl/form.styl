@@ -31,11 +31,16 @@ input,textarea
     color darken(darkgray, 25)
     box-sizing border-box
     transition border 400ms ease-out
+    &.reg
+        border-color lighten(gray, 60)
     &::placeholder
-        font-size 14px
-        color lighten(gray, 70)
+        font-size 16px
+        color lighten(gray, 65)
     &:focus, &:valid
         border 1px solid rgba(bluegreen, 0.9)
+    &.invalid
+        border-color rgba(red, 0.5)
+        background rgba(red, 0.1)
         
 textarea
     height auto
@@ -62,3 +67,27 @@ i.fa-close
         right initial
     .multiselect__tags
         padding 8px 40px 0 8px
+
+.line-field
+    position relative
+    display inline-block
+    input 
+        width 100%
+        transition background 400ms ease-out
+            & + label
+                display inline-block
+                position absolute
+                transform translate(-15%, -30px)
+                color lighten(gray, 30)
+                font-size 18px
+                transition transform 200ms ease-out, color 200ms ease-out, font-size 200ms ease-out
+            &:focus, &:valid
+                & + label
+                    transform translate(0, -56px)
+                    font-size 12px
+                    color darken(gray, 10)
+                    &:after
+                        content ':'
+                        display inline-block
+            &:valid
+                background rgba(#0bddbe, 0.02)

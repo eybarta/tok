@@ -33,8 +33,8 @@ router.beforeEach((to,from,next) => {
 
       let userId =  Meteor.userId();
       if (!!userId) {
-        console.log("has userId >> ", userId);
-        if (!userState.user.roles.length) {
+        console.log("has userId >> ", userId, userState.user);
+        if (!userState.user || !userState.user.roles.length) {
           console.log('user not hoooked >> wait for user data')
           // Don't go anywhere until you have the user object
           Tracker.autorun((c) => {
@@ -56,6 +56,7 @@ router.beforeEach((to,from,next) => {
       }
       else {
         console.log('user not logged in >> go home');
+        store.dispatch('usersModule/initUser');
         if (to.name!='home') {
           next('/')
         }

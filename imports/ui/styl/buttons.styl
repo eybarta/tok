@@ -4,6 +4,7 @@
     font-family 'Varela Round'
     display inline-block
     padding 4px 18px
+    min-height 40px
     background none
     outline none
     border 2px solid transparent
@@ -11,6 +12,8 @@
     transition all 400ms ease
     &-big
         font-size 40px
+    &.disabled
+        opacity 0.2
     for color, value in colormap
         &-{color}
             border-color rgba(darken(value, 5), 0.7)
@@ -21,5 +24,6 @@
             &:hover, &.router-link-active
                 color darken(value, 1)
                 background rgba(darken(value, 5), 0.005)
+            
         
         

@@ -61,7 +61,10 @@ import Popup from './Popup.vue'
                     label = this.activeCategory.label;
                     title = "נא לבחור מה"+ label;
                 }
-
+                else if (menutype==='fixedtest') {
+                    label = this.activeCategory.label;
+                    title = "נא לבחור מה"+ label;
+                }
                 return title
             }
         },

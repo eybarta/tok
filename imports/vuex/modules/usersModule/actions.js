@@ -3,8 +3,8 @@ import { Tracker }from 'meteor/tracker'
 import * as types from './mutation-types';
 // USER ID
 export const initUser = async ({ commit }) => {
-    console.log("initUser to vuex");
     let user = Meteor.user();
+    console.log("initUser to vuex >> ", user);
     commit('INIT_USER', user);
 }
 

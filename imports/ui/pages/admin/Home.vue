@@ -6,7 +6,9 @@
             <a href="#p">ניהול משתמשים</a>
         </router-link>
         <li><a href="">יצירת שאלה</a></li>
-        <li><a href="">יצירת מבחן</a></li>
+        <router-link :to="{ name:'createTest', exact: true }" tag="li">
+            <a href="#p">יצירת מבחן</a></li>
+        </router-link>
         <li><a href="">סטטיסטיקות</a></li>
         <!--
         <router-link tag="li">

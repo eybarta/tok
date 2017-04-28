@@ -32,6 +32,7 @@ export default {
 		console.log('app was created successfuly');
 		// this.initUser();
 		this.initUsers();
+		this.initFixedTests();
 	},
     components: {
 		SideMenu,
@@ -44,6 +45,9 @@ export default {
 			'initUser',
 			'initUsers'
 			
+		]),
+		...mapActions('testsModule', [
+			'initFixedTests'
 		])
 	},
 	computed: {

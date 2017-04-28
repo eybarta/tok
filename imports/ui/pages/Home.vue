@@ -1,6 +1,6 @@
 <template> 
 <main>
-    <div v-if="!user._id" v-blaze="'login'"></div>
+    <div v-if="!user || !user._id" v-blaze="'login'"></div>
     <router-view></router-view>
     <!--<component v-else :is="currentView"></component>-->
 </main>

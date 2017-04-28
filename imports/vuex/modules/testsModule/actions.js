@@ -1,3 +1,5 @@
+import { FixedTests } from '/imports/api/collections/fixedtests'
+
 // TEST MENU
 export const updateTestMenu = ({commit}, data) => {
     console.log('update test menu>> ', data);
@@ -8,6 +10,26 @@ export const updateTestMenu = ({commit}, data) => {
 export const saveTestToUser = ({ commit, state}, testinfo) => {
     return new Promise((resolve, reject) => {
         Meteor.call('user.savetest', testinfo, result => {
+            resolve();
+        })
+    });
+}
+
+export const initFixedTests = ({ commit }) => {
+    Tracker.autorun((c) => {
+        Meteor.subscribe('fixedtests');
+        let fixedtests = FixedTests.find({}).fetch();
+        if (!!fixedtests) {
+            commit('INIT_FIXED_TESTS', fixedtests)
+            stop();
+        }
+    })
+}
+
+export const saveFixedTestToDB = ({ commit, state}, testdata) => {
+    console.log("save test to db >> ", testdata);
+    return new Promise((resolve, reject) => {
+        Meteor.call('fixedtest.save', testdata, result => {
             resolve();
         })
     });

@@ -11,7 +11,7 @@
                 <input-field class="search" v-model="filters.search"></input-field>
             </div>
         </div>
-        <table class="user-table" v-if="parsedUsers.length>0">
+        <table class="data-table user-table" v-if="parsedUsers.length>0">
             <thead>
                 <th>שם משתמש  (ת.ז)</th>
                 <th>שם מלא</th>
@@ -38,7 +38,7 @@
         <h4 v-else>לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
     </div>
     <p class="tcenter mt-big" v-else>אין משתמשים רשומים במערכת.. כדאי להוסיף!</p>
-    <div :class="[!!users.length ? 'tright' : 'tcenter', 'mt-small']">
+    <div :class="[!!users.length ? 'tright' : 'tcenter', 'mt-small', 'actions']">
         <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="btn btn-success right">הוסף משתמשים</button>
         <button @click="callPopup({ title:'פרטים אישיים', type:'UserProfile', data:selected[0]})" v-if="selected.length==1" class="btn btn-warning">עריכת משתמש</button>
         <div class="changers" v-if="selected.length>1">
@@ -397,10 +397,9 @@ export default {
 .date-range
     h5
         padding-bottom 10px
-
-.btn
-    min-height 40px
-    margin-left 20px
+.actions
+    .btn
+        margin-left 20px
 // input
 //     height 36px
 //     border-radius 4px

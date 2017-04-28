@@ -5,7 +5,7 @@ import Home from '/imports/ui/pages/Home.vue';
 // Admin
 import AdminHome from '/imports/ui/pages/admin/Home.vue';
 import ManageUsers from '/imports/ui/pages/admin/ManageUsers.vue';
-
+import CreateTest from '/imports/ui/pages/admin/CreateTest.vue';
 // User
 import UserHome from '/imports/ui/pages/users/Home.vue';
 import ActiveTest from '/imports/ui/user/partials/ActiveTest.vue'
@@ -49,6 +49,12 @@ export const routes = [
 				name: 'manageUsers',
 				component: ManageUsers
 			},
+			{
+				path: 'createTest',
+				name: 'createTest',
+				component: CreateTest
+			}
+
 		],
 		beforeEnter: (to, from, next) => {
 			console.log("ADMINHOME BEFORE ENTER");
@@ -92,6 +98,11 @@ export const routes = [
 			{
 				path: ':type/:category/:activepractice',
 				name: 'activepractice',
+				component: ActiveTest
+			},
+			{
+				path: ':type/:category/:fixedtest',
+				name: 'fixedtest',
 				component: ActiveTest
 			},
 			{

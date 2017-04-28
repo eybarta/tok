@@ -1,13 +1,14 @@
 import { Random } from 'meteor/random'
-export function questionGenerator(category, type, amount) {
+export function questionGenerator(category, type, label, amount) {
     if (category=='series') {
-        return generate(amount, type);
+        return generate(type, label, amount);
     }
 }
 
 const questionObject =  {
     id: null,
     type: null,
+    label: null,
     parts: [],
     answers: {
         correct: null,
@@ -18,14 +19,14 @@ const questionObject =  {
     chosenAnswer: null
 }
 
-function generate(amount, type) {
+function generate(type, label, amount) {
     let questionList = [];  // Final questions list,
     let params = getParameters(amount, type);
 
     // Create Questions <<<<<<<<
     for (var i=0;i<amount;i++) {
         // Init question object
-        let obj = generateQuestion(i, type, params); 
+        let obj = generateQuestion(i, type, label, params); 
         // console.log("GENERATED QUESTION >>> ", obj);
         // ANSWERS
         // console.log("1 OBJ PARTS >> ", obj.parts);
@@ -36,10 +37,11 @@ function generate(amount, type) {
     return questionList;
 }
 
-function generateQuestion(index, type, params) {
+function generateQuestion(index, type, label, params) {
     let question = _.cloneDeep(questionObject);
     question.id = Random.id(7);
     question.type = type;
+    question.label = label;
     question.parts = generateQuestionParts(question, params);
     return question;
 }

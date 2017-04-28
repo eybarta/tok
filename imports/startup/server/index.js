@@ -1,4 +1,9 @@
+// Accounts
 import '/imports/api/accounts/roles';
 import '/imports/api/accounts/methods';
 import '/imports/api/accounts/publish';
 
+// Fixed Tests
+import '/imports/api/collections/fixedtests';
+import '/imports/api/collections/fixedtests/methods';
+import '/imports/api/collections/fixedtests/publish';

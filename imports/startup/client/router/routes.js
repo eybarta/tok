@@ -6,6 +6,7 @@ import Home from '/imports/ui/pages/Home.vue';
 import AdminHome from '/imports/ui/pages/admin/Home.vue';
 import ManageUsers from '/imports/ui/pages/admin/ManageUsers.vue';
 import CreateTest from '/imports/ui/pages/admin/CreateTest.vue';
+import AddQuestion from '/imports/ui/pages/admin/forms/AddQuestion.vue';
 // User
 import UserHome from '/imports/ui/pages/users/Home.vue';
 import ActiveTest from '/imports/ui/user/partials/ActiveTest.vue'
@@ -53,6 +54,11 @@ export const routes = [
 				path: 'createTest',
 				name: 'createTest',
 				component: CreateTest
+			},
+			{
+				path: 'addQuestion',
+				name: 'addQuestion',
+				component: AddQuestion
 			}
 
 		],
@@ -95,19 +101,25 @@ export const routes = [
 			}
 		},		
 		children: [
+
 			{
-				path: ':type/:category/:activepractice',
-				name: 'activepractice',
+				path: '/practice/:category/:name',
+				name: 'practice',
 				component: ActiveTest
 			},
 			{
-				path: ':type/:category/:fixedtest',
+				path: '/fixedtest/:category/:name',
 				name: 'fixedtest',
 				component: ActiveTest
 			},
 			{
-				path: ':type/:activetest',
-				name: 'activetest',
+				path: '/autotest/:category',
+				name: 'autotest',
+				component: ActiveTest
+			},
+			{
+				path: '/adaptivetest/:category',
+				name: 'adaptivetest',
 				component: ActiveTest
 			},
 			{
@@ -119,15 +131,23 @@ export const routes = [
 						path: ':type',
 						name: 'type',
 						children: [
-						{
-							path: ':category',
-							name: 'category',
-						}
+							{
+								path: ':category',
+								name: 'category',
+							}
 						]
-					}
+					},
+					// {
+					// 	path: '/fixedtest/',
+					// 	name: 'type',
+					// 	children: [
+					// 		{
+					// 			path: ':category',
+					// 			name: 'category',
+					// 		}
+					// 	]
+					// }
 				]
-				
-				
 			},
 			
 			

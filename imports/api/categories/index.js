@@ -109,7 +109,30 @@ export const categories = [
     },
     {
         label: 'עברית',
-        value: 'hebrew'
+        value: 'hebrew',
+        children: [
+            {
+                label: 'אוצר מילים',
+                value: 'vocabulary'
+            },
+            {
+                label: 'שגיאות כתיב',
+                value: 'misspelling'
+            },
+            {
+                label: 'השלמת משפטים',
+                value: 'completion'
+            },
+            {
+                label: 'ניסוח נכון',
+                value: 'wording'
+            },
+            {
+                label: 'הבנת הנקרא',
+                value: 'comprehension'
+            }
+            
+        ]
     },
     {
         label: 'מכינה',
@@ -139,3 +162,6 @@ export const testTypes = [
         value: 'adaptivetest'
     }
 ]
+
+
+// Questions

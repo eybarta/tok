@@ -31,11 +31,25 @@ const getters = {
         console.log("currentmenuItems >> ");
         console.log("params >> ", params);
         console.log("category >> ", category);
-        if (!!params.activepractice) {
+        if (!!params.name) {
             // THIS WILL BE THE ACTUAL TEST...
             return [];            
         }
         if (!!params.category) {
+            if (params.type==='fixedtest') {
+                let fixedTestByCategory = _.find(state.fixedtests, {type: params.category});
+                if (!!fixedTestByCategory) {
+                    console.log('fixedTestByCategory .. ', fixedTestByCategory);
+                    return _.map(fixedTestByCategory.tests, obj => {
+                        console.log('OBJ .. ', obj);
+                        return {
+                            label: obj.name,
+                            value: obj.name,
+                            questions: obj.questions
+                        }
+                    })
+                }
+            }
             let cat = _.find(categories, { value: category})
             return cat.children;
         }
@@ -48,10 +62,14 @@ const getters = {
 
     },
     currentCategory: (state, getters, rootState) => {
-        return rootState.route.params.category || rootState.route.params.activetest;
+        console.log(">>currentCategory >> ", rootState.route.params);
+        return rootState.route.params.category || rootState.route.params.name;
     },
     activeCategory: (state, getters, rootState) => {
+        
         let params = rootState.route.params;
+        console.log(">>activeCategory >> ", params);
+        
         if (!!params.category) {
             return _.find(categories, {value:params.category});
         }
@@ -83,7 +101,7 @@ const getters = {
                     name = key;
                     order = 2;
                 }
-                if (!!cat && key=='activepractice') {
+                if (!!cat && key=='name') {
                     let tests = _.find(cat.children, {value});
                     console.log('tests >> ', tests)
                     label = _.get(tests, 'label')
@@ -101,18 +119,31 @@ const getters = {
 	},
 
     questions: (state, getters, rootState) => {
+        let routename = rootState.route.name;
         let params = rootState.route.params;
-        if (!!params.activepractice) {
+        console.log("QUESTIONS GETTER >> params ", params, " :: ", routename);
+
+        if (!!params.name) {
+            if (routename==='fixedtest') {
+                let fixedTestByCategory = _.find(state.fixedtests, {type: params.category});
+                if (!!fixedTestByCategory) {
+                    let test = _.find(fixedTestByCategory.tests, { name: params.name});
+                    return test.questions;
+                }
+            }
             let category = getters.activeCategory;
-            let subcategory = _.find(category.children, { value: params.activepractice});
+            let subcategory = _.find(category.children, { value: params.name});
             return questionGenerator(category.value, subcategory.value, subcategory.label, 20);
         }
-        else if (!!params.activetest) {
+        else if (/test/gi.test(routename)) {
             let questions;
-            if (params.type==='autotest') {
-                questions = generateAutotest(params.activetest);
+            console.log("(params.activetest) QUESTIONS GETTER >> params ", params);
+            if (routename==='autotest') {
+                questions = generateAutotest(params.category);
             }
-            else if (params.type==='adaptivetest') {
+            else if (routename==='adaptivetest') {
+                console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
+                
                 questions = generateAdaptivetest(params, rootState.usersModule.user);
             }
             

@@ -3,6 +3,7 @@ import { questionGenerator } from './questionGenerator'
 
 
 export function generateAutotest(categoryname) {
+    console.log('generate autotest >> ', categoryname);
     let questions = [];
     let category = _.find(categories, { value: categoryname});
     let children = category.children;
@@ -20,6 +21,7 @@ export function generateAutotest(categoryname) {
     return questions;
 }
 export function generateAdaptivetest(params, user) {
+    console.log('generateAdaptivetest >> ', params);
     /*
         Get test statistics from user and create
         Adaptive test..
@@ -80,7 +82,7 @@ export function generateAdaptivetest(params, user) {
             Build the adaptive test
         */         
         let questions = [];
-        let category = _.find(categories, { value: params.activetest});
+        let category = _.find(categories, { value: params.category});
         let children = category.children;
 
         let p = mappedAnswersByCorrect;
@@ -101,8 +103,8 @@ export function generateAdaptivetest(params, user) {
                     for (var j = 0; j<testTypesByLevel.length; j++) {
                         let type = testTypesByLevel[j];
                         let amount = Math.min(5, 20-questions.length);
-                        console.log("type to generate=== ", params.activetest, type.value, amount);
-                        questions.push(...questionGenerator(params.activetest, type.value, type.label, amount))
+                        console.log("type to generate=== ", params.category, type.value, amount);
+                        questions.push(...questionGenerator(params.category, type.value, type.label, amount))
                     }
                 }
             }

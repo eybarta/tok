@@ -5,25 +5,22 @@
         <router-link :to="{ name:'manageUsers', exact: true }" tag="li">
             <a href="#p">ניהול משתמשים</a>
         </router-link>
-        <li><a href="">יצירת שאלה</a></li>
+        <router-link :to="{ name:'addQuestion', exact: true }" tag="li">
+            <a href="#p">יצירת שאלה</a></li>
+        </router-link>
         <router-link :to="{ name:'createTest', exact: true }" tag="li">
             <a href="#p">יצירת מבחן</a></li>
         </router-link>
         <li><a href="">סטטיסטיקות</a></li>
         <!--
         <router-link tag="li">
-            <a href="#p" class="tab-link">יצירת שאלה</a>
-        </router-link>
-        <router-link tag="li">
-            <a href="#p" class="tab-link">יצירת מבחן</a>
-        </router-link>
-        <router-link tag="li">
             <a href="#p" class="tab-link">סטטיסטיקות</a>            
         </router-link>
         -->
     </ul>
-
-    <router-view></router-view>
+    <div class="admin-part">
+        <router-view></router-view>
+    </div>
 </main>
 </template>
 <script>
@@ -52,7 +49,8 @@ import { mapActions } from 'vuex'
                 color darken(bluegreen, 8)
         &:hover a
             color darken(bluegreen, 8)
-            
+.admin-part
+    padding-top 40px
 h2
     text-align center
 </style>

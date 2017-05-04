@@ -18,6 +18,9 @@ $fa-font-path = "http://netdna.bootstrapcdn.com/font-awesome/4.7.0/fonts"
     float right
 .left
     float left
+
+.clear
+    clear both
 .clearfix
     &:after
         content ''
@@ -32,6 +35,9 @@ $fa-font-path = "http://netdna.bootstrapcdn.com/font-awesome/4.7.0/fonts"
 
 .inline
     display inline-block
+
+.txt-md
+    fontsizer(28px, 32px)
 // margin 
 for alias, prop in $space
     for size,value in margins
@@ -52,10 +58,17 @@ for alias, prop in $space
 .orange
     color orange
 
-for color, value in colormap
-        .{color}
+for $color, value in colormap
+        .{$color}
             border-color rgba(darken(value, 5), 0.7)
             color darken(value, 5)
             &:hover
                 color darken(value, 1)
                 background rgba(darken(value, 5), 0.005)    
+
+
+
+// borders
+
+.bt-dashed
+    border-top 1px dashed bluegreen

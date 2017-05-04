@@ -1,14 +1,14 @@
 <template>
-<div>
+<div class="item-menu">
 <ul class="breadcrumbs">
             <li v-for="crumb in breadCrumbs">
-                <router-link :key="crumb" :to="{ name: crumb.name, params:crumb.params}"><span v-html="crumb.label"></span></router-link>
+                <router-link class="txt-md" :key="crumb" :to="{ name: crumb.name, params:crumb.params}"><span v-html="crumb.label"></span></router-link>
             </li>
         </ul>
         <h2 v-text="title"></h2>
         <div class="block block-60">
             <transition-group name="list-complete" class="waffle waffle-4" tag="div"  appear>
-                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: currentMenuType, params: { [currentMenuType]: item.value }}"><span><span v-html="item.label">  </span></span></router-link>
+                <router-link :key="item" v-for="item in currentMenuItems" class="item" :to="{ name: nextroute.name, params: { [nextroute.paramkey]: item.value }}"><span><span v-html="item.label">  </span></span></router-link>
             </transition-group>                
         </div>
 </div>
@@ -22,7 +22,7 @@ import Popup from './Popup.vue'
         data() {
             return {
                 categories,
-                menuTypes: ['user', 'type', 'category', 'activepractice', 'activetest'],
+                menuTypes: ['user', 'type', 'category', 'name'],
             }
         },
         computed: {
@@ -48,6 +48,25 @@ import Popup from './Popup.vue'
                     }
                 return types[(index==types.length-1) ? 0 : ++index];
             },
+            nextroute() {
+                let nextRoute, menuOptions, currentRouteName, index;
+                nextRoute = {
+                    paramkey: '',
+                    name: ''
+                }
+                menuOptions = this.menuTypes;
+                currentRouteName = this.route.name;
+
+                let params = this.route.params;
+                let paramtype = params.type;
+                index = _.indexOf(menuOptions, currentRouteName);
+                let next =  menuOptions[(index==menuOptions.length-1) ? 0 : ++index];
+
+                nextRoute.name = ((!!this.route.params.category && !!this.route.params.type) || !!paramtype && (paramtype==='autotest' || paramtype==='adaptivetest')) ? this.route.params.type : next; 
+                nextRoute.paramkey =  (!!this.route.params.category && !!this.route.params.type) ? 'name' : next;
+                console.log("nextRoute >> ", nextRoute);
+                return nextRoute;
+            },
             title() {
                 let menutype = this.currentMenuType,
                 label,
@@ -57,7 +76,7 @@ import Popup from './Popup.vue'
                 if (menutype==='category') {
                     title = "באיזה נושא תרצו לתרגל?";
                 }
-                else if (menutype==='activepractice') {
+                else if (menutype==='name') {
                     label = this.activeCategory.label;
                     title = "נא לבחור מה"+ label;
                 }
@@ -154,6 +173,9 @@ import Popup from './Popup.vue'
             left 50%
             transform translate(-50%, -50%)
             text-align right
+.item-menu
+    h2
+        color darken(blue,75)
 .breadcrumbs
     text-align center
     margin 5vmin auto
@@ -163,7 +185,6 @@ import Popup from './Popup.vue'
         margin 0 0 0 15px
         a
             color darken(blue, 45)
-            font-size 3vmin
             &:after
                 content: '>'
                 display inline-block
@@ -172,7 +193,7 @@ import Popup from './Popup.vue'
             font-size 3.5vmin
         &:last-child a
             pointer-events none
-            color darken(blue, 65)
+            color darken(blue, 55)
             &:after
                 display none
 

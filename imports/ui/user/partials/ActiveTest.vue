@@ -281,7 +281,7 @@ import Series from './testTypes/Series.vue'
             },
             categoryName() {
                 let params = this.route.params;
-                let name = params.category || params.activetest;
+                let name = params.category || params.name;
                 console.log("name > ", name);
                 return _.find(categories, { value: name}).label;
             },
@@ -290,14 +290,14 @@ import Series from './testTypes/Series.vue'
                 let params, type, category, name;
                 
                 params = this.route.params;
-                type = _.find(this.testTypes, {value: params.type});
+                type = _.find(this.testTypes, {value: this.route.name});
                 if (!!params.category) {
                     console.log(" >> ", params.category);
                     category = _.find(categories, { value: params.category });
-                    name = _.find(category.children, { value: params.activepractice})
+                    name = _.find(category.children, { value: params.name})
                 }
                 console.log(type.label);
-                return 'מבחן'
+                return type.label;
                 // return type.label + " : " + !!params.category ? category.label + " : " + name.label : '';
             }
         }
@@ -474,8 +474,8 @@ import Series from './testTypes/Series.vue'
             position relative
             display inline-block
             margin 0 0.5% 1.5%
-            border 1px solid red
-            border-left-color rgba(darken(#0bddbe, 20), 0.7)
+            border 1px solid lighten(gray, 60)
+            border-left-color rgba(darken(#0bddbe, 20), 0.5)
             width 32px
             height 32px
             border-radius 20px
@@ -489,7 +489,7 @@ import Series from './testTypes/Series.vue'
             span
                 self-center()
                 display block
-                color red
+                color darken(gray, 5)
                 font-size 12px
                 transition color 400ms ease
                 position relative

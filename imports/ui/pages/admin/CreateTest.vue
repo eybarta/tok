@@ -81,16 +81,11 @@ export default {
 </script>
 <style lang="stylus">
 @import '~imports/ui/styl/variables.styl'
-
-.create-test
-    padding-top 40px
-.active-tab
-    padding 40px 20px
 .submenu
     width 100%
     padding 15px 3px
-    border-top 1px solid darken(bluegreen, 10)
-    border-bottom 1px solid darken(bluegreen, 10)
+    border-top 1px solid darken(bluegreen, 1)
+    border-bottom 1px solid darken(bluegreen, 1)
     text-align center
     li
         display inline-block

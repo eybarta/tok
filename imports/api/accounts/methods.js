@@ -5,12 +5,14 @@ Meteor.methods({
         console.log("save_users ", data.userIds);
         let _users = [];
         _.each(data.userIds, function (id) {
+            let psw = Random.id(5)
             let userData = {
                 username: id,
-                password: Random.id(5),
+                password: psw,
                 profile: {
                     group:data.date,
                     dirty: false,
+                    psw,
                     status: {
                         label: "פעיל",
                         value:"active"

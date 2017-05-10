@@ -7,3 +7,8 @@ import '/imports/api/accounts/publish';
 import '/imports/api/collections/fixedtests';
 import '/imports/api/collections/fixedtests/methods';
 import '/imports/api/collections/fixedtests/publish';
+
+// Questions
+import '/imports/api/collections/questions';
+import '/imports/api/collections/questions/methods';
+import '/imports/api/collections/questions/publish';

@@ -51,6 +51,7 @@ import { mapActions } from 'vuex'
             color darken(bluegreen, 8)
 .admin-part
     padding-top 40px
+
 h2
     text-align center
 </style>

@@ -12,16 +12,20 @@
                     :searchable="false"
                     :close-on-select="true"
                     :allow-empty="false"></multiselect>
+        <button @click="save" :class="['btn', 'btn-success-inverse', 'mr-min', !validQuestionEntry ? 'disabled' : '']">שמור</button>
         <div class="form pt-med mt-med bt-dashed clear">
             <div class="line-field w-elastic-50 maxw-500">
-                <input id="question" class="reg w-100" v-model="question" type="text" required>
+                <textarea id="question" class="reg w-100" v-model="question" type="text" required></textarea>
                 <label for="question">שאלה</label>
             </div>
-            <div class="pt-big">
-                <div v-for="(answer, index) in answers" class="line-field w-elastic-50 maxw-500 pb-med">
+            <div class="form-full block">
+                <div v-for="(answer, index) in answers" class="line-field w-elastic-50 maxw-500">
                     <input :id="'answer'+index" class="reg w-100" v-model="answers[index]" type="text" required>
-                    <label :for="'answer'+index" v-text="'תשובה' + ' ' + (index+1)"></label>
+                    <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
                 </div>
+            </div>
+            <div class="">
+                <button @click="save" :class="['btn', 'btn-success-inverse', !validQuestionEntry ? 'disabled' : '']">שמור</button>
             </div>
         </div>
     </div>
@@ -46,9 +50,57 @@ export default {
 
         }
     },
+    created() {
+        this.initQuestions();
+    },
+    methods: {
+        ...mapActions('testsModule', [
+            'saveQuestion',
+            'initQuestions'
+        ]),
+        save() {
+            let data = {
+                category: {
+                    label: this.activecat.label,
+                    value: this.activecat.value
+                },
+                type: {
+                    label: this.activesubcat.label,
+                    value: this.activesubcat.value,
+                },
+                question: this.question,
+                answers: this.answers
+            }
+
+            let result = this.saveQuestion(data);
+
+            console.log("RESULT >> ", result)
+
+            this.reset();
+
+        },
+        reset() {
+            let resetdata = {
+                activesubcat: null,
+                question: null,
+                answers: [
+                    null,
+                    null,
+                    null,
+                    null
+                ]
+            }
+            _.merge(this.$data, resetdata)
+        }   
+    },
     computed: {
         filteredCategories() {
             return _.filter(categories, category => { return category.value!='series'} )
+        },
+        validQuestionEntry() {
+            return !!this.question 
+                && _.compact(this.answers).length===this.answers.length
+                && !!this.activesubcat.value;
         }
     }
 }

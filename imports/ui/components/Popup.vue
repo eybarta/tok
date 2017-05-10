@@ -60,11 +60,14 @@ export default {
         self-center()
         padding 4%
         background #fff
-        width 60vw
-        min-height 45vh
+        width 100vw
+        min-height 65vh
         border-radius 7px
         height auto
         border 2px solid #0bddbe
+        @media screen and (min-width: 600px)
+            width 67vw
+            min-height 45vh
         h4
             font-size 26px
         i

@@ -32,9 +32,11 @@
     <div class="test-wrap">
         <div class="test">
             <h2 v-text="testTitle"></h2>
-            <component :is="currentCategory"></component>
-            <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
-            <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==questions.length-1?'disabled': '']"></div>
+            <div class="test-questions ltr">
+                <component :is="currentCategory"></component>
+                <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
+                <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==questions.length-1?'disabled': '']"></div>
+            </div>
             
         <div class="pager-progress ltr">
 	        <ul>
@@ -116,192 +118,211 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { categories } from '/imports/api/categories'
+
+// Test Types
 import Series from './testTypes/Series.vue'
-    export default {
-        data() {
-            return {
-                withtimer: true,
-                started: false,
-                goodluck: false,
-                timer: 840000,
-                questiontimer: null,
-                idle: {
-                    flag: false,
-                    timer: 60000
-                },
-                testinfo: {
-                    type: null,
-                    correct: null,
-                    wrong: null,
-                    unanswered: null,
-                    score: null,
-                    regulatoryScore: null,
-                    meta: null, 
-                    percentComplete: 0,
-                    timeToComplete: 0,
-                    averageTimeOnQuestion: 0,
-                    questions: []
-                },
-            }
-        },
-        created() {
-            this.testinfo.questions = this.questions;
-            console.log("active test created >> ", this.questions);
-            console.log("USER >> ", this.user);
-            // this.countdownobj.start();
-        },
-        components: {
-            Series
-        },
-        watch: {
-            'questionIndex'() {
-                this.timeQuestion(this.questionIndex)
-            }
-        },
-        methods: {
-            ...mapActions('testsModule', [
-                'saveTestToUser',
-                'updateQuestionIndex'
-            ]),
-            starttest() {
-                let ref = this;
-                this.updateQuestionIndex(0)
-                this.$set(this, 'goodluck', true)
-                Meteor.setTimeout(function() {
-                    this.$set(this, 'started', true);
-                    this.bindEvents();
-                    
-                    Meteor.setInterval(function() {
-                        if (this.withtimer) {
-                            this.$set(this, 'timer', this.timer-1000)
-                        }
-                        this.$set(this.idle, 'timer', this.idle.timer-1000)
-                        if (this.idle.timer<=0) {
-                            this.flagIdle();
-                        }
-                    }.bind(this),1000)
-                    this.timeQuestion(0)
-                }.bind(this), 1000)
+import Hebrew from './testTypes/Hebrew.vue'
+export default {
+    data() {
+        return {
+            withtimer: true,
+            started: false,
+            goodluck: false,
+            timer: 840000,
+            questiontimer: null,
+            idle: {
+                flag: false,
+                timer: 60000
+            },
+            testinfo: {
+                type: null,
+                correct: null,
+                wrong: null,
+                unanswered: null,
+                score: null,
+                regulatoryScore: null,
+                meta: null, 
+                percentComplete: 0,
+                timeToComplete: 0,
+                averageTimeOnQuestion: 0,
+                questions: []
+            },
+        }
+    },
+    // beforeRouteEnter(to, from, next) {
+    //     console.log("BEOFRE ROUTE ENTER >> ");
+    // },
+    // beforeRouteUpdate (to, from, next) {
+    //     // this.post = null
+    //     console.log("BEFORE ROUTE UPDATE !@&^*!&@%*!@&%*!&@");
+    //     if (typeof this.questions.then === 'function') {
+    //         this.questions.then(function(result) {
+    //             console.log("promise result > ", result);
+    //             next()
                 
-            },
-            bindEvents() {
-                    console.log("BIND EVENTS");
-                    $(document.body).off('keyup mousemove')
-                    $(document.body).on('keyup', this.keyupHandler)
-                    $(document.body).on('mousemove', this.notIdle)
-            },
-            keyupHandler(e) {
-                console.log("key up handler < ", e.keyCode);
-                (e.keyCode==37) 
-                ?   this.updateQuestionIndex('prev')
-                :   (e.keyCode==39)
-                ?   this.updateQuestionIndex('next')  // right
-                :   ''
-                this.notIdle();
-            },
-            notIdle() {
-                if (!!this.$set) {
-                    this.$set(this.idle, 'timer', 60000)
-                    this.$set(this.idle, 'flag', false)
-                }
-            },
-            timeQuestion(index) {
-                Meteor.clearInterval(this.questiontimer)
-                let question = this.testinfo.questions[index];
-                question.timer = question.timer || 0;
-                this.questiontimer = Meteor.setInterval(function() {
-                    question.timer++;
-                }, 1000)
-            },
-            flagIdle() {
-                console.log('User has been idle for 2 minutes');
-                this.$set(this.idle, 'flag', true);
-                $('body').on('mousemove', this.notIdle)
-                $('body').on('keyuo', this.notIdle)
-
-            },
-            timedQuestions() {
-                return _.filter(this.questions, 'timer');
-            },
-            totalTime() {
-                return _.sumBy(_.map(this.timedQuestions(), 'timer'));;
-            },
-            getAverageTimeOnQuestion() {
-                let sum = this.totalTime();
-                let timedQuestions = this.timedQuestions();
-                let averageInSeconds = sum / timedQuestions.length;
-                return Math.round(averageInSeconds);
-            },
-            finish() {
-                let answered, correct, wrong;
-                answered = _.filter(this.questions, question => {
-                    return !!question.chosenAnswer;
-                })
-                correct = _.filter(answered, question => {
-                    return question.chosenAnswer == question.answers.correct;
-                })
-                this.$set(this.testinfo, 'type', this.$route.params.type);
-                this.$set(this.testinfo, 'correct', correct.length);
-                this.$set(this.testinfo, 'wrong', answered.length-correct.length);
-                this.$set(this.testinfo, 'unanswered', this.questions.length-answered.length);
-                this.$set(this.testinfo, 'score', Math.round((correct.length/this.questions.length)*100));
-                this.$set(this.testinfo, 'regulatoryScore',Math.round(((correct.length-(this.testinfo.wrong/3))/20)*100));
-                this.$set(this.testinfo, 'meta', this.route.params)
-                this.$set(this.testinfo, 'percentComplete', (this.answeredSoFar/20)*100)
-                this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer)).asSeconds())
-                this.$set(this.testinfo, 'averageTimeOnQuestion', this.getAverageTimeOnQuestion())
-                console.log(correct.length, " questions were answered correctly");
-                console.log((correct.length/this.questions.length)*100, " is your score");
-
-                // Allow viewing of test with correct answers.
-                this.saveTestToUser(this.testinfo)
+    //         })
+    //     }
+    // },
+    created() {
+        this.testinfo.questions = this.questions;
+        console.log("active test created >> ", this.questions);
+        console.log("USER >> ", this.user);
+        // this.countdownobj.start();
+    },
+    components: {
+        Series,
+        Hebrew
+    },
+    watch: {
+        'questionIndex'() {
+            this.timeQuestion(this.questionIndex)
+        }
+    },
+    methods: {
+        ...mapActions('testsModule', [
+            'saveTestToUser',
+            'updateQuestionIndex'
+        ]),
+        starttest() {
+            let ref = this;
+            this.updateQuestionIndex(0)
+            this.$set(this, 'goodluck', true)
+            Meteor.setTimeout(function() {
+                this.$set(this, 'started', true);
+                this.bindEvents();
+                
+                Meteor.setInterval(function() {
+                    if (this.withtimer) {
+                        this.$set(this, 'timer', this.timer-1000)
+                    }
+                    this.$set(this.idle, 'timer', this.idle.timer-1000)
+                    if (this.idle.timer<=0) {
+                        this.flagIdle();
+                    }
+                }.bind(this),1000)
+                this.timeQuestion(0)
+            }.bind(this), 1000)
+            
+        },
+        bindEvents() {
+                console.log("BIND EVENTS");
+                $(document.body).off('keyup mousemove')
+                $(document.body).on('keyup', this.keyupHandler)
+                $(document.body).on('mousemove', this.notIdle)
+        },
+        keyupHandler(e) {
+            console.log("key up handler < ", e.keyCode);
+            (e.keyCode==37) 
+            ?   this.updateQuestionIndex('prev')
+            :   (e.keyCode==39)
+            ?   this.updateQuestionIndex('next')  // right
+            :   ''
+            this.notIdle();
+        },
+        notIdle() {
+            if (!!this.$set) {
+                this.$set(this.idle, 'timer', 60000)
+                this.$set(this.idle, 'flag', false)
             }
         },
-        computed: {
-            ...mapState('testsModule', [
-                'testTypes',
-                'questionIndex'
-            ]),
-            ...mapState([
-                'route'
-            ]),
-            ...mapGetters('testsModule', [
-                'currentCategory',
-                'questions'
-            ]),
-            countdown() {
-                return moment(this.timer).format('m:ss');
-            },
-            formatAverageTimeOnQuestion() {
-                let ref = this;
-                return moment.duration(ref.testinfo.averageTimeOnQuestion, 'seconds').format('m:ss', {trim:false})
-            },
-            answeredSoFar() {
-                return _.filter(this.questions, 'chosenAnswer').length
-            },
-            categoryName() {
-                let params = this.route.params;
-                let name = params.category || params.name;
-                console.log("name > ", name);
-                return _.find(categories, { value: name}).label;
-            },
-            testTitle() {
-                console.log("params >>", this.route.params)
-                let params, type, category, name;
-                
-                params = this.route.params;
-                type = _.find(this.testTypes, {value: this.route.name});
-                if (!!params.category) {
-                    console.log(" >> ", params.category);
-                    category = _.find(categories, { value: params.category });
-                    name = _.find(category.children, { value: params.name})
-                }
-                console.log(type.label);
-                return type.label;
-                // return type.label + " : " + !!params.category ? category.label + " : " + name.label : '';
+        timeQuestion(index) {
+            Meteor.clearInterval(this.questiontimer)
+            let question = this.testinfo.questions[index];
+            question.timer = question.timer || 0;
+            this.questiontimer = Meteor.setInterval(function() {
+                question.timer++;
+            }, 1000)
+        },
+        flagIdle() {
+            console.log('User has been idle for 2 minutes');
+            this.$set(this.idle, 'flag', true);
+            $('body').on('mousemove', this.notIdle)
+            $('body').on('keyuo', this.notIdle)
+
+        },
+        timedQuestions() {
+            return _.filter(this.questions, 'timer');
+        },
+        totalTime() {
+            return _.sumBy(_.map(this.timedQuestions(), 'timer'));;
+        },
+        getAverageTimeOnQuestion() {
+            let sum = this.totalTime();
+            let timedQuestions = this.timedQuestions();
+            let averageInSeconds = sum / timedQuestions.length;
+            return Math.round(averageInSeconds);
+        },
+        finish() {
+            let answered, correct, wrong;
+            answered = _.filter(this.questions, question => {
+                return !!question.chosenAnswer;
+            })
+            correct = _.filter(answered, question => {
+                return question.chosenAnswer == question.answers.correct;
+            })
+            this.$set(this.testinfo, 'type', this.$route.params.type);
+            this.$set(this.testinfo, 'correct', correct.length);
+            this.$set(this.testinfo, 'wrong', answered.length-correct.length);
+            this.$set(this.testinfo, 'unanswered', this.questions.length-answered.length);
+            this.$set(this.testinfo, 'score', Math.round((correct.length/this.questions.length)*100));
+            this.$set(this.testinfo, 'regulatoryScore',Math.round(((correct.length-(this.testinfo.wrong/3))/20)*100));
+            this.$set(this.testinfo, 'meta', this.route.params)
+            this.$set(this.testinfo, 'percentComplete', (this.answeredSoFar/20)*100)
+            this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer)).asSeconds())
+            this.$set(this.testinfo, 'averageTimeOnQuestion', this.getAverageTimeOnQuestion())
+            console.log(correct.length, " questions were answered correctly");
+            console.log((correct.length/this.questions.length)*100, " is your score");
+
+            // Allow viewing of test with correct answers.
+            this.saveTestToUser(this.testinfo)
+        }
+    },
+    computed: {
+        ...mapState('testsModule', [
+            'testTypes',
+            'questionIndex'
+        ]),
+        ...mapState([
+            'route',
+            'activeQuestions'
+        ]),
+        ...mapGetters('testsModule', [
+            'currentCategory',
+            'questions'
+        ]),
+        countdown() {
+            return moment(this.timer).format('m:ss');
+        },
+        formatAverageTimeOnQuestion() {
+            let ref = this;
+            return moment.duration(ref.testinfo.averageTimeOnQuestion, 'seconds').format('m:ss', {trim:false})
+        },
+        answeredSoFar() {
+            return _.filter(this.questions, 'chosenAnswer').length
+        },
+        categoryName() {
+            let params = this.route.params;
+            let name = params.category || params.name;
+            console.log("name > ", name);
+            return _.find(categories, { value: name}).label;
+        },
+        testTitle() {
+            console.log("params >>", this.route.params)
+            let params, type, category, name;
+            
+            params = this.route.params;
+            type = _.find(this.testTypes, {value: this.route.name});
+            if (!!params.category) {
+                console.log(" >> ", params.category);
+                category = _.find(categories, { value: params.category });
+                name = _.find(category.children, { value: params.name})
             }
+            console.log(type.label);
+            return type.label;
+            // return type.label + " : " + !!params.category ? category.label + " : " + name.label : '';
         }
     }
+}
 </script>
 <style lang="stylus" scoped>
 @import '~imports/ui/styl/variables.styl'
@@ -402,6 +423,14 @@ import Series from './testTypes/Series.vue'
     transform translateX(0)
     
 
+.test-questions
+    position relative
+    overflow hidden
+    padding 0 
+    margin 0
+    width 100%
+    border-top 1px solid #0bddbe
+    border-bottom 1px solid #0bddbe
 
 .test
     position absolute
@@ -543,7 +572,8 @@ import Series from './testTypes/Series.vue'
     color red
     font-size 6vmin
     letter-spacing 10px
-
+    @media screen and (max-width:740px)
+        top 15%
 .welcome
     position fixed
     top 0

@@ -11,7 +11,6 @@ import VueMultiselect from 'vue-multiselect'
 Vue.component('Multiselect', VueMultiselect)
 
 // PLUGINS
-
 import { sync } from 'vuex-router-sync';
 import '/imports/startup/client';
 import '/imports/startup/client/account-config.js';

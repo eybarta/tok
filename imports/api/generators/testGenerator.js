@@ -1,25 +1,135 @@
 import { testTypes, categories } from '/imports/api/categories'
 import { questionGenerator } from './questionGenerator'
+import { Questions } from '/imports/api/collections/questions'
 
 
-export function generateAutotest(categoryname) {
-    console.log('generate autotest >> ', categoryname);
-    let questions = [];
-    let category = _.find(categories, { value: categoryname});
-    let children = category.children;
-    _.each(children, child => {
-        questions.push(
-            ...questionGenerator(categoryname, child.value, child.label, 1)
-        ) 
-    })
-    while(questions.length<20) {
-        let child = children[_.random(0, children.length)];
-        questions.push(
-            ...questionGenerator(categoryname, child.value, child.label, 1)
-        ) 
-    }
-    return questions;
+export async function fetchQuestions(state, getters, rootState) {
+    return new Promise((resolve, reject) => {
+            let routename = rootState.route.name;
+            let params = rootState.route.params;
+            console.log("QUESTIONS GETTER >> params ", params, " :: ", routename);
+
+            if (!!params.name) {
+                if (routename==='fixedtest') {
+                    let fixedTestByCategory = _.find(state.fixedtests, {type: params.category});
+                    if (!!fixedTestByCategory) {
+                        let test = _.find(fixedTestByCategory.tests, { name: params.name});
+                        return test.questions;
+                    }
+                }
+                let category = getters.activeCategory;
+                let subcategory = _.find(category.children, { value: params.name});
+                let quetions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
+                resolve(questions)
+            }
+            else if (/test/gi.test(routename)) {
+                let questionPromise;
+                let questions;
+                console.log("(params.activetest) QUESTIONS GETTER >> params ", params, " ::: ", routename);
+                if (routename==='autotest') {
+                        console.log('await for question gen!! ..', params.category);
+                        questionlist =  generateAutoQuestions(params.category);
+                        questions =  generateAutotest(params.category, questionlist)
+                        console.log("questions from autotest generator >. ", questions);
+                    
+                
+                }
+                else if (routename==='adaptivetest') {
+                    console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
+                    
+                    questions = generateAdaptivetest(params, rootState.usersModule.user);
+                }
+                
+                console.log("return questions  >", questions);
+                
+                resolve(_.shuffle(_.flatten(questions)));
+            }
+        }).then(function(result) {
+            return result;
+        })
 }
+export async function generateAutoQuestions(categoryname) {
+    return new Promise((resolve, reject) => {
+        if (categoryname!='series') {
+            Tracker.autorun((c) => {
+                Meteor.subscribe('questions', categoryname);
+                let questionsFetched = Questions.find({}).fetch();
+                if (!!questionsFetched.length) {
+                    stop();
+                    resolve(questionsFetched[0].questions);
+                }
+            })
+        }
+        else {
+            resolve(null);
+        }
+    }).then(function(result) {
+        return result;
+    });
+}
+
+export async function generateAutotest(categoryname, questionlist) {
+    return new Promise((resolve, reject) => {
+        let questions = [];
+        let category = _.find(categories, { value: categoryname});
+        let children = category.children;
+        if (!!questionlist) {
+            let questionListByCategory = _.groupBy(questionlist, 'type.value');
+            questionListByCategory = _.map(questionListByCategory, function(arr, key) {
+                arr = _.map(arr, question => {
+                    let identifier = { ['type.value']: question.type.value };
+                    for (var i = 0; i<questionlist.length;i++) {
+                        // TODO.. use _id's when implemented
+                        let q = questionlist[i]
+                        if (q.question===question.question) {
+                            return i;
+                        }
+                    }
+                    return -1
+                })
+                return {
+                    [key]:arr
+                }
+            })
+            let categoryArray = _.flattenDeep(_.map(questionListByCategory, (a,b,c) => {
+                return Object.keys( a );
+            }))
+            var count = 0;
+            
+            while(count<20) {
+                for (var j = 0; j<categoryArray.length;j++) {
+                    let category = categoryArray[j];
+                    let index = questionListByCategory[j][category][count];
+                    if (!!index) {
+                        let question = questionlist[index]
+                        questions.push(question)    
+                    }
+                    
+                }
+                count++;
+            }
+
+        }
+        else {
+            _.each(children, child => {
+                questions.push(
+                    ...questionGenerator(categoryname, child.value, child.label, 1)
+                ) 
+            })
+            while(questions.length<20) {
+                let child = children[_.random(0, children.length)];
+                questions.push(
+                    ...questionGenerator(categoryname, child.value, child.label, 1)
+                ) 
+            }
+        }
+            resolve(questions);
+    }).then(function(result) {
+        return result;
+    });
+    // return questions;
+}
+
 export function generateAdaptivetest(params, user) {
     console.log('generateAdaptivetest >> ', params);
     /*
@@ -60,20 +170,15 @@ export function generateAdaptivetest(params, user) {
         let mappedAnswersByCorrect = _.groupBy(mappedAnswersByType, function(obj){ 
             switch(true) {
                 case(obj.percent>=90):
-                    return '90'
-                    break;
+                    return '90';
                 case(obj.percent>=75):
                     return '75';
-                    break;
                 case(obj.percent>=50):
                     return '50';
-                    break;
                 case(obj.percent>=25):
                     return '25';
-                    break;
                 default:
                     return '0'
-                    break;
             }
         })
         console.log('mappedAnswersByCorrect >> ', mappedAnswersByCorrect);

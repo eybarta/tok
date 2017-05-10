@@ -15,20 +15,21 @@
     "pikaday": "^1.5.1",
     "swiper": "^3.4.1",
     "velocity-animate": "^1.5.0",
-    "vue": "^2.2.6",
+    "vue": "^2.3.2",
+    "vue-meteor-tracker": "^1.2.1",
     "vue-multiselect": "^2.0.0-beta.15",
-    "vue-router": "^2.2.1",
-    "vuex": "^2.1.2",
+    "vue-router": "^2.5.3",
+    "vue-supply": "^0.1.1",
+    "vuex": "^2.3.1",
     "vuex-router-sync": "^4.1.2"
   },
   "devDependencies": {
     "kouto-swiss": "^1.1.0",
     "lost": "^8.0.0",
-    "meteor-babel": "^0.19.1",
+    "meteor-babel": "^0.20.2",
     "rucksack-css": "^0.9.1",
     "rupture": "^0.6.2",
-    "shortid": "^2.2.8",
-    "vue-multiselect": "^2.0.0-beta.15"
+    "shortid": "^2.2.8"
   },
   "postcss": {
     "plugins": {

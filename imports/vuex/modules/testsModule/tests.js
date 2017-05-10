@@ -1,12 +1,15 @@
 import { testTypes, categories } from '/imports/api/categories/index.js'
+import { Questions } from '/imports/api/collections/questions'
 import { questionGenerator } from '/imports/api/generators/questionGenerator'
-import { generateAutotest, generateAdaptivetest } from '/imports/api/generators/testGenerator'
+import { fetchQuestions, generateAutoQuestions, generateAutotest, generateAdaptivetest } from '/imports/api/generators/testGenerator'
 import * as actions from './actions.js'
 
 const state = {
     testTypes,
     questionIndex: 0,
-    fixedtests: null
+    fixedtests: null,
+    questionbank: null,
+    activeQuestions: []
 }
 
 const mutations = {
@@ -20,6 +23,12 @@ const mutations = {
     },
     INIT_FIXED_TESTS (state, tests) {
         state.fixedtests = tests;
+    },
+    INIT_QUESTIONS (state, questions) {
+        state.questionbank = questions;
+    },
+    POPULATE_TEST (state, questions) {
+        state.activeQuestions = questions;
     }
 }
 
@@ -118,38 +127,9 @@ const getters = {
 		return _.orderBy(bc, 'order');
 	},
 
-    questions: (state, getters, rootState) => {
-        let routename = rootState.route.name;
-        let params = rootState.route.params;
-        console.log("QUESTIONS GETTER >> params ", params, " :: ", routename);
-
-        if (!!params.name) {
-            if (routename==='fixedtest') {
-                let fixedTestByCategory = _.find(state.fixedtests, {type: params.category});
-                if (!!fixedTestByCategory) {
-                    let test = _.find(fixedTestByCategory.tests, { name: params.name});
-                    return test.questions;
-                }
-            }
-            let category = getters.activeCategory;
-            let subcategory = _.find(category.children, { value: params.name});
-            return questionGenerator(category.value, subcategory.value, subcategory.label, 20);
-        }
-        else if (/test/gi.test(routename)) {
-            let questions;
-            console.log("(params.activetest) QUESTIONS GETTER >> params ", params);
-            if (routename==='autotest') {
-                questions = generateAutotest(params.category);
-            }
-            else if (routename==='adaptivetest') {
-                console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
-                
-                questions = generateAdaptivetest(params, rootState.usersModule.user);
-            }
-            
-            
-            return _.shuffle(_.flatten(questions));
-        }
+    questions: async (state, getters, rootState) => {
+        return fetchQuestions(state, getters, rootState);
+        
     }
 }
 

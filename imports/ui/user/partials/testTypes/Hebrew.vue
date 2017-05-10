@@ -1,18 +1,15 @@
 <template>
 <div class="series-test">
-    <h4>מה הספרה הבאה בסדרה?</h4>
     <ul :style="sliderTransform">
         <li v-for="(question, index) in questions" :key="question" :data-index="index" class="list-item">
+
             <div class="question">
-                <div class="parts ltr">
-                    <span v-for="part in question.parts">{{ part }}</span>
-                    <span class="next">?</span>
-                </div>
+                <h4 v-text="question.question"></h4>            
             </div>
             <div class="answer">
                 <h5 class="rtl"> נא לבחור אחת התשובות:</h5>
                 <ul class="rtl">
-                    <li v-for="(answer, index) in question.answers.list">
+                    <li v-for="(answer, index) in question.answers">
                         <a href="#p" @click.prevent="question.chosenAnswer=answer" :class="[question.chosenAnswer==answer ? 'chosen' : '']" v-text="answer"></a>
                         <span class="rtl" v-text="'.'+answerLabel[index]"></span>
                     </li>

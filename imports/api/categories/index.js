@@ -105,7 +105,37 @@ export const categories = [
     },
     {
         label: 'מילוי הוראות',
-        value: 'instruct'
+        value: 'instruct',
+        children: [
+            {
+                label: 'סידורי אותיות',
+                value: 'letter_arrange'
+            },
+            {
+                label: 'סידורי שמות',
+                value: 'name_arrange'
+            },
+            {
+                label: 'אותיות ומספרים',
+                value: 'letters_numbers'
+            },
+            {
+                label: 'מצפן',
+                value: 'compass'
+            },
+            {
+                label: 'שאלות מילון',
+                value: 'dictionary'
+            },
+            {
+                label: 'לוגיקה מילולית',
+                value: 'word_logic'
+            },
+            {
+                label: 'קריאת נתונים',
+                value: 'analyze'
+            },
+        ]
     },
     {
         label: 'עברית',

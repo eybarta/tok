@@ -11,30 +11,34 @@
                 <input-field class="search" v-model="filters.search"></input-field>
             </div>
         </div>
-        <table class="data-table user-table" v-if="parsedUsers.length>0">
-            <thead>
-                <th>שם משתמש  (ת.ז)</th>
-                <th>שם מלא</th>
-                <th>קבוצה</th>
-                <th class="sortable" @click="sort('profile.dob')"> <i :class="['fa', sortClass('profile.dob')]"></i> גיל</th>
-                <th class="sortable" @click="sort('profile.status.label')"><i :class="['fa', sortClass('profile.status.label')]"></i> סטטוס</th>
-                <th>יישוב</th>
-                <th>טלפון</th>
-                <th>מייל</th>
-            </thead>
-            <tbody name="table-row" is="transition-group">
-                <tr v-for="user in parsedUsers" :key="user.username" :class="[!!user.selected ? 'selected' : '', 'table-row-item']" @click="user.selected=!user.selected">
-                    <td v-html="user.username"></td>
-                    <td v-html="user.profile.name"></td>
-                    <td v-html="user.profile.group"></td>
-                    <td v-html="user.profile.age"></td>
-                    <td v-html="user.profile.status.label" :class="[user.profile.status.value=='active' ? 'green' : 'red']"></td>
-                    <td v-html="user.profile.city"></td>
-                    <td v-html="user.profile.phone"></td>
-                    <td v-html="user.profile.email"></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="data-table-wrapper"  v-if="parsedUsers.length>0">
+            <table class="data-table user-table">
+                <thead>
+                    <th>שם משתמש  (ת.ז)</th>
+                    <th>סיסמא</th>
+                    <th>שם מלא</th>
+                    <th>קבוצה</th>
+                    <th class="sortable" @click="sort('profile.dob')"> <i :class="['fa', sortClass('profile.dob')]"></i> גיל</th>
+                    <th class="sortable" @click="sort('profile.status.label')"><i :class="['fa', sortClass('profile.status.label')]"></i> סטטוס</th>
+                    <th>יישוב</th>
+                    <th>טלפון</th>
+                    <th>מייל</th>
+                </thead>
+                <tbody name="table-row" is="transition-group">
+                    <tr v-for="user in parsedUsers" :key="user.username" :class="[!!user.selected ? 'selected' : '', 'table-row-item']" @click="user.selected=!user.selected">
+                        <td v-html="user.username"></td>
+                        <td v-html="user.profile.psw"></td>
+                        <td v-html="user.profile.name"></td>
+                        <td v-html="user.profile.group"></td>
+                        <td v-html="user.profile.age"></td>
+                        <td v-html="user.profile.status.label" :class="[user.profile.status.value=='active' ? 'green' : 'red']"></td>
+                        <td v-html="user.profile.city"></td>
+                        <td v-html="user.profile.phone"></td>
+                        <td v-html="user.profile.email"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <h4 v-else>לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
     </div>
     <p class="tcenter mt-big" v-else>אין משתמשים רשומים במערכת.. כדאי להוסיף!</p>

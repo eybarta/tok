@@ -35,9 +35,13 @@ $fa-font-path = "http://netdna.bootstrapcdn.com/font-awesome/4.7.0/fonts"
 
 .inline
     display inline-block
-
+.block
+    display block !important
 .txt-md
     fontsizer(28px, 32px)
+
+.pb-0
+    padding-bottom 0 !important
 // margin 
 for alias, prop in $space
     for size,value in margins
@@ -70,5 +74,8 @@ for $color, value in colormap
 
 // borders
 
-.bt-dashed
-    border-top 1px dashed bluegreen
+.b
+    &t-dashed
+        border-top 1px dashed bluegreen
+    &b-dashed
+        border-bottom 1px dashed bluegreen

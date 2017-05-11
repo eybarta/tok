@@ -1,15 +1,15 @@
 import { testTypes, categories } from '/imports/api/categories/index.js'
 import { Questions } from '/imports/api/collections/questions'
-import { questionGenerator } from '/imports/api/generators/questionGenerator'
-import { fetchQuestions, generateAutoQuestions, generateAutotest, generateAdaptivetest } from '/imports/api/generators/testGenerator'
+// import { questionGenerator } from '/imports/api/generators/questionGenerator'
+// import { fetchQuestions, generateAutoQuestions, generateAutotest, generateAdaptivetest } from '/imports/api/generators/testGenerator'
 import * as actions from './actions.js'
-
+// import QuestionList from '/imports/api/supply/questions-resource'
 const state = {
     testTypes,
-    questionIndex: 0,
+    // questionIndex: 0,
     fixedtests: null,
-    questionbank: null,
-    activeQuestions: []
+    activeQuestions: [],
+    // questionbank: null,
 }
 
 const mutations = {
@@ -24,11 +24,8 @@ const mutations = {
     INIT_FIXED_TESTS (state, tests) {
         state.fixedtests = tests;
     },
-    INIT_QUESTIONS (state, questions) {
+    INIT_QUESTIONS (state, questions) { // <! -- ADMIN ONLY
         state.questionbank = questions;
-    },
-    POPULATE_TEST (state, questions) {
-        state.activeQuestions = questions;
     }
 }
 
@@ -127,10 +124,11 @@ const getters = {
 		return _.orderBy(bc, 'order');
 	},
 
-    questions: async (state, getters, rootState) => {
-        return fetchQuestions(state, getters, rootState);
+    // questions: (state, getters, rootState) => {
+    //     // console.log('in QUESTION GETER >> ', QuestionList.list);
+    //     // return fetchQuestions(state, getters, rootState);
         
-    }
+    // }
 }
 
 export const testsModule = {

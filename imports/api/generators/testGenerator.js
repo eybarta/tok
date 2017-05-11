@@ -19,7 +19,7 @@ export async function fetchQuestions(state, getters, rootState) {
                 }
                 let category = getters.activeCategory;
                 let subcategory = _.find(category.children, { value: params.name});
-                let quetions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
+                let questions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
                 resolve(questions)
             }
             else if (/test/gi.test(routename)) {
@@ -49,23 +49,23 @@ export async function fetchQuestions(state, getters, rootState) {
         })
 }
 export async function generateAutoQuestions(categoryname) {
-    return new Promise((resolve, reject) => {
-        if (categoryname!='series') {
-            Tracker.autorun((c) => {
-                Meteor.subscribe('questions', categoryname);
-                let questionsFetched = Questions.find({}).fetch();
-                if (!!questionsFetched.length) {
-                    stop();
-                    resolve(questionsFetched[0].questions);
-                }
-            })
-        }
-        else {
-            resolve(null);
-        }
-    }).then(function(result) {
-        return result;
-    });
+    // return new Promise((resolve, reject) => {
+    //     if (categoryname!='series') {
+    //         Tracker.autorun((c) => {
+    //             Meteor.subscribe('questions', categoryname);
+    //             let questionsFetched = Questions.find({}).fetch();
+    //             if (!!questionsFetched.length) {
+    //                 stop();
+    //                 resolve(questionsFetched[0].questions);
+    //             }
+    //         })
+    //     }
+    //     else {
+    //         resolve(null);
+    //     }
+    // }).then(function(result) {
+    //     return result;
+    // });
 }
 
 export async function generateAutotest(categoryname, questionlist) {

@@ -1,4 +1,3 @@
-import { Random } from 'meteor/random'
 import SeriesQuestionGenerator from './series/generate'
 import { Questions } from '/imports/api/collections/questions'
 export function questionGenerator(category, type, label, amount) {

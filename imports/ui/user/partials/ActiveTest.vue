@@ -22,25 +22,25 @@
                         </label>
                     </div>
                 </div>
-                <button @click="starttest" class="btn btn-success btn-big">התחל</button>
+                <button @click="starttest" :class="['btn', 'btn-success', 'btn-big', !!testQuestions && !!testQuestions.length ? '' : 'disabled']">התחל</button>
                 <router-link to="/" class="back-btn btn btn-primary" exact>חזרה <i class="fa fa-chevron-left"></i></router-link>
             </div>
             <h2 v-else class="primary" key="1"> בהצלחה !!</h2>
         </transition-group>
     </transition>
     <div class="countdown" v-if="withtimer" v-text="countdown"></div>
-    <div class="test-wrap">
+    <div v-if="!!started && !!testQuestions && !!testQuestions.length" class="test-wrap">
         <div class="test">
             <h2 v-text="testTitle"></h2>
             <div class="test-questions ltr">
-                <component :is="currentCategory"></component>
+                <component :questionIndex="questionIndex" :questions="testQuestions" :is="currentCategory"></component>
                 <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
-                <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==questions.length-1?'disabled': '']"></div>
+                <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==testQuestions.length-1?'disabled': '']"></div>
             </div>
             
         <div class="pager-progress ltr">
 	        <ul>
-                <li @click.prevent="updateQuestionIndex(index)" v-for="(question, index) in questions" :class="[!!question.chosenAnswer ? 'answered' : '', index==questionIndex ? 'active' : '']" >
+                <li @click.prevent="updateQuestionIndex(index)" v-for="(question, index) in testQuestions" :class="[!!question.chosenAnswer ? 'answered' : '', index==questionIndex ? 'active' : '']" >
                    <span>{{ index+1 }}</span>
                 </li>
             </ul>
@@ -49,7 +49,9 @@
             <button class="center btn btn-success btn-big" @click="finish">סיימתי</button>
         </div>
         <div class="status">
-            <h4>ענית עד כה על <span v-text="answeredSoFar"  :class="[!!answeredSoFar? '' : 'red']"></span><span>/{{ questions.length}}</span></h4>
+            <h4>ענית עד כה על 
+            <span v-text="answeredSoFar"  :class="[!!answeredSoFar? '' : 'red']"></span>
+            <span>/{{ testQuestions.length}}</span></h4>
         </div>
         </div>
 
@@ -116,7 +118,11 @@
     </main>
 </template>
 <script>
+import { use, consume } from 'vue-supply'
+import QuestionList from '/imports/api/supply/questions-resource'
 import { mapState, mapActions, mapGetters } from 'vuex'
+import { questionGenerator } from '/imports/api/generators/questionGenerator'
+
 import { categories } from '/imports/api/categories'
 
 // Test Types
@@ -130,6 +136,7 @@ export default {
             goodluck: false,
             timer: 840000,
             questiontimer: null,
+            questionIndex: 0,
             idle: {
                 flag: false,
                 timer: 60000
@@ -149,59 +156,69 @@ export default {
             },
         }
     },
-    // beforeRouteEnter(to, from, next) {
-    //     console.log("BEOFRE ROUTE ENTER >> ");
+    mixins: [use(QuestionList)],
+    // created() {
+    //     console.log("USER >> ", this.user);
+    //     // this.countdownobj.start();
+    //     console.log("questionList >>", this.testQuestions);
     // },
-    // beforeRouteUpdate (to, from, next) {
-    //     // this.post = null
-    //     console.log("BEFORE ROUTE UPDATE !@&^*!&@%*!@&%*!&@");
-    //     if (typeof this.questions.then === 'function') {
-    //         this.questions.then(function(result) {
-    //             console.log("promise result > ", result);
-    //             next()
-                
-    //         })
-    //     }
-    // },
-    created() {
-        this.testinfo.questions = this.questions;
-        console.log("active test created >> ", this.questions);
-        console.log("USER >> ", this.user);
-        // this.countdownobj.start();
-    },
     components: {
         Series,
         Hebrew
     },
     watch: {
         'questionIndex'() {
+            console.log('qindex watch %%%%%%%');
             this.timeQuestion(this.questionIndex)
+        },
+        'testQuestions'() {
+            console.log('1 tquestion watch %%%%%%%');
+            this.$set(this.testinfo, 'questions', this.testQuestions);
+            console.log('2 tquestion watch %%%%%%%');
+            
         }
     },
     methods: {
         ...mapActions('testsModule', [
-            'saveTestToUser',
-            'updateQuestionIndex'
+            'saveTestToUser'
         ]),
+        updateQuestionIndex(to) {
+            let index = this.questionIndex,
+            questionsAmount = this.testQuestions.length-1
+            if (to=='next') {
+                index != questionsAmount ? index++ : index=0
+            }
+            else if (to=='prev') {
+                index != 0 ? index-- : index=questionsAmount
+            }
+            else {
+                index = to;
+            }
+            this.$set(this, 'questionIndex', index);
+        },
         starttest() {
             let ref = this;
             this.updateQuestionIndex(0)
-            this.$set(this, 'goodluck', true)
-            Meteor.setTimeout(function() {
-                this.$set(this, 'started', true);
-                this.bindEvents();
-                
-                Meteor.setInterval(function() {
-                    if (this.withtimer) {
-                        this.$set(this, 'timer', this.timer-1000)
-                    }
-                    this.$set(this.idle, 'timer', this.idle.timer-1000)
-                    if (this.idle.timer<=0) {
-                        this.flagIdle();
-                    }
-                }.bind(this),1000)
-                this.timeQuestion(0)
-            }.bind(this), 1000)
+            this.$set(this, 'goodluck', true);
+
+            this.$nextTick(function() {
+                console.log("testinfo >> ", this.testinfo);      
+                Meteor.setTimeout(function() {
+                    this.$set(this, 'started', true);
+                    this.bindEvents();
+                    
+                    Meteor.setInterval(function() {
+                        if (this.withtimer) {
+                            this.$set(this, 'timer', this.timer-1000)
+                        }
+                        this.$set(this.idle, 'timer', this.idle.timer-1000)
+                        if (this.idle.timer<=0) {
+                            this.flagIdle();
+                        }
+                    }.bind(this),1000)
+                    this.timeQuestion(0)
+                }.bind(this), 1000)
+            })
             
         },
         bindEvents() {
@@ -226,8 +243,16 @@ export default {
             }
         },
         timeQuestion(index) {
+            console.log('1 index', index);
+            console.log('1 this.questiontimer', this.questiontimer);
             Meteor.clearInterval(this.questiontimer)
+            console.log('2 this.questiontimer', this.questiontimer);
+            
+            console.log('2 question', this.testinfo.questions);
+            
             let question = this.testinfo.questions[index];
+            console.log('3 this.questiontimer', question);
+            
             question.timer = question.timer || 0;
             this.questiontimer = Meteor.setInterval(function() {
                 question.timer++;
@@ -241,7 +266,7 @@ export default {
 
         },
         timedQuestions() {
-            return _.filter(this.questions, 'timer');
+            return _.filter(this.testQuestions, 'timer');
         },
         totalTime() {
             return _.sumBy(_.map(this.timedQuestions(), 'timer'));;
@@ -254,7 +279,7 @@ export default {
         },
         finish() {
             let answered, correct, wrong;
-            answered = _.filter(this.questions, question => {
+            answered = _.filter(this.testQuestions, question => {
                 return !!question.chosenAnswer;
             })
             correct = _.filter(answered, question => {
@@ -263,32 +288,256 @@ export default {
             this.$set(this.testinfo, 'type', this.$route.params.type);
             this.$set(this.testinfo, 'correct', correct.length);
             this.$set(this.testinfo, 'wrong', answered.length-correct.length);
-            this.$set(this.testinfo, 'unanswered', this.questions.length-answered.length);
-            this.$set(this.testinfo, 'score', Math.round((correct.length/this.questions.length)*100));
+            this.$set(this.testinfo, 'unanswered', this.testQuestions.length-answered.length);
+            this.$set(this.testinfo, 'score', Math.round((correct.length/this.testQuestions.length)*100));
             this.$set(this.testinfo, 'regulatoryScore',Math.round(((correct.length-(this.testinfo.wrong/3))/20)*100));
             this.$set(this.testinfo, 'meta', this.route.params)
             this.$set(this.testinfo, 'percentComplete', (this.answeredSoFar/20)*100)
             this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer)).asSeconds())
             this.$set(this.testinfo, 'averageTimeOnQuestion', this.getAverageTimeOnQuestion())
             console.log(correct.length, " questions were answered correctly");
-            console.log((correct.length/this.questions.length)*100, " is your score");
+            console.log((correct.length/this.testQuestions.length)*100, " is your score");
 
             // Allow viewing of test with correct answers.
             this.saveTestToUser(this.testinfo)
+        },
+        fetchFixedTest(category, name) {
+            let fixedTestByCategory = _.find(this.fixedtests, {type: category});
+            if (!!fixedTestByCategory) {
+                let test = _.find(fixedTestByCategory.tests, { name});
+                return test.questions;
+            }
+        },
+        fetchAutoTest(categoryname) {
+            let questions = [];
+            let category = _.find(categories, { value: categoryname});
+            let children = category.children;
+            if (!!this.questionList && !!this.questionList.length && this.questionList.length>0) {
+                let questionlist = this.questionList[0].questions;
+                console.log("1 IN FETCH AUTO >> ", questionlist);
+                
+                let questionListByCategory = _.groupBy(questionlist, 'type.value');
+                questionListByCategory = _.map(questionListByCategory, function(arr, key) {
+                    arr = _.map(arr, question => {
+                        let identifier = { ['type.value']: question.type.value };
+                        for (var i = 0; i<questionlist.length;i++) {
+                            // TODO.. use _id's when implemented
+                            let q = questionlist[i]
+                            if (q.question===question.question) {
+                                return i;
+                            }
+                        }
+                        return -1
+                    })
+                    return {
+                        [key]:arr
+                    }
+                })
+                let categoryArray = _.flattenDeep(_.map(questionListByCategory, (a,b,c) => {
+                    return Object.keys( a );
+                }))
+
+                var count = 0;
+                while(count<20) {
+                    for (var j = 0; j<categoryArray.length;j++) {
+                        let category = categoryArray[j];
+                        let index = questionListByCategory[j][category][count];
+                        if (!!index) {
+                                // id: null,
+                                // type: null,
+                                // label: null,
+                                // parts: [],
+                                // answers: {
+                                // correct: null,
+                                // list:[]
+                                // },
+                                // control: null,
+                                // shift: null,
+                                // chosenAnswer: null
+                            let question = questionlist[index]
+                            let answers = {
+                                list: question.answers,
+                                correct: question.answers[0]
+                            }
+                            question.answers = answers;
+                            question.chosenAnswer = null;
+                            questions.push(question)    
+                        }
+                    }
+                    count++;
+                }
+                console.log("2 IN FETCH AUTO >> ", questions);
+                
+            }
+            else {
+                console.log("AUTO TEST QUESTIONS > SERIES??!?!!?");
+                _.each(children, child => {
+                    questions.push(
+                        ...questionGenerator(categoryname, child.value, child.label, 1)
+                    ) 
+                })
+                while(questions.length<20) {
+                    let child = children[_.random(0, children.length)];
+                    questions.push(
+                        ...questionGenerator(categoryname, child.value, child.label, 1)
+                    ) 
+                }
+            }
+            console.log("AUTO TEST QUESTIONS > ", questions);
+            return questions;
+        },
+        fetchAdaptivetest(params, user) {
+            console.log('generateAdaptivetest >> ', params);
+            /*
+                Get test statistics from user and create
+                Adaptive test..
+                Question Amount by correctly answered:
+                >90% -- 0
+                >=75% -- 5
+                >=50% -- 5
+                >=25% -- 5
+                >=0 -- 5 
+            */
+            if (!!user.profile.tests) {
+                let tests = _.filter(user.profile.tests, test => {return /test/g.test(test.type)});
+                console.log("tests user has taken > ", tests);
+                /*
+                    Now.. for every test
+                    - Filter out only the answered questions
+                    - Map out { type / correct|wrong }
+                    
+                    -- Map all tests to { type: x, correct: y, wrong: z }
+                */
+                let allAnsweredQuestions = _.filter(_.flatMap(tests, 'questions'), 'chosenAnswer');
+                let mappedAnswersByType = _(allAnsweredQuestions)
+                    .groupBy('type')
+                    .map((v, k) => ({ 
+                        type: k,
+                        total: _.sumBy(allAnsweredQuestions, {type:k}),
+                        correct: _.sumBy(v, function(obj) { return Number(obj.chosenAnswer===obj.answers.correct)}),
+                        get percent() {
+                            return Math.round(this.correct/this.total*100);
+                        }
+                    })).value();
+
+                /*
+                    Group by percent correctly answered
+                */
+                let mappedAnswersByCorrect = _.groupBy(mappedAnswersByType, function(obj){ 
+                    switch(true) {
+                        case(obj.percent>=90):
+                            return '90';
+                        case(obj.percent>=75):
+                            return '75';
+                        case(obj.percent>=50):
+                            return '50';
+                        case(obj.percent>=25):
+                            return '25';
+                        default:
+                            return '0'
+                    }
+                })
+                console.log('mappedAnswersByCorrect >> ', mappedAnswersByCorrect);
+
+                /*
+                    Build the adaptive test
+                */         
+                let questions = [];
+                let category = _.find(categories, { value: params.category});
+                let children = category.children;
+
+                let p = mappedAnswersByCorrect;
+                let breakpoints = [75,50,25,0];
+                while (questions.length<20) {
+                    for (var i = 0; i < breakpoints.length; i++) {
+                        let bp = breakpoints[i];
+                        if (_.has(p, bp) && p[bp].length>0) {
+                            console.log(">>>>> ", p[bp] );
+                            console.log("children >>>> ", children );
+                            let types = _.map(p[bp], 'type');
+
+                            let testTypesByLevel = _.sortBy(_.filter(children, obj => {
+                                return types.indexOf(obj.value)>-1
+                            }), 'level');
+                            console.log('testTypesByLevel>> ', testTypesByLevel);
+
+                            for (var j = 0; j<testTypesByLevel.length; j++) {
+                                let type = testTypesByLevel[j];
+                                let amount = Math.min(5, 20-questions.length);
+                                console.log("type to generate=== ", params.category, type.value, amount);
+                                questions.push(...questionGenerator(params.category, type.value, type.label, amount))
+                            }
+                        }
+                    }
+                }
+                console.log("final adpative questions>> ", questions);
+                return questions;
+
+            }
         }
+    },
+    asyncComputed: {
+        async questionList() {
+            let list = QuestionList.list;
+            console.log("LIST **** ", list);
+            return list;
+        },
+        async testQuestions() {
+            let routename = this.route.name;
+            let params = this.route.params;
+            if (params.category!='series') {
+                let questionslist = await this.questionList;
+                console.log("222QUESTIONLIST > ", questionslist, questionslist.length);
+                if (!questionslist || !questionslist.length) {
+                    console.log("STOP!!!!!!!!!!!!");
+                    return;
+                }
+            }
+            console.log("CONTINUE!!!!!!!");
+            if (!!params.name) {
+                if (routename==='fixedtest') {
+                    return this.fetchFixedTest(params.category, params.name);
+                }
+                // else {
+                //     let category = this.activeCategory;
+                //     let subcategory = _.find(category.children, { value: params.name});
+                //     let questions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
+                //     return questions;
+                // }
+            }
+            else if (/test/gi.test(routename)) {
+                let questions;
+                if (routename==='autotest') {
+                    return this.fetchAutoTest(params.category);
+                }
+                else if (routename==='adaptivetest') {
+                    console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
+                    
+                    questions = this.fetchAdaptivetest(params, this.user);
+                }
+                
+                console.log("return questions  >", questions);
+                
+                resolve(_.shuffle(_.flatten(questions)));
+            }
+            // }
+           
+        },
     },
     computed: {
         ...mapState('testsModule', [
             'testTypes',
-            'questionIndex'
+            'fixedtests'
+        ]),
+        ...mapState('usersModule', [
+            'user'
         ]),
         ...mapState([
             'route',
-            'activeQuestions'
         ]),
         ...mapGetters('testsModule', [
             'currentCategory',
-            'questions'
+            'activeCategory'
         ]),
         countdown() {
             return moment(this.timer).format('m:ss');
@@ -298,7 +547,9 @@ export default {
             return moment.duration(ref.testinfo.averageTimeOnQuestion, 'seconds').format('m:ss', {trim:false})
         },
         answeredSoFar() {
-            return _.filter(this.questions, 'chosenAnswer').length
+            let questions = this.testQuestions;
+            console.log('answered>> ', _.filter(questions, 'chosenAnswer').length);
+            return _.filter(questions, 'chosenAnswer').length
         },
         categoryName() {
             let params = this.route.params;
@@ -328,7 +579,9 @@ export default {
 @import '~imports/ui/styl/variables.styl'
 @import '~imports/ui/styl/mixins'
 
-
+.btn.disabled
+    pointer-events none
+    opacity 0.5
 .fade-enter-active, .fade-leave-active {
   transition: all .5s
   transform: scale(1) rotate(0)

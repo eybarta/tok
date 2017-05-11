@@ -1,3 +1,5 @@
+import { Random } from 'meteor/random'
+
 const questionObject =  {
     id: null,
     type: null,

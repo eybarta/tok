@@ -3,8 +3,12 @@ import Vuex from 'vuex';
 import {Meteor} from 'meteor/meteor';
 import { Tracker }from 'meteor/tracker'
 import {Accounts} from 'meteor/accounts-base'
-
+import VueSupply from 'vue-supply'
+import AsyncComputed from 'vue-async-computed'
+ 
 Vue.use(Vuex);
+Vue.use(VueSupply)
+Vue.use(AsyncComputed)
 
 
 import VueMultiselect from 'vue-multiselect'

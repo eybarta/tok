@@ -1,5 +1,5 @@
 <template>
-<div class="series-test">
+<div class="hebrew-test">
     <ul :style="sliderTransform">
         <li v-for="(question, index) in questions" :key="question" :data-index="index" class="list-item">
 
@@ -9,8 +9,8 @@
             <div class="answer">
                 <h5 class="rtl"> נא לבחור אחת התשובות:</h5>
                 <ul class="rtl">
-                    <li v-for="(answer, index) in question.answers">
-                        <a href="#p" @click.prevent="question.chosenAnswer=answer" :class="[question.chosenAnswer==answer ? 'chosen' : '']" v-text="answer"></a>
+                    <li v-for="(answer, index) in question.answers.list" :key="answer">
+                        <a href="#p" @click.prevent="chooseAnswer(question, answer)" :class="[question.chosenAnswer===answer ? 'chosen' : '']" v-text="answer"></a>
                         <span class="rtl" v-text="'.'+answerLabel[index]"></span>
                     </li>
                 </ul>
@@ -22,18 +22,23 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 export default {
+    props: ['questions', 'questionIndex'],
     data() {
         return {
             answerLabel: ['א','ב','ג','ד']
         }
     },  
+    created() {
+        console.log('in hebrew questions > ', this.questions)
+    },
+    methods: {
+        chooseAnswer(question, answer) {
+            this.$set(question, 'chosenAnswer', answer)
+            this.$forceUpdate();
+        }
+    },
     computed: {
-        ...mapState('testsModule', [
-            'questionIndex'
-        ]),
-        ...mapGetters('testsModule', [
-            'questions'
-        ]),
+        
         sliderTransform() {
             let percentageX = -(this.questionIndex*100) + "%";
             return `transform: translate3d(${percentageX}, 0, 0)`
@@ -41,9 +46,9 @@ export default {
     }
 }
 </script>
-<style lang="stylus">
+<style lang="stylus" scoped>
 @import '~imports/ui/styl/variables.styl'
-.series-test
+.hebrew-test
     h4
         padding 40px 0 0
         font-size 25px
@@ -95,6 +100,8 @@ export default {
             padding 8% 0 6% 0
             h5
                 padding-bottom 20px
+            ul
+                white-space normal
             li
                 display inline-block
                 margin 0 2.2%
@@ -106,7 +113,7 @@ export default {
                 box-sizing border-box
                 text-decoration none
                 color lighten(darkblue, 20)
-                font-size 40px
+                font-size 28px
                 border 1px solid transparent
                 background transparent
                 transition border 400ms ease, background 400ms ease, color 400ms ease

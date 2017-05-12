@@ -1,5 +1,7 @@
 import { testTypes, categories } from '/imports/api/categories/index.js'
 import { Questions } from '/imports/api/collections/questions'
+import QuestionList from '/imports/api/supply/questions-resource'
+
 // import { questionGenerator } from '/imports/api/generators/questionGenerator'
 // import { fetchQuestions, generateAutoQuestions, generateAutotest, generateAdaptivetest } from '/imports/api/generators/testGenerator'
 import * as actions from './actions.js'
@@ -8,7 +10,7 @@ const state = {
     testTypes,
     // questionIndex: 0,
     fixedtests: null,
-    activeQuestions: [],
+    testQuestions: [],
     // questionbank: null,
 }
 
@@ -26,6 +28,9 @@ const mutations = {
     },
     INIT_QUESTIONS (state, questions) { // <! -- ADMIN ONLY
         state.questionbank = questions;
+    },
+    UPDATE_TEST_QUESTIONS (state, questions) {
+        state.testQuestions = questions;
     }
 }
 
@@ -123,7 +128,7 @@ const getters = {
 		    })
 		return _.orderBy(bc, 'order');
 	},
-
+    // 'questionsFromDB': state => Questionlist.list
     // questions: (state, getters, rootState) => {
     //     // console.log('in QUESTION GETER >> ', QuestionList.list);
     //     // return fetchQuestions(state, getters, rootState);

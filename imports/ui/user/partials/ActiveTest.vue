@@ -50,8 +50,12 @@
         </div>
         <div class="status">
             <h4>ענית עד כה על 
-            <span v-text="answeredSoFar"  :class="[!!answeredSoFar? '' : 'red']"></span>
-            <span>/{{ testQuestions.length}}</span></h4>
+                <span>
+                    <span v-text="answeredSoFar"  :class="[!!answeredSoFar? '' : 'red']"></span>
+                    <span>/{{ testQuestions.length}}</span>
+                </span>
+                    
+            </h4>
         </div>
         </div>
 
@@ -156,7 +160,7 @@ export default {
             },
         }
     },
-    mixins: [use(QuestionList)],
+    // mixins: [use(QuestionList)],
     // created() {
     //     console.log("USER >> ", this.user);
     //     // this.countdownobj.start();
@@ -165,6 +169,9 @@ export default {
     components: {
         Series,
         Hebrew
+    },
+    mounted() {
+        this.fetchTestQuestions();
     },
     watch: {
         'questionIndex'() {
@@ -180,7 +187,8 @@ export default {
     },
     methods: {
         ...mapActions('testsModule', [
-            'saveTestToUser'
+            'saveTestToUser',
+            'fetchTestQuestions'
         ]),
         updateQuestionIndex(to) {
             let index = this.questionIndex,
@@ -476,58 +484,59 @@ export default {
             }
         }
     },
-    asyncComputed: {
-        async questionList() {
-            let list = QuestionList.list;
-            console.log("LIST **** ", list);
-            return list;
-        },
-        async testQuestions() {
-            let routename = this.route.name;
-            let params = this.route.params;
-            if (params.category!='series') {
-                let questionslist = await this.questionList;
-                console.log("222QUESTIONLIST > ", questionslist, questionslist.length);
-                if (!questionslist || !questionslist.length) {
-                    console.log("STOP!!!!!!!!!!!!");
-                    return;
-                }
-            }
-            console.log("CONTINUE!!!!!!!");
-            if (!!params.name) {
-                if (routename==='fixedtest') {
-                    return this.fetchFixedTest(params.category, params.name);
-                }
-                // else {
-                //     let category = this.activeCategory;
-                //     let subcategory = _.find(category.children, { value: params.name});
-                //     let questions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
-                //     return questions;
-                // }
-            }
-            else if (/test/gi.test(routename)) {
-                let questions;
-                if (routename==='autotest') {
-                    return this.fetchAutoTest(params.category);
-                }
-                else if (routename==='adaptivetest') {
-                    console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
+    // asyncComputed: {
+    //     async questionList() {
+    //         let list = QuestionList.list;
+    //         console.log("LIST **** ", list);
+    //         return list;
+    //     },
+    //     async testQuestions() {
+    //         let routename = this.route.name;
+    //         let params = this.route.params;
+    //         if (params.category!='series') {
+    //             let questionslist = await this.questionList;
+    //             console.log("222QUESTIONLIST > ", questionslist, questionslist.length);
+    //             if (!questionslist || !questionslist.length) {
+    //                 console.log("STOP!!!!!!!!!!!!");
+    //                 return;
+    //             }
+    //         }
+    //         console.log("CONTINUE!!!!!!!");
+    //         if (!!params.name) {
+    //             if (routename==='fixedtest') {
+    //                 return this.fetchFixedTest(params.category, params.name);
+    //             }
+    //             // else {
+    //             //     let category = this.activeCategory;
+    //             //     let subcategory = _.find(category.children, { value: params.name});
+    //             //     let questions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
+    //             //     return questions;
+    //             // }
+    //         }
+    //         else if (/test/gi.test(routename)) {
+    //             let questions;
+    //             if (routename==='autotest') {
+    //                 return this.fetchAutoTest(params.category);
+    //             }
+    //             else if (routename==='adaptivetest') {
+    //                 console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
                     
-                    questions = this.fetchAdaptivetest(params, this.user);
-                }
+    //                 questions = this.fetchAdaptivetest(params, this.user);
+    //             }
                 
-                console.log("return questions  >", questions);
+    //             console.log("return questions  >", questions);
                 
-                resolve(_.shuffle(_.flatten(questions)));
-            }
-            // }
+    //             resolve(_.shuffle(_.flatten(questions)));
+    //         }
+    //         // }
            
-        },
-    },
+    //     },
+    // },
     computed: {
         ...mapState('testsModule', [
             'testTypes',
-            'fixedtests'
+            'fixedtests',
+            'testQuestions'
         ]),
         ...mapState('usersModule', [
             'user'
@@ -812,9 +821,11 @@ export default {
     text-align center
     padding 10% 0
     span
+        text-align left
+        display inline-block
         direction ltr
         font-family 'Helvetica Thin'
-        &:first-child
+        :first-child
             color darken(#0bddbe, 10)
 
 .countdown
@@ -899,7 +910,7 @@ export default {
                     border-color red
                 
 .modal
-    background rgba(#fff, 0.8)
+    background rgba(#fff, 0.98)
     position fixed
     top 0
     left 0

@@ -34,7 +34,7 @@ export default {
     methods: {
         chooseAnswer(question, answer) {
             this.$set(question, 'chosenAnswer', answer)
-            this.$forceUpdate();
+            // this.$forceUpdate();
         }
     },
     computed: {

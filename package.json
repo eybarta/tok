@@ -17,10 +17,9 @@
     "velocity-animate": "^1.5.0",
     "vue": "^2.3.3",
     "vue-async-computed": "^3.1.2",
-    "vue-meteor-tracker": "^1.2.1",
     "vue-multiselect": "^2.0.0-beta.15",
     "vue-router": "^2.5.3",
-    "vue-supply": "^0.1.1",
+    "vue2-dropzone": "^2.2.7",
     "vuex": "^2.3.1",
     "vuex-router-sync": "^4.1.2"
   },

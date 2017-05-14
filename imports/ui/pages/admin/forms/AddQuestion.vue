@@ -14,19 +14,32 @@
                     :allow-empty="false"></multiselect>
         <button @click="save" :class="['btn', 'btn-success-inverse', 'mr-min', !validQuestionEntry ? 'disabled' : '']">שמור</button>
         <div class="form pt-med mt-med bt-dashed clear">
-            <div class="line-field w-elastic-50 maxw-500">
-                <textarea id="question" class="reg w-100" v-model="question" type="text" required></textarea>
-                <label for="question">שאלה</label>
-            </div>
-            <div class="form-full block">
-                <div v-for="(answer, index) in answers" class="line-field w-elastic-50 maxw-500">
-                    <input :id="'answer'+index" class="reg w-100" v-model="answers[index]" type="text" required>
-                    <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
+                <div class="col-6">
+        
+                    <div class="line-field w-elastic-50 maxw-500">
+                        <textarea id="question" class="reg w-100" v-model="question" type="text" required></textarea>
+                        <label for="question">שאלה</label>
+                    </div>
+                    <div class="form-full block">
+                        <div v-for="(answer, index) in answers" class="line-field w-elastic-50 maxw-500">
+                            <input :id="'answer'+index" class="reg w-100" v-model="answers[index]" type="text" required>
+                            <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
+                        </div>
+                </div>
+                <div class="col-6">
+                <!--
+                    <dropzone id="myVueDropzone" url="https://httpbin.org/post" @vdropzone-success="fileDropped">
+                        Optional parameters if any! 
+                        <input type="hidden" name="token" value="xxx">
+                    </dropzone>
+                    -->
                 </div>
             </div>
             <div class="">
                 <button @click="save" :class="['btn', 'btn-success-inverse', !validQuestionEntry ? 'disabled' : '']">שמור</button>
+                <button @click="anotherQuestion" :class="['btn', 'btn-success-inverse', !validQuestionEntry ? 'disabled' : '']">שמור והוסף שאלה<i class="fa fa-plus-circle pr-small"></i></button>
             </div>
+            
         </div>
     </div>
 </div>
@@ -34,7 +47,11 @@
 <script>
 import { categories } from '/imports/api/categories'
 import { mapActions } from 'vuex'
+// if (Meteor.isClient) {
+    // var Dropzone = require('vue2-dropzone');
 
+// import Dropzone from 'vue2-dropzone'
+// }
 export default {
     data() {
         return {
@@ -46,18 +63,34 @@ export default {
                null,
                null,
                null
-            ]
+            ],
+            uploader: false
 
         }
     },
     created() {
         this.initQuestions();
     },
+    watch: {
+        activesubcat: {
+            handler() {
+                if (this.activesubcat.value==='comprehension') {
+                    this.uploader = true;
+                }
+            }
+        }
+    },
+    components: {
+    //   Dropzone
+    },
     methods: {
         ...mapActions('testsModule', [
             'saveQuestion',
             'initQuestions'
         ]),
+        fileDropped(res) {
+            console.log("File dropped>> ", res);
+        },
         save() {
             let data = {
                 category: {
@@ -78,6 +111,9 @@ export default {
 
             this.reset();
 
+        },
+        anotherQuestion() {
+            console.log('add another question');
         },
         reset() {
             let resetdata = {

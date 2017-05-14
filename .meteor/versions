@@ -6,6 +6,7 @@ akryum:vue-blaze-template@0.0.3
 akryum:vue-component@0.8.18
 akryum:vue-component-dev-client@0.2.9
 akryum:vue-component-dev-server@0.0.7
+akryum:vue-less@0.0.5
 akryum:vue-sass@0.0.6
 akryum:vue-stylus@0.0.4
 alanning:roles@1.2.16

@@ -6,6 +6,7 @@ const state = {
     // questionIndex: 0,
     fixedtests: null,
     testQuestions: [],
+    images: null
     // questionbank: null,
 }
 
@@ -26,6 +27,9 @@ const mutations = {
     },
     UPDATE_TEST_QUESTIONS (state, questions) {
         state.testQuestions = questions;
+    },
+    INIT_IMAGES_COLLECTION (state, images) {
+        state.images = images;
     }
 }
 

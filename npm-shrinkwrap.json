@@ -658,7 +658,7 @@
     },
     "babel-runtime": {
       "version": "6.23.0",
-      "from": "babel-runtime@>=6.23.0 <7.0.0",
+      "from": "babel-runtime@>=6.22.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.23.0.tgz"
     },
     "babel-template": {
@@ -742,7 +742,7 @@
     },
     "brace-expansion": {
       "version": "1.1.7",
-      "from": "brace-expansion@>=1.0.0 <2.0.0",
+      "from": "brace-expansion@>=1.1.7 <2.0.0",
       "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.7.tgz"
     },
     "browserslist": {
@@ -873,7 +873,7 @@
     },
     "dropzone": {
       "version": "4.3.0",
-      "from": "dropzone@>=4.3.0 <5.0.0",
+      "from": "https://registry.npmjs.org/dropzone/-/dropzone-4.3.0.tgz",
       "resolved": "https://registry.npmjs.org/dropzone/-/dropzone-4.3.0.tgz"
     },
     "ecc-jsbn": {
@@ -912,7 +912,7 @@
     },
     "font-awesome-stylus": {
       "version": "4.7.1-alpha.1",
-      "from": "font-awesome-stylus@>=4.7.1-alpha.1 <5.0.0",
+      "from": "https://registry.npmjs.org/font-awesome-stylus/-/font-awesome-stylus-4.7.1-alpha.1.tgz",
       "resolved": "https://registry.npmjs.org/font-awesome-stylus/-/font-awesome-stylus-4.7.1-alpha.1.tgz"
     },
     "forever-agent": {
@@ -1034,7 +1034,7 @@
     },
     "inherits": {
       "version": "2.0.3",
-      "from": "inherits@>=2.0.1 <2.1.0",
+      "from": "inherits@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
     "ini": {
@@ -1616,7 +1616,7 @@
     },
     "mongo-dot-notation": {
       "version": "1.0.7",
-      "from": "mongo-dot-notation@>=1.0.7 <2.0.0",
+      "from": "https://registry.npmjs.org/mongo-dot-notation/-/mongo-dot-notation-1.0.7.tgz",
       "resolved": "https://registry.npmjs.org/mongo-dot-notation/-/mongo-dot-notation-1.0.7.tgz"
     },
     "ms": {
@@ -2088,7 +2088,7 @@
     },
     "strip-ansi": {
       "version": "3.0.1",
-      "from": "strip-ansi@>=3.0.1 <4.0.0",
+      "from": "strip-ansi@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-3.0.1.tgz"
     },
     "strip-json-comments": {
@@ -2213,7 +2213,7 @@
     },
     "vue-multiselect": {
       "version": "2.0.0-beta.15",
-      "from": "vue-multiselect@>=2.0.0-beta.15 <3.0.0",
+      "from": "vue-multiselect@next",
       "resolved": "https://registry.npmjs.org/vue-multiselect/-/vue-multiselect-2.0.0-beta.15.tgz"
     },
     "vue-router": {
@@ -2223,7 +2223,7 @@
     },
     "vue2-dropzone": {
       "version": "2.2.7",
-      "from": "vue2-dropzone@>=2.0.0 <3.0.0",
+      "from": "https://registry.npmjs.org/vue2-dropzone/-/vue2-dropzone-2.2.7.tgz",
       "resolved": "https://registry.npmjs.org/vue2-dropzone/-/vue2-dropzone-2.2.7.tgz"
     },
     "vuex": {

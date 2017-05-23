@@ -1,5 +1,6 @@
 import { FixedTests } from '/imports/api/collections/fixedtests'
 import { Questions } from '/imports/api/collections/questions'
+import { Images } from '/imports/api/collections/images'
 // import QuestionList from '/imports/api/supply/questions-resource'
 import { questionGenerator } from '/imports/api/generators/questionGenerator'
 
@@ -65,6 +66,21 @@ export const saveQuestion = ({commit, state}, questiondata) => {
         })
     });
 }
+
+export const initImagesCollection = ({commit}) => {
+    Tracker.autorun((c) => {
+        Meteor.subscribe('images');
+        let images = Images.find({}).fetch();
+        console.log("IMAGES >> ", images);
+        if (!!images) {
+            commit('INIT_IMAGES_COLLECTION', images)
+            console.log("IMAGES >> ", images);
+            stop();
+        }
+    })   
+}
+
+
 // export const updateQuestionIndex = ({commit, state, getters}, to) => {
 //     let index = state.questionIndex,
 //         questionsAmount = getters.questions.length-1

@@ -1,0 +1,32 @@
+@import './variables'
+.btn
+    cursor pointer
+    font-family 'Varela Round'
+    display inline-block
+    padding 4px 18px
+    min-height 40px
+    background none
+    outline none
+    border 2px solid transparent
+    border-radius 12px
+    transition all 400ms ease
+    &-big
+        font-size 40px
+    &.disabled
+        opacity 0.2
+    for $color, value in colormap
+        &-{$color}
+            border-color rgba(darken(value, 5), 0.7)
+            color darken(value, 5)
+            &-inverse
+                color lighten(value, 95)
+                background-color darken(value, 5)
+            &:hover, &.router-link-active
+                color darken(value, 1)
+                background rgba(darken(value, 5), 0.005)
+            
+        
+.min
+    fa(minus)
+.max
+    fa(plus)

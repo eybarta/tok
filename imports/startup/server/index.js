@@ -12,3 +12,7 @@ import '/imports/api/collections/fixedtests/publish';
 import '/imports/api/collections/questions';
 import '/imports/api/collections/questions/methods';
 import '/imports/api/collections/questions/publish';
+
+// Images
+import '/imports/api/collections/images';
+import '/imports/api/collections/images/publish';

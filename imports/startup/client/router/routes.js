@@ -1,17 +1,17 @@
 // import { isAdmin } from '/imports/vuex/getters'
 // import { mapGetters } from 'vuex'
 // pages
-import Home from '/imports/ui/pages/Home.vue';
+import Home from '/imports/client/ui/pages/Home.vue';
 // Admin
-import AdminHome from '/imports/ui/pages/admin/Home.vue';
-import ManageUsers from '/imports/ui/pages/admin/ManageUsers.vue';
-import CreateTest from '/imports/ui/pages/admin/CreateTest.vue';
-import AddQuestion from '/imports/ui/pages/admin/forms/AddQuestion.vue';
+import AdminHome from '/imports/client/ui/pages/admin/Home.vue';
+import ManageUsers from '/imports/client/ui/pages/admin/ManageUsers.vue';
+import CreateTest from '/imports/client/ui/pages/admin/CreateTest.vue';
+import AddQuestion from '/imports/client/ui/pages/admin/forms/AddQuestion.vue';
 // User
-import UserHome from '/imports/ui/pages/users/Home.vue';
-import ActiveTest from '/imports/ui/user/partials/ActiveTest.vue'
+import UserHome from '/imports/client/ui/pages/users/Home.vue';
+import ActiveTest from '/imports/client/ui/user/partials/ActiveTest.vue'
 // components
-import ItemMenu from '/imports/ui/components/ItemMenu.vue'
+import ItemMenu from '/imports/client/ui/components/ItemMenu.vue'
 
 export const routes = [
 	{

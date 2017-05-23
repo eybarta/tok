@@ -1,15 +1,15 @@
+console.log('global.Buffer > ', global.Buffer)
 import Vue from 'vue';
 import Vuex from 'vuex';
 import {Meteor} from 'meteor/meteor';
 import { Tracker }from 'meteor/tracker'
 import {Accounts} from 'meteor/accounts-base'
- 
+
 Vue.use(Vuex);
 
 
 import VueMultiselect from 'vue-multiselect'
 Vue.component('Multiselect', VueMultiselect)
-
 // PLUGINS
 import { sync } from 'vuex-router-sync';
 import '/imports/startup/client';
@@ -67,7 +67,7 @@ router.beforeEach((to,from,next) => {
 // Libs
 _ = lodash;
 
-import App from '/imports/ui/App.vue';
+import App from '/imports/client/ui/App.vue';
 
 Vue.config.devtools = true;
 Vue.config.debug = true;

@@ -33,8 +33,9 @@ Meteor.methods({
 
         let question = {
             type: data.type,
-            question: data.question,
-            answers: data.answers
+            questions: data.questions,
+            answers: data.answers,
+            imageUrl: data.imageUrl
         }
         console.log('all questions  > ', allquestions);
         if (!!allquestions.length) {

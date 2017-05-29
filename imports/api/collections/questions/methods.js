@@ -31,21 +31,29 @@ Meteor.methods({
         let identifier = {category:data.category};
         let allquestions = Questions.find({}).fetch();
 
-        let question = {
-            type: data.type,
-            questions: data.questions,
-            answers: data.answers,
-            imageUrl: data.imageUrl
+        let questions = data.questions;
+        for (var i = 0 ; i < questions.length ; i++) {
+            console.log('imageUrl > ', data.imageUrl);
+            questions[i].imageUrl = data.imageUrl
+            questions[i].type = data.type
         }
+
+        // let question = {
+        //     type: data.type,
+        //     questions,
+        //     answers: data.answers
+        // }
         console.log('all questions  > ', allquestions);
         if (!!allquestions.length) {
             console.log('category exists');
+            Questions.upsert({"category.value":data.category,"questions.type.value":data.type}, {$push:
+ {"questions.$.questions": questions}})
             // categoryfound = _.find(allquestions[0].tests, { name: data.name})
-            Questions.upsert(identifier, { $push: { "questions": question}});
+            // Questions.upsert(identifier, { $push: { "questions": question}});
         }
         else {
             console.log('category does not exists');
-            Questions.upsert(identifier, { $push: { "questions": question}});
+            Questions.upsert(identifier, { $push: { "questions": questions}});
         }
     },
 })

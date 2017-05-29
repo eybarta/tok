@@ -37,7 +37,7 @@
                 <input required v-model="profile.city" type="text" id="city">
                 <label for="city">אזור מגורים</label>
             </li>
-            <li>
+            <li class="field flb">
                 <div class="field-select">
                     <multiselect 
                         v-model="profile.education.years"
@@ -51,7 +51,7 @@
                     <label for="yearsOfEducation">שנות לימוד</label>
                 </div>
             </li>
-            <li>
+            <li class="field flb">
                 <div class="field-select">
                     <multiselect 
                         v-model="profile.education.higher"

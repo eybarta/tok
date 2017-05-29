@@ -43,14 +43,14 @@ export const saveFixedTestToDB = ({ commit, state}, testdata) => {
 
 // QUESTION BANK :: ADMIN
 export const initQuestions = ({ commit }) => {
-    // Tracker.autorun((c) => {
-    //     Meteor.subscribe('questions');
-    //     let questions = Questions.find({}).fetch();
-    //     if (!!questions) {
-    //         commit('INIT_QUESTIONS', questions)
-    //         stop();
-    //     }
-    // })
+    Tracker.autorun((c) => {
+        Meteor.subscribe('questions');
+        let questions = Questions.find({}).fetch();
+        if (!!questions) {
+            commit('INIT_QUESTIONS', questions)
+            stop();
+        }
+    })
 }
 export const saveQuestion = ({commit, state}, questiondata) => {
     console.log('save question to db >>', questiondata);
@@ -71,7 +71,7 @@ export const initImagesCollection = ({commit}) => {
     Tracker.autorun((c) => {
         Meteor.subscribe('images');
         let images = Images.find({}).fetch();
-        console.log("IMAGES >> ", images);
+        // console.log("IMAGES >> ", images);
         if (!!images) {
             commit('INIT_IMAGES_COLLECTION', images)
             console.log("IMAGES >> ", images);

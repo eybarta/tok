@@ -98,10 +98,14 @@ import Popup from './Popup.vue'
             console.log("currentMenuItems >> ", this.currentMenuItems);
         },
         methods: {
-            ...mapActions([
-                'globalStore/callPopup',
-                'usersModule/dirtifyUser',
-                'testsModule/updateTestMenu'
+            ...mapActions('usersModule', [
+			    'dirtifyUser'			
+		    ]),
+            ...mapActions('testsModule', [
+                'updateTestMenu',
+            ]),
+            ...mapActions('globalStore', [
+                'callPopup'
             ]),
             nextMenu() {
                 let types = this.menuTypes,

@@ -5,6 +5,16 @@ $fa-font-path = "http://netdna.bootstrapcdn.com/font-awesome/4.7.0/fonts"
 @import './mixins'
 
 
+.vmid
+    &:before
+        content ''
+        display inline-block
+        vertical-align middle
+        height 100%
+    & > *
+        vertical-align middle
+        display inline-block
+
 .center
     margin 0 auto
 .tcenter

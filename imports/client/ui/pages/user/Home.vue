@@ -1,6 +1,7 @@
 <template>
 <div class="users-home">
     <main>
+    <a class="profile-link" href="#p" title="לחץ לעדכון פרטים" @click.prevent="callPopup({ title:'פרטים אישיים', type:'UserProfile'})"><span v-text="user.profile.name"></span><i class="fa fa-user"></i></a>
         <router-view></router-view>
     </main>
     
@@ -8,12 +9,8 @@
 </template>
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import Popup from '../../components/Popup.vue'
+import Popup from '/imports/client/ui/components/Popup.vue';
     export default {
-        data() {
-            return {
-            }
-        },
         mounted() {
             let user = this.user;
             if (!!user && !user.profile.dirty) {
@@ -55,5 +52,19 @@ import Popup from '../../components/Popup.vue'
 .list-complete-leave-active {
   position: absolute;
 }
+
+.profile-link
+    color lighten(red, 15)
+    position absolute
+    left 30px
+    top 20px
+    padding-bottom 2px
+    border-bottom 1px dotted lighten(red, 15)
+    transition color 300ms ease, border 300ms ease
+    &:hover
+        color red
+        border-color red
+    i
+        margin-right 5px
 
 </style>

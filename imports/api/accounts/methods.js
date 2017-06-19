@@ -1,6 +1,11 @@
 import dot from 'mongo-dot-notation';
-import { Random } from 'meteor/random'
+import { Random } from 'meteor/random';
 Meteor.methods({
+    'users.isEmpty'() {
+        const userCount = Meteor.users.find().count();
+        console.log("[server] Check if any users exist >> ", userCount);
+        return userCount === 0;
+    },
     'users.save'(data) {
         console.log("save_users ", data.userIds);
         let _users = [];
@@ -39,7 +44,9 @@ Meteor.methods({
         console.log('user save profile... ', userId, " :: ", profile);
         Meteor.users.update(userId, profile);
     },
-    
+    'user.delete'(userId) {
+        Meteor.users.remove(userId);
+    },
     'user.dirtify'(user) {
         console.log('dirtify method>> ', user._id);
         Meteor.users.update(user._id, {

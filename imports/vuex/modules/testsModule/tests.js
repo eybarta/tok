@@ -6,8 +6,8 @@ const state = {
     // questionIndex: 0,
     fixedtests: null,
     testQuestions: [],
-    images: null
-    // questionbank: null,
+    images: null,
+    questionbank: null,
 }
 
 const mutations = {

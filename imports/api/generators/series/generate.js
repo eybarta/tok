@@ -9,8 +9,9 @@ const questionObject =  {
         correct: null,
         list:[]
     },
-    control: null,
-    shift: null,
+    controls: [],
+    shifts: [],
+    operations: [],
     chosenAnswer: null
 }
 
@@ -22,11 +23,8 @@ export default function generate(type, label, amount) {
     for (var i=0;i<amount;i++) {
         // Init question object
         let obj = generateQuestion(i, type, label, params); 
-        // console.log("GENERATED QUESTION >>> ", obj);
         // ANSWERS
-        // console.log("1 OBJ PARTS >> ", obj.parts);
         obj.answers = generateAnswers(obj.parts, params);
-        // console.log("2 OBJ PARTS >> ", obj.parts);
         questionList.push(obj);
     }
     return questionList;
@@ -40,15 +38,30 @@ function generateQuestion(index, type, label, params) {
     question.parts = generateQuestionParts(question, params);
     return question;
 }
+function populateQuestionObj(question, constants, shift, operations) {
+    if (question.type==='add_multiply_shift_double') {
 
+    console.log('populateQuestionObj>>> ', operations);
+    }
+    question.controls.push(...constants);
+    question.shifts.push(shift);
+    question.operations.push(...operations);
+    if (question.type==='add_multiply_shift_double') {
+
+    console.log('populateQuestionObj>>> ', operations);
+    console.log('question.operations>>> ', question.operations);
+    }
+}
 function generateQuestionParts(question, params) {
-    let _params = _.clone(params),
-    sequenceAmount = _params.length,
+    console.log("params..", params)
+    // let _params = _.clone(params),
+    let sequenceAmount = params.length,
     parts = [],
-    control = _.clone(question.control),
-    totalAmountOfParts = _.sum(_.map(_params, 'partsAmount')); //params.partsAmount + params.length;
-    let shift = generateShifts(params);
-    question.shift = shift; 
+    shift = generateShifts(params),
+    
+    // control = _.clone(question.control),
+    totalAmountOfParts = _.sum(_.map(params, 'partsAmount')); //params.partsAmount + params.length;
+    // question.shift = shift; 
     /*
         Generate sequence/s for series.
     */
@@ -58,7 +71,7 @@ function generateQuestionParts(question, params) {
             sequences.push(generateFibonacciSequence(params[i]));
         }
         else {
-            sequences.push(generateSequence(shift[i],params[i]));
+            sequences.push(generateSequence(question, shift[i],params[i]));
         }
     }
     for (var k = 0;k<totalAmountOfParts;k++) {
@@ -71,7 +84,7 @@ function generateQuestionParts(question, params) {
 /* 
     GENERATE SEQUENCE: returns Array
 */
-function generateSequence(shift, params) {
+function generateSequence(question, shift, params) {
     console.log("SHIFT << ", shift);
     let sequenceparts = [];
     let constants = [],
@@ -83,8 +96,11 @@ function generateSequence(shift, params) {
     for (var o = 0; o< operations.length; o++) {
         constants.push(generateSequenceConstant(params.generateConstant))
     }
+    /* Feed controls / shift back to questionObject for later processing */
+    console.log("GENERATE SEQUENCE:: params >> ", params, " :: shift >> ", shift, " :: constants >> ",constants, " :: operations >> ", operations);
+    populateQuestionObj(question, _.clone(constants), shift, operations);
+
     powconstant = constants[operationIndex];
-    // TODO :: let shift = generateSequenceShift(params.generateConstant);
     for (var i=0; i< params.partsAmount; i++) {
         let constant = constants[operationIndex],
         operation = operations[operationIndex];
@@ -197,19 +213,27 @@ function generateNumber(range, exclude = [], amount, operation, constant) {
 function generateAnswers(parts, params) {
     let list = [];
     let correct = null;
-
-    // console.log("generate answers >>");
-    // console.log("1 parts >> ", parts, " :: LENGTH:", parts.length);
     for (var i = 0; i < params.length; i++) {
         let amount = params[i].answersAmount-1; // to 0 based
         let wrongControls = generateWrongControls([]);
         correct = _.last(parts);
-        list.push(correct)
+        list.push(correct);
         parts.pop();
         for (var j=0;j<amount;j++) {
-            list.push(_.add(correct, wrongControls[j]))
+            let nextVal = _.add(correct, wrongControls[j]);
+            while (list.indexOf(nextVal)>-1) ++nextVal
+            list.push(nextVal);
         }  
         // list = _.shuffle(list)
+    }
+    if (_.uniq(list).length !== list.length) {
+        console.log("correct < ", correct);
+        console.log("1 list < ", list);
+        
+        list = _.uniq(list);
+        list.push(_.min(list)-1);
+
+        console.log("2 list < ", list);
     }
     return {
         correct,

@@ -7,7 +7,7 @@
 </template>
 <script>
 import AdminHome from './admin/Home.vue'
-import UsersHome from './users/Home.vue'
+import UsersHome from './user/Home.vue'
 import { mapState, mapGetters } from 'vuex'
 
     export default {
@@ -39,5 +39,5 @@ import { mapState, mapGetters } from 'vuex'
 </script>
 <style lang="stylus">
 main
-    padding 100px 10%
+    padding 100px 0 0
 </style>

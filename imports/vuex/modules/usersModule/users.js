@@ -22,23 +22,23 @@ const mutations = {
 
 const getters = {
    
-    activeUser: (state) => {
-        // let user = Meteor.user();
+    // activeUser: (state) => {
+    //     // let user = Meteor.user();
         
-        Tracker.autorun((c) => {
-            let userId = Meteor.userId();
-            if (!!userId) {
-                let user = Meteor.user();
-                console.log('USER GET ', user);
-                return user;
-                // Meteor.setTimeout(function() {
-                //     c.stop();
-                // }, 3000)
-            } else {
-                return null;
-            }
-        })
-    },
+    //     Tracker.autorun((c) => {
+    //         let userId = Meteor.userId();
+    //         if (!!userId) {
+    //             let user = Meteor.user();
+    //             console.log('USER GET ', user);
+    //             return user;
+    //             // Meteor.setTimeout(function() {
+    //             //     c.stop();
+    //             // }, 3000)
+    //         } else {
+    //             return null;
+    //         }
+    //     })
+    // },
      isAdmin: (state) => {
         let user = state.user;
         console.log('>> user >> ', user);

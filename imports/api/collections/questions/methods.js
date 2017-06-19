@@ -27,14 +27,14 @@ if (Meteor.isServer) {
 Meteor.methods({
     'questions.save'(data) {
         console.log('save question in server >> ', data);
-        let categoryfound;
+        // let categoryfound;
         let identifier = {category:data.category};
-        let allquestions = Questions.find({}).fetch();
-
+        // let allquestions = Questions.find({}).fetch();
         let questions = data.questions;
         for (var i = 0 ; i < questions.length ; i++) {
-            console.log('imageUrl > ', data.imageUrl);
-            questions[i].imageUrl = data.imageUrl
+            if (!!data.imageUrl) {
+                questions[i].imageUrl = data.imageUrl
+            }
             questions[i].type = data.type
         }
 
@@ -43,18 +43,29 @@ Meteor.methods({
         //     questions,
         //     answers: data.answers
         // }
-        console.log('all questions  > ', allquestions);
-        if (!!allquestions.length) {
-            console.log('category exists');
-            Questions.upsert({"category.value":data.category,"questions.type.value":data.type}, {$push:
- {"questions.$.questions": questions}})
-            // categoryfound = _.find(allquestions[0].tests, { name: data.name})
-            // Questions.upsert(identifier, { $push: { "questions": question}});
-        }
-        else {
-            console.log('category does not exists');
-            Questions.upsert(identifier, { $push: { "questions": questions}});
-        }
+        // console.log('all questions  > ', allquestions);
+        Questions.upsert(identifier, { $push: { "questions": {$each:questions}}});
+        
+        // if (!!allquestions.length) {
+        //     console.log('category exists, questions to push >> ', questions);
+        //     Questions.upsert(
+        //         {
+        //             "category.value":data.category,
+        //             "questions.type.value":data.type}, 
+        //         {
+        //             $push:
+        //             {
+        //                 "questions.$.questions": { $each:questions}
+        //             }
+        //         }
+        //     )
+        //     // categoryfound = _.find(allquestions[0].tests, { name: data.name})
+        //     // Questions.upsert(identifier, { $push: { "questions": question}});
+        // }
+        // else {
+        //     console.log('category does not exists');
+        //     Questions.upsert(identifier, { $push: { "questions": questions}});
+        // }
     },
 })
 }

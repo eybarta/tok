@@ -14,7 +14,7 @@ import { mapState, mapActions } from 'vuex'
 import AddUsers from '/imports/client/ui/pages/admin/forms/AddUsers.vue'
 
 // User
-import UserProfile from '/imports/client/ui/pages/users/forms/Profile.vue'
+import UserProfile from '/imports/client/ui/pages/user/forms/Profile.vue'
 export default {
     components: {
         AddUsers,
@@ -58,7 +58,7 @@ export default {
     z-index 11
     .popup-content
         self-center()
-        padding 4%
+        padding 30px
         background #fff
         width 100vw
         min-height 65vh
@@ -66,6 +66,7 @@ export default {
         height auto
         border 2px solid #0bddbe
         @media screen and (min-width: 600px)
+            max-width 600px
             width 67vw
             min-height 45vh
         h4

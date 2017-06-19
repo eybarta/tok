@@ -1,84 +1,84 @@
 <template>
 <div class="manage-users">
-    <div v-if="!!users.length" class="user-list pt-med">
-        <div class="filters mb-med clearfix">
-            <div class="date-range right ">
-                <h5 class="label">פילטור לפי תאריך</h5>
-                <date-range v-model="filters.date"></date-range>
+        <div v-if="!!users.length" class="user-list pt-med">
+            <div class="filters mb-med clearfix">
+                <div class="date-range right ">
+                    <h5 class="label">פילטור לפי תאריך</h5>
+                    <date-range v-model="filters.date"></date-range>
+                </div>
+                <div class="free-search">
+                    <h5 class="label inline">חיפוש:</h5>
+                    <input-field class="search" v-model="filters.search"></input-field>
+                </div>
             </div>
-            <div class="free-search">
-                <h5 class="label inline">חיפוש:</h5>
-                <input-field class="search" v-model="filters.search"></input-field>
+            <div class="data-table-wrapper"  v-if="parsedUsers.length>0">
+                <table class="data-table user-table">
+                    <thead>
+                        <th>שם משתמש  (ת.ז)</th>
+                        <th>סיסמא</th>
+                        <th>שם מלא</th>
+                        <th>קבוצה</th>
+                        <th class="sortable" @click="sort('profile.dob')"> <i :class="['fa', sortClass('profile.dob')]"></i> גיל</th>
+                        <th class="sortable" @click="sort('profile.status.label')"><i :class="['fa', sortClass('profile.status.label')]"></i> סטטוס</th>
+                        <th>יישוב</th>
+                        <th>טלפון</th>
+                        <th>מייל</th>
+                    </thead>
+                    <tbody name="table-row" is="transition-group">
+                        <tr v-for="user in parsedUsers" :key="user.username" :class="[!!user.selected ? 'selected' : '', 'table-row-item']" @click="user.selected=!user.selected">
+                            <td v-html="user.username"></td>
+                            <td v-html="user.profile.psw"></td>
+                            <td v-html="user.profile.name"></td>
+                            <td v-html="user.profile.group"></td>
+                            <td v-html="user.profile.age"></td>
+                            <td v-html="user.profile.status.label" :class="[user.profile.status.value=='active' ? 'green' : 'red']"></td>
+                            <td v-html="user.profile.city"></td>
+                            <td v-html="user.profile.phone"></td>
+                            <td v-html="user.profile.email"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h4 v-else>לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
+        </div>
+        <p class="tcenter mt-big" v-else>אין משתמשים רשומים במערכת.. כדאי להוסיף!</p>
+        <div :class="[!!users.length ? 'tright' : 'tcenter', 'mt-small', 'actions']">
+            <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="btn btn-success">הוסף משתמשים</button>
+            <button @click="callPopup({ title:'פרטים אישיים', type:'UserProfile', data:selected[0]})" v-if="selected.length==1" class="btn btn-warning">עריכת משתמש</button>
+            <div class="changers" v-if="selected.length>1">
+                <label class="orange" for="">שינוי גורף:</label>
+                <multiselect
+                        class="dropdown"
+                        v-model="multichange.selected"
+                        placeholder="תבחר"
+                        track-by="value"
+                        label="label"
+                        :options="multichange.options"
+                        :show-labels="false"
+                        :searchable="false"
+                        :close-on-select="true"
+                        :allow-empty="false"></multiselect>
+                <multiselect
+                        class="dropdown"
+                        v-if="multichange.selected.value==='status'"
+                        placeholder="שינוי סטטוס"
+                        track-by="value" 
+                        label="label"
+                        v-model="multichange.status"
+                        :options="userOptions.status"
+                        :show-labels="false"
+                        :searchable="false"
+                        :close-on-select="true"
+                        :allow-empty="false"></multiselect>
+                    <input 
+                        class="field"
+                        ref="groupcal"
+                        v-if="multichange.selected.value==='group'"
+                        v-model="multichange.groupdate"
+                        type="text" >
+                    <button class="btn btn-success-inverse mr-small" @click="saveToSelected">שמור</button>
             </div>
         </div>
-        <div class="data-table-wrapper"  v-if="parsedUsers.length>0">
-            <table class="data-table user-table">
-                <thead>
-                    <th>שם משתמש  (ת.ז)</th>
-                    <th>סיסמא</th>
-                    <th>שם מלא</th>
-                    <th>קבוצה</th>
-                    <th class="sortable" @click="sort('profile.dob')"> <i :class="['fa', sortClass('profile.dob')]"></i> גיל</th>
-                    <th class="sortable" @click="sort('profile.status.label')"><i :class="['fa', sortClass('profile.status.label')]"></i> סטטוס</th>
-                    <th>יישוב</th>
-                    <th>טלפון</th>
-                    <th>מייל</th>
-                </thead>
-                <tbody name="table-row" is="transition-group">
-                    <tr v-for="user in parsedUsers" :key="user.username" :class="[!!user.selected ? 'selected' : '', 'table-row-item']" @click="user.selected=!user.selected">
-                        <td v-html="user.username"></td>
-                        <td v-html="user.profile.psw"></td>
-                        <td v-html="user.profile.name"></td>
-                        <td v-html="user.profile.group"></td>
-                        <td v-html="user.profile.age"></td>
-                        <td v-html="user.profile.status.label" :class="[user.profile.status.value=='active' ? 'green' : 'red']"></td>
-                        <td v-html="user.profile.city"></td>
-                        <td v-html="user.profile.phone"></td>
-                        <td v-html="user.profile.email"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <h4 v-else>לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
-    </div>
-    <p class="tcenter mt-big" v-else>אין משתמשים רשומים במערכת.. כדאי להוסיף!</p>
-    <div :class="[!!users.length ? 'tright' : 'tcenter', 'mt-small', 'actions']">
-        <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="btn btn-success right">הוסף משתמשים</button>
-        <button @click="callPopup({ title:'פרטים אישיים', type:'UserProfile', data:selected[0]})" v-if="selected.length==1" class="btn btn-warning">עריכת משתמש</button>
-        <div class="changers" v-if="selected.length>1">
-            <label class="orange" for="">שינוי גורף:</label>
-            <multiselect
-                    class="dropdown"
-                    v-model="multichange.selected"
-                    placeholder="תבחר"
-                    track-by="value"
-                    label="label"
-                    :options="multichange.options"
-                    :show-labels="false"
-                    :searchable="false"
-                    :close-on-select="true"
-                    :allow-empty="false"></multiselect>
-             <multiselect
-                    class="dropdown"
-                    v-if="multichange.selected.value==='status'"
-                    placeholder="שינוי סטטוס"
-                    track-by="value" 
-                    label="label"
-                    v-model="multichange.status"
-                    :options="userOptions.status"
-                    :show-labels="false"
-                    :searchable="false"
-                    :close-on-select="true"
-                    :allow-empty="false"></multiselect>
-                <input 
-                    class="field"
-                    ref="groupcal"
-                    v-if="multichange.selected.value==='group'"
-                    v-model="multichange.groupdate"
-                    type="text" >
-                <button class="btn btn-success-inverse mr-small" @click="saveToSelected">שמור</button>
-        </div>
-    </div>
 </div>
 </template>
 <script>
@@ -343,6 +343,8 @@ export default {
 @import '~imports/client/ui/styl/mixins'
 .manage-users
     margin-top 20px
+    padding 0 5%
+    padding-bottom 120px
 .user-table
     width 100%
     border-top 1px solid bluegreen

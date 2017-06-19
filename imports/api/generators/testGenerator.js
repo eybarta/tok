@@ -42,7 +42,7 @@ export async function fetchQuestions(state, getters, rootState) {
                 
                 console.log("return questions  >", questions);
                 
-                resolve(_.shuffle(_.flatten(questions)));
+                resolve(_.flatten(questions));
             }
         }).then(function(result) {
             return result;
@@ -118,9 +118,11 @@ export async function generateAutotest(categoryname, questionlist) {
             })
             while(questions.length<20) {
                 let child = children[_.random(0, children.length)];
-                questions.push(
-                    ...questionGenerator(categoryname, child.value, child.label, 1)
-                ) 
+                if (!!child && !!child.value) {
+                    questions.push(
+                        ...questionGenerator(categoryname, child.value, child.label, 1)
+                    ) 
+                }
             }
         }
             resolve(questions);

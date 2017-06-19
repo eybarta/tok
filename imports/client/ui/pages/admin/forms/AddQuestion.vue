@@ -2,77 +2,74 @@
 <div class="add-question">
     <ul class="submenu choose-category">
         <li v-for="category in filteredCategories" :class="[!!activecat && activecat.value==category.value ? 'active' : '']">
-            <a href="#p" @click.prevent="activecat=category">{{category.label}}</a>
+            <a href="#p" @click.prevent="updateActiveCat(category)">{{category.label}}</a>
         </li>
     </ul>
     <div v-if="!!activecat" class="active-tab clearfix">
-        <multiselect class="dropdown w-elastic-30 maxw-300" v-model="activesubcat" track-by="value" label="label" placeholder="תבחר סוג שאלה"
-                    :options="activecat.children"
-                    :show-labels="false"
-                    :searchable="false"
-                    :close-on-select="true"
-                    :allow-empty="false"></multiselect>
-        <button @click="save" :class="['btn', 'btn-success-inverse', 'mr-min', !validQuestionEntry ? 'disabled' : '']">שמור</button>
-        <div class="form pt-big mt-med bt-dashed clear">
-            <div>
-                <div v-for="(item, index) in list" :class="['qa', activeQuestionIndex===index ? 'active' : '']">
-                    <button :class="[activeQuestionIndex===index ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(index)" ></button>
-                    <transition name="fade-slide">
-                        <div v-if="activeQuestionIndex===index">
-                            <div class="field flb w-elastic-50 maxw-500 pb-big">
-                                <textarea id="question" class="reg w-100" v-model="item.question" type="text" required></textarea>
-                                <label for="question">שאלה</label>
-                            </div>
-                            <div class="form-full block">
-                                <div v-for="(answer, index) in item.answers" class="field flb w-elastic-50 maxw-500">
-                                    <input :id="'answer'+index" class="reg w-100" v-model="item.answers[index]" type="text" required>
-                                    <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
+        <div v-if="!!log" class="log-msg">
+            <h5 v-text="logMsg"></h5>
+            <button @click="log=false;logMsg=null" class="btn btn-success" v-text="'הוסף עוד שאלה או שאלות ב' + activecat.label"></button>
+        </div>
+        <div v-else>
+            <multiselect v-if="!!activecat.children && activecat.children.length" class="dropdown w-elastic-30 maxw-300" v-model="activesubcat" track-by="value" label="label" placeholder="תבחר סוג שאלה"
+                        :options="activecat.children"
+                        :show-labels="false"
+                        :searchable="false"
+                        :close-on-select="true"
+                        :allow-empty="false"></multiselect>
+            <button @click="save" :class="['btn', 'btn-success', 'mr-min', !validQuestionEntry ? 'disabled' : '']">שמור</button>
+            <div class="form pt-big mt-med bt-dashed clear">
+                <div v-if="activecat.value==='matrices'">
+                    <div v-for="(item, itemindex) in list" :class="['qa', activeQuestionIndex===itemindex ? 'active' : '']">
+                        <button v-if="list.length>1" :class="[activeQuestionIndex===itemindex ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(itemindex)" ><span></span></button>
+                        <transition name="fade-slide">
+                            <div v-if="activeQuestionIndex===itemindex">
+                                <div class="form-full block">
+                                    <div v-for="(answer, index) in item.answers" class="field upload flb w-elastic-50 maxw-500" @click="uploadFile('answer', [itemindex, index], $event)">
+                                        <img v-if="!!answer" :src="answer" alt="">
+                                        <input :value="answer" type="text">
+                                        <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </transition>
-                    
+                        </transition>
+                    </div>
                 </div>
+                <div v-else>
+                    <div v-for="(item, index) in list" :class="['qa', activeQuestionIndex===index ? 'active' : '']">
+                        <button v-if="list.length>1" :class="[activeQuestionIndex===index ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(index)" ><span></span></button>
+                        <transition name="fade-slide">
+                            <div v-if="activeQuestionIndex===index">
+                                <div class="field flb w-elastic-50 maxw-500 pb-big">
+                                    <textarea id="question" class="reg w-100" v-model="item.question" type="text" required></textarea>
+                                    <label for="question">שאלה</label>
+                                </div>
+                                <div class="form-full block">
+                                    <div v-for="(answer, index) in item.answers" class="field flb w-elastic-50 maxw-500">
+                                        <input :id="'answer'+index" class="reg w-100" v-model="item.answers[index]" type="text" required>
+                                        <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+                        
+                    </div>
+                </div>
+                <div class="pt-small">
+                    <div v-if="!!uploader" class="dropzone" @click="uploadFile('uploader', null, $event)">
+                        <img ref="preview" v-if="!!previewimage" class="preview-image" :src="previewimage" alt="">
+                        <div class="upload" v-else>
+                            <img v-if="!!uploading" class="loader-icon spinning-cog hidden" src="/img/cog-loader.svg" data-cog="cog02">
+                            <i v-else :class="['fa', activecat.value==='matrices' ? ' fa-th' : 'fa-upload']"></i>
+                            <span v-text="!!uploading ? 'מעלה קובץ...' : activecat.value==='matrices' ? 'העלת מטריצה' : 'להעלות תמונה'"></span>
+                        </div>
+                    </div>
+                </div>            
             </div>
-            <div class="pt-small">
-                <!--
-                    <dropzone 
-                        class="dropzone"
-                        :useFontAwesome="true"
-                        :maxNumberOfFiles="1"
-                        id="myVueDropzone"
-                        url="https://httpbin.org/post"
-                        :language="{dictDefaultMessage:'זרוק פה קובץ'}"
-                        @vdropzone-success="fileDropped">
-                        // Optional parameters if any! 
-                        <input type="hidden" name="token" value="xxx">
-                    </dropzone>
-                -->
-                <!--
-                <div class="test-images">
-                    <div v-for="image in images">
-                        <div v-if="!!image.uploading">
-                            <span>UPLOADING</span>
-                        </div>
-                        <div v-else>
-                            <img :src="image.url" :title="image.name">
-                        </div>
-                    </div>
-                </div>
-                -->
-                <div v-if="!!uploader" class="dropzone" @click="uploadFile($event)">
-                    <img v-if="!!previewimage" class="preview-image" :src="previewimage" alt="">
-                    <div class="upload" v-else>
-                        <img v-if="!!uploading" class="loader-icon spinning-cog hidden" src="/img/cog-loader.svg" data-cog="cog02">
-                        <i v-else class="fa fa-upload"></i>
-                        <span v-text="!!uploading ? 'מעלה קובץ...' : 'להעלות תמונה'"></span>
-                    </div>
-                </div>
-            </div>            
-        </div>
-        <div class="">
-            <button @click="save" :class="['btn', 'btn-success-inverse', !validQuestionEntry ? 'disabled' : '']">שמור</button>
-            <button @click="anotherQuestion" :class="['btn', 'btn-success-inverse', !validQuestionEntry ? 'disabled' : '']">שמור והוסף שאלה<i class="fa fa-plus-circle pr-small"></i></button>
+            <div class="">
+                <button @click="save" :class="['btn', 'btn-success', !validQuestionEntry ? 'disabled' : '']">שמור</button>
+                <button @click="anotherQuestion" :class="['btn', 'btn-primary', !validQuestionEntry ? 'disabled' : '']">שמור והוסף שאלה<i class="fa fa-plus-circle mr-small"></i></button>
+            </div>
         </div>
     </div>
 </div>
@@ -81,7 +78,6 @@
 import { ImageStore } from '/imports/api/collections/images';
 import {UploadFS} from 'meteor/jalik:ufs';
 import { categories } from '/imports/api/categories'
-// import Dropzone from '/imports/client/ui/components/vue2-dropzone/index.vue'
 import { mapActions, mapState } from 'vuex';
 
 const questionObj = {
@@ -102,41 +98,52 @@ export default {
             list: [_.cloneDeep(questionObj)],            
             uploader: false,
             uploading:false,
-            previewimage: null
-
+            previewimage: null,
+            log: null,
+            logMsg: null
         }
     },
     created() {
         this.initQuestions();
-        
+        this.$set(this, 'activecat', null);
+        console.log();
         
     },
     watch: {
-        activesubcat: {
-            handler() {
-                if (!!this.activesubcat && this.activesubcat.value==='comprehension') {
-                    this.uploader = true;
-                    this.$set(this, 'list', [_.merge({ imageUrl: null}, _.cloneDeep(questionObj))])
-                }
+        'activecat'() {
+            if (!!this.activecat && this.activecat.value==='matrices') {
+                this.$set(this, 'uploader', true);
+                let q = _.cloneDeep(questionObj);
+                q.answers = q.answers.concat([null,null,null,null]);
+                this.$set(this, 'list', [q]);
+            }
+            else {
+                this.$set(this, 'uploader', false);
+            }
+        },
+        'activesubcat'() {
+            if (!!this.activesubcat && this.activesubcat.value==='comprehension') {
+                this.uploader = true;
+                this.$set(this, 'list', [_.merge({ imageUrl: null}, _.cloneDeep(questionObj))])
+            }
+            else {
+                this.$set(this, 'uploader', false);
             }
         }
-    },
-    components: {
-    //   Dropzone
     },
     methods: {
         ...mapActions('testsModule', [
             'saveQuestion',
             'initQuestions'
         ]),
-        minimizeQuestion() {
-
+        updateActiveCat(category) {
+            this.$set(this, 'activecat', category);
         },
         changeActiveQuestionIndex(index) {
             console.log('change question index> ', index);
             this.$set(this, 'activeQuestionIndex',index)
         },
-        uploadFile(e) {
+        uploadFile(from, target, e) {
             let vm = this;
             UploadFS.selectFiles(function (file) {
             // Prepare the file to insert in database, note that we don't provide a URL,
@@ -144,12 +151,12 @@ export default {
 
                 // Preview image in UI
                 // vm.previewimage = window.URL.createObjectURL(file);
-                // Get image natural dimensions
-                let dimensions = vm.imageDimensions;
+                // // Get image natural dimensions
+                // let dimensions = vm.imageDimensions;
 
                 
-                
-                URL.createObjectURL(file);
+                // console.log("dimensions >> ", dimensions);
+                // URL.createObjectURL(file);
                 let image = {
                     name: file.name,
                     size: file.size,
@@ -189,7 +196,21 @@ export default {
                     console.log(JSON.stringify(file) + ' has been uploaded');
                     setTimeout(function() {
                         vm.$nextTick(function() {
-                            vm.$set(vm, 'previewimage', file.url);
+                            console.log("FROM ?? ", from);
+                            if (from==='uploader') {
+                                vm.$set(vm, 'previewimage', file.url);
+                            }
+                            else if (from==='answer') {
+                                console.log("target >> ", target);
+                                // let answers = vm.list[target[0]]['answers'];
+                                // answers[target[1]] = file.url;
+                                // let item = vm.list[target[0]];
+                                // item.answers = answers;
+                                let list = vm.list;
+                                list[target[0]]['answers'][target[1]] = file.url;
+                                vm.$set(vm, 'list', list);
+                                
+                            }
                         })
                         vm.$set(vm, 'uploading', false);
                     }, 1000)
@@ -203,7 +224,12 @@ export default {
                 },
                 onStart(file) {
                     console.log(file.name + ' started');
-                    vm.$set(vm, 'uploading', true);
+                    if (from=='uploader') {
+                        vm.$set(vm, 'uploading', true);
+                    }
+                    // else if(from=='answer') {
+
+                    // }
                     
                 },
                 onStop(file) {
@@ -252,17 +278,17 @@ export default {
             this.$set(this, 'activeQuestionIndex', this.list.length-1);
         },
         reset() {
-            let resetdata = {
-                activesubcat: null,
-                question: null,
-                answers: [
-                    null,
-                    null,
-                    null,
-                    null
-                ]
-            }
-            _.merge(this.$data, resetdata)
+            this.log = true;
+            this.logMsg = (this.list.length>1 ? "שאלות הוספו " : "שאלה הוספה ") + "בהצלחה";
+
+            this.activeQuestionIndex = 0;
+            this.activesubcat = null;
+            this.list = [_.cloneDeep(questionObj)];
+            this.uploader = false,
+            this.uploading = false;
+            this.previewimage = null;
+
+            
         }   
     },
     computed: {
@@ -277,15 +303,20 @@ export default {
         },
         imageDimensions() {
             if (!!this.previewimage) {
-                return {
-                    width: this.previewimage.naturalWidth,
-                    height: this.previewimage.naturalHeight,
-                }
+                console.log("preview ref", this.$refs.preview, " :: ", this.$refs);
+                this.$nextTick(function() {
+                    return {
+                        width: this.$refs.preview.naturalWidth,
+                        height: this.$refs.preview.naturalHeight,
+                    }
+                })
+                
             }
             return null;
         },
         ...mapState('testsModule', [
-            'images'
+            'images',
+            'questionbank'
         ])
     }
 }
@@ -294,45 +325,83 @@ export default {
 @import '~imports/client/ui/styl/variables.styl'
 @import '~imports/client/ui/styl/settings'
 .fade-slide-enter-active, .fade-slide-leave-active {
-  transition: all .2s
-  transform: scale(1)
+  transition all .3s ease-out
+  transform scale(1, 1)
 }
 .fade-slide-enter, .fade-slide-leave-to /* .fade-leave-active in <2.1.8 */ {
-  opacity: 0
-  transform: scale(0.2)
+  opacity 0
+  transform scale(1, 0)
 }
 .qa
     position relative
-    padding 30px 20px
+    padding 30px 40px 30px 20px
     border-right 1px solid lighten(gray, 45)
-    background rgba(bluegreen 0.01)
+    background rgba(orange, 0.12)
     max-height 30px
     transition max-height 400ms ease-out
     border-bottom 1px dotted lighten(gray, 45)
-    for num in (1...5)
+    border-top 1px dotted lighten(gray, 45)
+    cursor pointer
+    & > div
+        position relative
+        transform-origin top
+    &:last-child
+        border-top 0
+    for num in (1...10)
         &:nth-child({num})
             &:after
                 content 'שאלה ' +num
                 position absolute
                 top 50%
-                right 5%
+                right 40px
                 transform translateY(-50%) 
     &.active
         max-height 600px
         border-bottom 0
+        border-top 0
         border-radius 0 0 0 12px
+        background #fff
+        cursor initial
         &:after
          content none
     .min, .max
         position absolute
-        top 10px
-        right -40px
+        right 0
+        top 20px
+        width 100%
         font-size 22px
         background none
         border 0
         cursor pointer
         color lighten(gray, 20)
         outline none
+        span
+            self-center()
+            width 30px
+            height 30px
+            left 100%
+            border-radius 15px
+            border 1px solid lighten(gray, 40)
+            background #fff
+            &:before
+                content ''
+                self-center()
+                left 50%
+                height 2px
+                width 16px
+                background lighten(gray, 30)
+                border-radius 4px
+        &.max
+            top 50%
+            transform translateY(-50%)
+            span:after
+                content ''
+                self-center()
+                left 50%
+                width 2px
+                height 16px
+                background lighten(gray, 30)
+                border-radius 4px
 .dropzone
     height 100%
     border-radius 9px
@@ -358,7 +427,8 @@ export default {
             color lighten(gray, 50)
 
     .preview-image
-        max-width 600px
+        width 100%
+        self-center()
     .dz-message
         position absolute
         top 50%
@@ -373,7 +443,10 @@ export default {
             margin 5px auto
             font-size 30px
             color lighten(gray, 22)
-.test-images
-    img
-        max-width 200px            
+.log-msg
+    self-center()
+    text-align center
+    h5
+        font-size 26px
+        padding-bottom 30px    
 </style>

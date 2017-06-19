@@ -175,10 +175,10 @@ export const categories = [
 ]
 
 export const testTypes = [
-    {
-        label:'תרגול',
-        value: 'practice'
-    },
+    // {
+    //     label:'תרגול',
+    //     value: 'practice'
+    // },
     {
         label: 'מבחן',
         value: 'autotest'

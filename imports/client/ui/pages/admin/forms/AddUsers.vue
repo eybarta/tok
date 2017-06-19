@@ -1,58 +1,73 @@
 <template>
 <div class="add-users-form">
-    <div v-if="!userLogins">
+    <div v-if="!loading && !userLogins">
         <div class="form">
             <input placeholder="הזן תאריך" ref="datepicker" v-model="date" @change="dateChange($event)" type="text">
             <textarea v-model="rawStringIds" cols="30" rows="10"></textarea>
         </div>
         <div class="tleft mtbase">
-            <button @click="saveUsers({ date, userIds})" class="btn btn-success">לשמור
+            <button @click="save({ date, userIds})" class="btn btn-success">לשמור
             </button>
         </div>
     </div>
-    
+    <preloader v-if="loading" pretitle="שומר משתמשים חדשים..."></preloader>
 </div>
 </template>
 <script>
 if (Meteor.isClient) {
     var Pikaday = require('pikaday');
 }
+import Preloader from '/imports/client/ui/components/Preloader.vue'
 import { mapActions, mapState } from 'vuex'
-    export default {
-        data() {
-            return {
-                date: null,
-                rawStringIds: '',
-            }
-        },
-        mounted() {
-            let ref = this;
-            new Pikaday({ 
-                field: ref.$refs.datepicker,
-                format: 'D/M/YYYY' 
-            });
-        },
-        methods: {
-            ...mapActions('usersModule',[
-                'saveUsers'
-            ]),
-            dateChange(e) {
-                this.$set(this, 'date', e.target.value)
-            }
-        },
-        computed: {
-            userIds() {
-                let string = this.rawStringIds.replace(/\s/g, '');
-                return string.split(',')
-            },
-            ...mapState('usersModule', [
-                'userLogins'
-            ])
+export default {
+    data() {
+        return {
+            date: null,
+            rawStringIds: '',
+            loading: false,
         }
+    },
+    components: {
+       Preloader
+    },
+    mounted() {
+        let ref = this;
+        new Pikaday({ 
+            field: ref.$refs.datepicker,
+            format: 'D/M/YYYY' 
+        });
+    },
+    methods: {
+        ...mapActions('usersModule',[
+            'saveUsers'
+        ]),
+        save() {
+            let date = this.date,
+                userIds = this.userIds;
+            this.$set(this, 'loading', true);
+            this.saveUsers({date, userIds});
+        },
+        dateChange(e) {
+            this.$set(this, 'date', e.target.value)
+        }
+    },
+    computed: {
+        userIds() {
+            let string = this.rawStringIds.replace(/\s/g, '');
+            return string.split(',')
+        },
+        ...mapState('usersModule', [
+            'userLogins'
+        ])
     }
+}
 </script>
 <style lang="stylus" scoped>
 @import '~imports/client/ui/styl/variables.styl'
+.preloader
+    position absolute 0 0 0 0
+    background #fff
+
 .add-users-form
     .form
         padding 30px 0

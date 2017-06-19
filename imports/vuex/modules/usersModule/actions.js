@@ -53,8 +53,11 @@ export const saveUserProfile = ({ commit, state, dispatch}, data) => {
     Meteor.call('user.saveprofile', userId, profile);
     dispatch('globalStore/closePopup', null, {root:true})
 }
+export const deleteUser = ({commit, state, dispatch}, userId) => {
+    Meteor.call('user.delete', userId);
+    dispatch('globalStore/closePopup', null, {root:true})
+}
 export const updateMultipleUserProfiles = ({ commit, state, dispatch}, data) => {
-    console.log('update users >> ', data);
     let userIds = data[0];
     let profile = data[1];
     Meteor.call('users.updateprofiles', userIds, profile);

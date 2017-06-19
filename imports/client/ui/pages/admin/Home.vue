@@ -54,4 +54,5 @@ import { mapActions } from 'vuex'
 
 h2
     text-align center
+    font-size responsive 24px 30px
 </style>

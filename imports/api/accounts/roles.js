@@ -1,7 +1,8 @@
-const checkIfFirstUser = () => {
+export const checkIfFirstUser = () => {
   const userCount = Meteor.users.find().count();
   return userCount === 0;
 };
+
 
 const assignRoles = (options, user) => {
   const firstUser = checkIfFirstUser();
@@ -18,7 +19,6 @@ const assignRoles = (options, user) => {
 };
 
 Accounts.onCreateUser((options, user) => {
-  console.log('on create user >> ', options, user);
   if (options.profile) {
     user.profile = options.profile;
   }

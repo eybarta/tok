@@ -1,4 +1,3 @@
-// const gm = require('gm').subClass({imageMagick: true});
 import {Mongo} from 'meteor/mongo';
 import {UploadFS} from 'meteor/jalik:ufs';
 import {GridFSStore} from 'meteor/jalik:ufs-gridfs';
@@ -23,15 +22,11 @@ export const ImageStore = new GridFSStore({
     },
     // Transform file when writing
     transformWrite(from, to, fileId, file) {
-        from.pipe(to); // this returns the raw data
-        
-        // let gm = Npm.require('gm');
         if (gm) {
             gm(from)
-                // .resize(400, 400)
-                // .gravity('Center')
-                // .extent(400, 400)
-                // .quality(75)
+                .resize(900)
+                .gravity('Center')
+                .quality(88)
                 .stream().pipe(to);
         } else {
             console.error("gm is not available", file);

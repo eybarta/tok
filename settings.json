@@ -1,0 +1,10 @@
+{
+  "galaxy.meteor.com": {
+    "env": {
+      "NODE_ENV": "production",
+      "ROOT_URL": "http://www.ehc-test.com/",
+      "DEPLOY_HOSTNAME":"galaxy.meteor.com",  
+      "MONGO_URL": "mongodb://webkit:webkit3e3@ds025772.mlab.com:25772/tok"
+    }
+  }
+}

@@ -3,15 +3,25 @@
     cursor pointer
     font-family 'Varela Round'
     display inline-block
-    padding 4px 18px
-    min-height 40px
+    padding 0 8px
+    height 40px
     background none
     outline none
     border 2px solid transparent
     border-radius 12px
     transition all 400ms ease
+    i
+        font-size 18px
+        vertical-align middle
+        &.flip
+            transition transform 400ms ease-out
+            transform rotateY(0deg)
+    &:hover
+        i.flip
+            transform rotateY(-180deg)
     &-big
         font-size 40px
+        height 60px
     &.disabled
         opacity 0.2
     for $color, value in colormap
@@ -24,9 +34,3 @@
             &:hover, &.router-link-active
                 color darken(value, 1)
                 background rgba(darken(value, 5), 0.005)
-            
-        
-.min
-    fa(minus)
-.max
-    fa(plus)

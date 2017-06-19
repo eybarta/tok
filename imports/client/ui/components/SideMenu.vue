@@ -32,6 +32,7 @@
     right 0
     width 30vw
     height 100vh
+    max-width 300px
     border-left 1px solid bluegreen
     background #fff
     z-index 11
@@ -43,14 +44,10 @@
         background rgba(bluegreen, 0.5)
         position relative
         &:after
-            content 'Q'
-            font-family "Varela Round"
-            color lighten(darkblue, 10)
             self-center()
-            transition transform 400ms ease
-            font-size 1280%
-        &:hover:after
-            transform translate(-50%,-50%) rotate(-22deg)
+            content url(/img/logo-etz-fff.svg)
+            width 40%
+            opacity 0.7
 
 
     .menu-toggler

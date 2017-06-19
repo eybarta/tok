@@ -1,125 +1,136 @@
 <template>
-    <main>
-    <transition name="fade">
-        <transition-group  v-if="!started" class="welcome" name="fade-slide" tag="div">
-            <div v-if="!goodluck" key="0">
-                <h2 class="pb-big" v-text="'מולך מבחן 20 שאלות ב' + categoryName"></h2>
-                <!--
-                <h2 class="pb-big">יש לך 14 דקות לסיים.</h2>
-                -->
-                <div class="radio-group">
-                    <h4>האם תרצה לתרגל על זמן?</h4>
-                    <div class="radio">
-                        <label for="yes">   
-                            <input hidden type="radio" name="timedtest" id="yes" :value="true" v-model="withtimer">
-                            <span class="yes">כן</span>
-                        </label>
-                    </div>
-                    <div class="radio">
-                        <label for="no">
-                        <input hidden type="radio" name="timedtest" id="no" :value="false" v-model="withtimer">
-                            <span class="no">לא</span>
-                        </label>
-                    </div>
-                </div>
-                <button @click="starttest" :class="['btn', 'btn-success', 'btn-big', !!testQuestions && !!testQuestions.length ? '' : 'disabled']">התחל</button>
-                <router-link to="/" class="back-btn btn btn-primary" exact>חזרה <i class="fa fa-chevron-left"></i></router-link>
-            </div>
-            <h2 v-else class="primary" key="1"> בהצלחה !!</h2>
-        </transition-group>
-    </transition>
-    <div class="countdown" v-if="withtimer" v-text="countdown"></div>
-    <div v-if="!!started && !!testQuestions && !!testQuestions.length" class="test-wrap">
-        <div class="test">
-            <h2 v-text="testTitle"></h2>
-            <div class="test-questions ltr">
-                <component :questionIndex="questionIndex" :questions="testQuestions" :is="currentCategory"></component>
-                <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
-                <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==testQuestions.length-1?'disabled': '']"></div>
-            </div>
-            
-        <div class="pager-progress ltr">
-	        <ul>
-                <li @click.prevent="updateQuestionIndex(index)" v-for="(question, index) in testQuestions" :class="[!!question.chosenAnswer ? 'answered' : '', index==questionIndex ? 'active' : '']" >
-                   <span>{{ index+1 }}</span>
-                </li>
-            </ul>
-        </div>
-        <div class="tcenter actions">
-            <button class="center btn btn-success btn-big" @click="finish">סיימתי</button>
-        </div>
-        <div class="status">
-            <h4>ענית עד כה על 
-                <span>
-                    <span v-text="answeredSoFar"  :class="[!!answeredSoFar? '' : 'red']"></span>
-                    <span>/{{ testQuestions.length}}</span>
-                </span>
-                    
-            </h4>
-        </div>
-        </div>
-
-        <div v-if="!!testinfo.score" class="popup">
-            <div class="popup-content">
-                <i class="lnr lnr-close"></i>
-                <!--
-                <ul>
-                    <li>
-                        <span class="label">ציון</span>
-                        <div class="big score">{{ testinfo.score }} <span>/ 100</span></div>
-                    </li>
-
-                </ul>
-                -->
-                <div class="review">
-                    <div class="ltr score">
-                        <h5 class="label">ציון יחיד</h5>
-                        <div class="ltr singlescore">{{ testinfo.score }} <span>/ 100</span></div>
-                    </div>
-                    <h5>סיכום תשובות</h5>
-                    <div class="review-bubble success">
-                        <span class="num">{{ testinfo.correct}}</span>
-                        <span>נכונות</span>
-                    </div>
-                    <div class="review-bubble danger">
-                        <span class="num">
-                            {{ testinfo.wrong}}
-                        </span>
-                        <span>שגיאות</span>
-                    </div>
-                    <div class="review-bubble info">
-                        <span class="num">
-                            {{ testinfo.unanswered}}
-                        </span>
-                        <span>לא נענו</span>
-                    </div>
-                   
-                </div>
-                <div class="centerize">
-                    <div class="regscore">
-                        <h4>ציון תקן</h4>
-                        <div class="big num">{{ testinfo.regulatoryScore }} <span>/ 100</span></div>
-                    </div>
-                    <div class="info">
-                        <h5 class="label">זמן ממוצע לשאלה</h5>
-                        <span>{{ formatAverageTimeOnQuestion }}</span>
-                    </div>
-                </div>
-                <div class="links">
-                    <router-link to="/" class="back-btn btn btn-primary" exact>חזרה לעמוד הבית <i class="fa fa-chevron-left"></i></router-link>
-                </div>
-            </div>
-        </div>
-
+    <div class="active-test">
         <transition name="fade">
-            <div v-if="!!idle.flag" class="modal idle-modal">
-                <div class="inner">
-                    <h4>הלו תעורר!</h4>
+            <transition-group  v-if="!started" class="welcome" name="fade-slide" tag="div">
+                <div v-if="!goodluck" key="0">
+                    <h2 class="pb-big" v-text="'מולך מבחן 20 שאלות ב' + categoryName"></h2>
+                    <!--
+                    <h2 class="pb-big">יש לך 14 דקות לסיים.</h2>
+                    -->
+                    <div class="radio-group">
+                        <h4>האם תרצה לתרגל על זמן?</h4>
+                        <div class="radio">
+                            <label for="yes">   
+                                <input hidden type="radio" name="timedtest" id="yes" :value="true" v-model="withtimer">
+                                <span class="yes">כן</span>
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label for="no">
+                            <input hidden type="radio" name="timedtest" id="no" :value="false" v-model="withtimer">
+                                <span class="no">לא</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button @click="starttest" :class="['btn', 'btn-success', 'btn-big', !!testQuestions && !!testQuestions.length ? '' : 'disabled']">התחל</button>
+                    <router-link to="/" class="back-btn btn btn-primary" exact>חזרה <i class="fa fa-chevron-left"></i></router-link>
+                </div>
+                <h2 v-else class="primary" key="1"> בהצלחה !!</h2>
+            </transition-group>
+        </transition>
+        <div v-if="!!started && !!testQuestions && !!testQuestions.length" class="test-wrap">
+            <div class="test">
+                <h2 v-text="testTitle"></h2>
+                <div :class="['countdown', !!idle.flag ? 'bigger' : '']" v-if="mode==='test' && withtimer">
+                    <span v-text="countdown"></span>
+                    <i class="fa fa-clock-o"></i>
+                </div>
+                <div class="question-container">
+                    
+                    <div :key="0" :class="['test-questions', 'ltr', !!questionImageUrl ? 'split-screen' : '']">
+                        <component :mode="mode" :questionIndex="questionIndex" :questions="testQuestions" :is="currentCategory"></component>
+                        <div @click="updateQuestionIndex('prev')" :class="['slide-btn', 'slide-prev', questionIndex==0?'disabled': '']"></div>
+                        <div @click="updateQuestionIndex('next')" :class="['slide-btn', 'slide-next', questionIndex==testQuestions.length-1?'disabled': '']"></div>
+                    </div>
+                    <transition name="fade-left">
+                    
+                        <div :key="1" @click.stop="popImage=!popImage" v-if="!!questionImageUrl" class="question-image-container">
+                                <img :src="questionImageUrl" alt="">
+                        </div>
+                    </transition>
+                </div>
+            <div class="pager-progress ltr">
+                <ul>
+                    <li @click.prevent="updateQuestionIndex(index)" v-for="(question, index) in testQuestions" 
+                        :class="[
+                            !!question.chosenAnswer 
+                            ? (mode==='review' 
+                                ? (question.chosenAnswer===question.answers.correct ? 'correct' : 'wrong') 
+                                : 'answered')
+                            : '', index==questionIndex ? 'active' : '']" >
+                    <span>{{ index+1 }}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="tcenter actions">
+                <button :class="['mt-small', 'mb-small', 'center', 'btn', 'btn-big', mode==='test' ? 'btn-success' : 'btn-warning']" @click="finish" v-text="mode==='test' ? 'סיימתי' : 'יציאה'"></button>
+            </div>
+            <div v-if="mode==='test'" class="status">
+                <h4>ענית עד כה על 
+                    <span>
+                        <span v-text="answeredSoFar"  :class="[!!answeredSoFar? '' : 'red']"></span>
+                        <span>/{{ testQuestions.length}}</span>
+                    </span>
+                        
+                </h4>
+            </div>
+            </div>
+            <div >
+                <img @click.stop.prevent="popImage=false" :src="questionImageUrl" alt="" v-if="!!questionImageUrl && !!popImage" class="overlayed">
+            </div>
+            <div v-if="testinfo.score>-1 && mode!='review'" class="popup">
+                <div class="popup-content">
+                    <i class="lnr lnr-close"></i>
+                    <div class="review">
+                        <div class="ltr score">
+                            <h5 class="label">ציון יחיד</h5>
+                            <div class="ltr singlescore">{{ testinfo.score }} <span>/ 100</span></div>
+                        </div>
+                        <h5>סיכום תשובות</h5>
+                        <div class="review-bubble success">
+                            <span class="num">{{ testinfo.correct}}</span>
+                            <span>נכונות</span>
+                        </div>
+                        <div class="review-bubble danger">
+                            <span class="num">
+                                {{ testinfo.wrong}}
+                            </span>
+                            <span>שגיאות</span>
+                        </div>
+                        <div class="review-bubble info">
+                            <span class="num">
+                                {{ testinfo.unanswered}}
+                            </span>
+                            <span>לא נענו</span>
+                        </div>
+                    
+                    </div>
+                    <div class="centerize">
+                        <div class="regscore">
+                            <h4>ציון תקן</h4>
+                            <div class="big num">{{ testinfo.regulatoryScore }} <span>/ 100</span></div>
+                        </div>
+                        <div class="info">
+                            <h5 class="label">זמן ממוצע לשאלה</h5>
+                            <span>{{ formatAverageTimeOnQuestion }}</span>
+                        </div>
+                    </div>
+                    <div class="links">
+                        <button class="btn btn-warning block center mb-small" @click="mode='review'">חזרה על המבחן</button>
+                        <router-link to="/" class="back-btn btn btn-primary vmid" exact><span>חזרה לעמוד הבית </span><i class="fa fa-chevron-left mr-min"></i></router-link>
+                    </div>
                 </div>
             </div>
-        </transition>
+
+            <transition name="fade">
+                <div v-if="!!idle.flag" class="modal idle-modal">
+                    <div class="inner">
+                        <h4>הלו תעורר!</h4>
+                    </div>
+                </div>
+            </transition>
+        </div>
     </div>
-    </main>
 </template>
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
@@ -137,6 +148,8 @@ export default {
             timer: 840000,
             questiontimer: null,
             questionIndex: 0,
+            popImage: false,
+            mode: 'test',
             idle: {
                 flag: false,
                 timer: 60000
@@ -146,7 +159,7 @@ export default {
                 correct: null,
                 wrong: null,
                 unanswered: null,
-                score: null,
+                score: -1,
                 regulatoryScore: null,
                 meta: null, 
                 percentComplete: 0,
@@ -213,7 +226,10 @@ export default {
                     
                     Meteor.setInterval(function() {
                         if (this.withtimer) {
-                            this.$set(this, 'timer', this.timer-1000)
+                            this.$set(this, 'timer', this.timer-1000);
+                            if (this.timer<=0) {
+                                this.finish();
+                            }
                         }
                         this.$set(this.idle, 'timer', this.idle.timer-1000)
                         if (this.idle.timer<=0) {
@@ -264,9 +280,9 @@ export default {
         },
         flagIdle() {
             console.log('User has been idle for 2 minutes');
-            this.$set(this.idle, 'flag', true);
+            // this.$set(this.idle, 'flag', true);
             $('body').on('mousemove', this.notIdle)
-            $('body').on('keyuo', this.notIdle)
+            $('body').on('keyup', this.notIdle)
 
         },
         timedQuestions() {
@@ -322,6 +338,11 @@ export default {
             'currentCategory',
             'activeCategory'
         ]),
+        questionImageUrl() {
+            let q = this.testQuestions[this.questionIndex];
+            console.log("QQQQ > ", q);
+            return q.imageUrl;
+        },
         countdown() {
             return moment(this.timer).format('m:ss');
         },
@@ -351,28 +372,25 @@ export default {
                 category = _.find(categories, { value: params.category });
                 name = _.find(category.children, { value: params.name})
             }
-            console.log(type.label);
-            return type.label;
+            console.log("tst title, category", category, name, type);
+            return type.label + (!!category ? " ב" + category.label : '');
             // return type.label + " : " + !!params.category ? category.label + " : " + name.label : '';
         }
     }
 }
 </script>
-<style lang="stylus" scoped>
+<style lang="stylus">
 @import '~imports/client/ui/styl/variables.styl'
 @import '~imports/client/ui/styl/mixins'
+
+correct-color = darken(bluegreen, 5)
+wrong-color = lighten(red, 5);
+
 
 .btn.disabled
     pointer-events none
     opacity 0.5
-.fade-enter-active, .fade-leave-active {
-  transition: all .5s
-  transform: scale(1) rotate(0)
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
-  opacity: 0
-  transform: scale(4) rotate(-720deg)
-}
+
 .popup
     position fixed
     top 0
@@ -467,24 +485,113 @@ export default {
     width 100%
     border-top 1px solid #0bddbe
     border-bottom 1px solid #0bddbe
-
+    transition width 200ms linear
+    h4
+        padding 40px 0 0
+        font-size 25px
+        letter-spacing 1px
+        direction rtl
+        text-align center
+    & > div > ul
+        width 100%
+        word-spacing 0
+        white-space nowrap
+        position relative
+        transition transform 400ms ease
+        & > li
+            position relative
+            display inline-block
+            width 100%
+            vertical-align top
+            padding 6% 14% 2%
+            margin 0
+            @media screen and (max-width:740px)
+                padding-left 8%
+                padding-right 8%
+            .question
+                text-align center
+                h4
+                    padding 0 0 2%
+                    font-size 25px
+                    letter-spacing 1px
+                    direction rtl
+                    text-align center
+                .parts
+                    padding 2% 0
+                    border-top 1px dashed rgba(darken(#0bddbe, 60), 0.2)
+                    border-bottom 1px dashed rgba(darken(#0bddbe, 60), 0.4)
+                    span
+                        display inline-block
+                        margin 0 3.5vw
+                        font-size 22px
+                        font-family 'Helvetica Thin'
+                        @media screen and (max-width:740px)
+                            // margin 0 30px
+                            font-size 22px
+                        &.next
+                            border-radius 4px
+                            border 1px solid lighten(red, 15)
+                            padding 1% 2%
+                            color lighten(red, 15)
+                            min-width 60px
+        .answer
+            text-align center
+            padding 60px 0
+            h5
+                padding-bottom 20px
+            li
+                display inline-block
+                margin 0 2.2%
+                a
+                    font-family 'Helvetica Thin'
+                    display inline-block
+                    padding 10px
+                    border-radius 9px
+                    box-sizing border-box
+                    text-decoration none
+                    color lighten(darkblue, 20)
+                    font-size 40px
+                    border 1px solid transparent
+                    background transparent
+                    transition border 400ms ease, background 400ms ease, color 400ms ease
+                    @media screen and (max-width:740px)
+                        font-size 22px
+                    &:hover
+                        border 1px solid lighten(#0bddbe, 25)
+                        color darken(#0bddbe, 10)
+                    &.chosen
+                        border 1px solid darken(#0bddbe, 5)
+                        background rgba(#0bddbe, 0.02)
+                        color darken(#0bddbe, 5)
+                        & + span
+                            color darken(#0bddbe, 5)
+                    &.correct
+                        border 1px solid correct-color
+                        background rgba(correct-color, 0.01)
+                        color correct-color
+                        & + span
+                            color correct-color
+                    &.wrong
+                        border 1px solid wrong-color
+                        background rgba(wrong-color, 0.01)
+                        color wrong-color
+                        & + span
+                            color wrong-color
+                
 .test
-    position absolute
-    top 40%
-    left 0
-    transform translateY(-50%)
-    height 50vh
+    min-height 50vh
     width 100%
+    padding-bottom 75px
     h2
         text-align center
-        color lighten(darkblue, 10)
-        padding 40px 0
+        color lighten(gray, 40)
+        padding 20px 0 40px
         font-weight normal
-    
 
-                
-.actions
-    padding 30px 0          
+        
+/* 
+    PROGRESS -- Pager with progress markers
+*/
 .pager
     padding 30px 0
     width 100%
@@ -497,10 +604,6 @@ export default {
         color lighten(darkblue, 5)
     .active a
         color darken(#f2a856, 10)
-        
-/* 
-    PROGRESS -- Pager with progress markers
-*/
 .slide-btn
     position absolute
     top 0
@@ -532,7 +635,7 @@ export default {
         opacity 0.1
         pointer-events none
 .pager-progress
-    padding 3% 0 0
+    padding 30px 6%
     ul
         text-align center
         li
@@ -551,6 +654,7 @@ export default {
             transform translateZ(0)
             transform rotate(-45deg)
             transition border 400ms ease, background 400ms ease, transform 400ms ease
+           
             span
                 self-center()
                 display block
@@ -559,6 +663,7 @@ export default {
                 transition color 400ms ease
                 position relative
                 transform translate(-50%,-50%) rotate(45deg)
+            
             &:hover, &.active
                 border-color rgba(darken(#0bddbe, 20), 0.7)
                 transform rotate(-20deg)
@@ -578,6 +683,18 @@ export default {
                 transform rotate(-20deg) scale(2)
                 background #f3fefc
                 z-index 9
+            &.correct
+                border 1px solid bluegreen !important
+                background-color rgba(bluegreen, 0.03)
+                span
+                    color bluegreen !important
+            &.wrong
+                border 1px solid red !important
+                background-color lighten(red, 55)
+                &:after
+                    background darken(red, 20)
+                span
+                    color red !important
                 
                 
             &.answered
@@ -593,7 +710,7 @@ export default {
 .status
     direction rtl
     text-align center
-    padding 10% 0
+    padding 30px 0
     span
         text-align left
         display inline-block
@@ -603,15 +720,17 @@ export default {
             color darken(#0bddbe, 10)
 
 .countdown
-    position absolute
-    left 50%
-    transform translate(-50%)
-    top 10%
     color red
-    font-size 6vmin
-    letter-spacing 10px
-    @media screen and (max-width:740px)
-        top 15%
+    margin 10px auto
+    text-align center
+    font-size 3vmin
+    position relative
+    z-index 103
+    transition font-size 400ms ease
+    &.bigger
+       font-size 6vmin
+    span 
+        letter-spacing 10px
 .welcome
     position fixed
     top 0
@@ -690,6 +809,7 @@ export default {
     left 0
     right 0
     bottom 0 
+    z-index 102
     .inner
         self-center()
         h4
@@ -727,5 +847,65 @@ export default {
             height 100%
             display inline-block
             vertical-align middle
-        
+.question-container
+    word-spacing 0
+    letter-spacing -5px
+    position relative
+    & > *
+        word-spacing initial
+        letter-spacing initial
+.split-screen
+    width 50%
+    mid(top)
+.question-image-container
+    transition all 300ms ease-out
+    overflow hidden
+    width 50%
+    border-top 1px solid bluegreen
+    border-right 1px dotted bluegreen
+    mid(top)   
+    padding-bottom 5%
+    img
+        position relative
+        width 100%
+.overlayed
+    background rgba(0,0,0,0.7);
+    padding 4px 4px 4px 0
+    position absolute
+    border-radius 0 6px 6px 0
+    top 50%
+    left 0
+    text-align center
+    transform translateY(-50%)
+    z-index 105
+
+
+.fade-enter-active, .fade-leave-active
+    transition all .5s
+    transform scale(1) rotate(0)
+.fade-enter, .fade-leave-to
+    opacity 0
+    transform scale(4) rotate(-720deg)
+
+.fade-left-enter
+    transition all 200ms linear
+    position absolute
+    left 0
+    width 10%
+    transform translateX(-100%)
+.fade-left-enter-to
+    position relative
+    width 50%
+    transform translateX(0)
+.fade-left-leave
+    position absolute
+    transition all 200ms linear
+    width 50%
+    transform translateX(0)
+.fade-left-leave-to
+    position absolute
+    left -100%
+    width 1%
+    transform translateX(-100%)
+    
 </style>

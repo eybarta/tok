@@ -75,6 +75,8 @@
         </ul>
     </div>
     <button @click="saveUserProfile({profile, userId})" class="btn btn-success">שמור</button>
+    <button v-if="!!isAdmin" @click="deleteUser(userId)" class="btn btn-danger mr-small">מחוק משתמש</button>
+
 </div>
 </template>
 <script>
@@ -99,7 +101,6 @@ export default {
                 education: {
                     years: null,
                     higher:null,
-                    higher: null
                 },
                 status: {
                     label: null,
@@ -135,7 +136,8 @@ export default {
     },
     methods: {
         ...mapActions('usersModule', [
-            'saveUserProfile'
+            'saveUserProfile',
+            'deleteUser'
         ])
     },
     computed: {
@@ -173,26 +175,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-
-        
-        // input 
-        //     width 100%
-        //     transition background 400ms ease-out
-        //     & + label
-        //         display inline-block
-        //         position absolute
-        //         transform translate(-15%, -30px)
-        //         color lighten(gray, 30)
-        //         font-size 18px
-        //         transition transform 200ms ease-out, color 200ms ease-out, font-size 200ms ease-out
-        //     &:focus, &:valid
-        //         & + label
-        //             transform translate(0, -56px)
-        //             font-size 12px
-        //             color darken(gray, 10)
-        //             &:after
-        //                 content ':'
-        //                 display inline-block
-        //     &:valid
-        //         background rgba(#0bddbe, 0.02)
 </style>

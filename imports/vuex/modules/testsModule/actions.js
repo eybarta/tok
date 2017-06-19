@@ -47,6 +47,7 @@ export const initQuestions = ({ commit }) => {
         Meteor.subscribe('questions');
         let questions = Questions.find({}).fetch();
         if (!!questions) {
+            console.log("QUESTIONS >>> ", questions);
             commit('INIT_QUESTIONS', questions)
             stop();
         }
@@ -79,22 +80,6 @@ export const initImagesCollection = ({commit}) => {
         }
     })   
 }
-
-
-// export const updateQuestionIndex = ({commit, state, getters}, to) => {
-//     let index = state.questionIndex,
-//         questionsAmount = getters.questions.length-1
-//     if (to=='next') {
-//         index != questionsAmount ? index++ : index=0
-//     }
-//     else if (to=='prev') {
-//         index != 0 ? index-- : index=questionsAmount
-//     }
-//     else {
-//         index = to;
-//     }
-//     commit('UPDATE_QUESTION_INDEX', index)
-// }
 
 async function fetchQuestionList(category = null) {
     return new Promise((resolve, reject) => {
@@ -149,7 +134,7 @@ export const fetchTestQuestions = async ({commit, state, dispatch, rootState}) =
                 
                 console.log("return questions  >", questions);
                 
-                commit('UPDATE_TEST_QUESTIONS', _.shuffle(_.flatten(questions)));
+                commit('UPDATE_TEST_QUESTIONS', _.flatten(questions));
                 // return _.shuffle(_.flatten(questions));
             }
             // }
@@ -174,46 +159,63 @@ const fetchAutoTest = (params, questionlist) =>  {
                 console.log("1 IN FETCH AUTO >> ", questionlist);
                 
                 let questionListByCategory = _.groupBy(questionlist, 'type.value');
-                questionListByCategory = _.map(questionListByCategory, function(arr, key) {
-                    arr = _.map(arr, question => {
-                        let identifier = { ['type.value']: question.type.value };
-                        for (var i = 0; i<questionlist.length;i++) {
-                            // TODO.. use _id's when implemented
-                            let q = questionlist[i]
-                            if (q.question===question.question) {
-                                return i;
-                            }
-                        }
-                        return -1
-                    })
-                    return {
-                        [key]:arr
+
+                console.log('1 questionListByCategory >> ', questionListByCategory);
+                for (var cat in questionListByCategory) {
+                    questionListByCategory[cat] = _.shuffle(questionListByCategory[cat])
+                    if (cat=="comprehension") {
+                        questionListByCategory[cat] = _.filter(questionListByCategory[cat], { imageUrl:questionListByCategory[cat][0].imageUrl })
                     }
-                })
+                    /*
+                        Transform questionListByCategory question arrays into
+                        index arrays.
+                    */
+                    questionListByCategory[cat] = 
+                        _.map(questionListByCategory[cat], 
+                            question => {
+                                for (var i = 0; i<questionlist.length;i++) {
+                                    let q = questionlist[i];
+                                    //    console.log("for >> ", q.question, " :: ", question);
+                                
+                                    if (q.question===question.question) {
+                                        return i;
+                                    }
+                                }
+                                return -1
+                            }
+                        )
+                }
                 let categoryArray = _.flattenDeep(_.map(questionListByCategory, (a,b,c) => {
                     return Object.keys( a );
                 }))
-
                 var count = 0;
-                while(count<20) {
-                    for (var j = 0; j<categoryArray.length;j++) {
-                        let category = categoryArray[j];
-                        let index = questionListByCategory[j][category][count];
-                        if (!!index) {
-                            let question = questionlist[index]
+                var amount = 28; // temp
+                // while(count<20) {
+
+                    /*
+                        Take 5 from each category in order
+                    */
+                    for (var i in questionListByCategory) {
+                        let questionArray = questionListByCategory[i];
+                        console.log('questionArray >> ', questionArray)
+                        for (var j = 0; j < questionArray.length; j++) {
+                            let index = questionArray[j];
+                            // console.log("index >> ", index);
+                            let question = _.clone(questionlist[index]);
                             let answers = {
                                 list: question.answers,
                                 correct: question.answers[0]
                             }
                             question.answers = answers;
                             question.chosenAnswer = null;
-                            if(questions.length<20) 
-                                questions.push(question)    
+                            if(questions.length<amount) {
+
+                                questions.push(question)
+                                count++;
+                            }
+                                
                         }
                     }
-                    count++;
-                }
-                console.log("2 IN FETCH AUTO >> ", questions);
             }
             else {
                 console.log("AUTO TEST QUESTIONS > SERIES??!?!!?");
@@ -224,9 +226,11 @@ const fetchAutoTest = (params, questionlist) =>  {
                 })
                 while(questions.length<20) {
                     let child = children[_.random(0, children.length)];
-                    questions.push(
-                        ...questionGenerator(type, child.value, child.label, 1)
-                    ) 
+                    if (!!child && !!child.value) {
+                        questions.push(
+                            ...questionGenerator(type, child.value, child.label, 1)
+                        ) 
+                    }
                 }
             }
             console.log("AUTO TEST QUESTIONS > ", questions);

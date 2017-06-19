@@ -8,7 +8,7 @@ import {Accounts} from 'meteor/accounts-base'
 Vue.use(Vuex);
 
 
-import VueMultiselect from 'vue-multiselect'
+import VueMultiselect from '/imports/client/ui/components/vue-multiselect'
 Vue.component('Multiselect', VueMultiselect)
 // PLUGINS
 import { sync } from 'vuex-router-sync';
@@ -74,6 +74,8 @@ Vue.config.debug = true;
 
 // App start
 Meteor.startup(() => {
+  //  process.env.MONGO_URL = "mongodb://webkit:webkit3e3@ds025772.mlab.com:25772/tok";
+  // process.env.NODE_ENV = "production";
   new Vue({
     router,
     render: h => h(App),

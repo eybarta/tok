@@ -8,8 +8,8 @@ import ManageUsers from '/imports/client/ui/pages/admin/ManageUsers.vue';
 import CreateTest from '/imports/client/ui/pages/admin/CreateTest.vue';
 import AddQuestion from '/imports/client/ui/pages/admin/forms/AddQuestion.vue';
 // User
-import UserHome from '/imports/client/ui/pages/users/Home.vue';
-import ActiveTest from '/imports/client/ui/user/partials/ActiveTest.vue'
+import UserHome from '/imports/client/ui/pages/user/Home.vue';
+import ActiveTest from '/imports/client/ui/pages/user/partials/ActiveTest.vue'
 // components
 import ItemMenu from '/imports/client/ui/components/ItemMenu.vue'
 

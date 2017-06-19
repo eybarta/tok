@@ -1,6 +1,9 @@
 import { router } from '/imports/startup/client/router'
-
-console.log('Router ?? ', router)
+Meteor.call('users.isEmpty', null, function(err, result) {
+  if (!result) {
+    $("#at-signUp").remove();
+  }
+});
 
 var email = AccountsTemplates.removeField('email');
 var pwd = AccountsTemplates.removeField('password');
@@ -19,16 +22,21 @@ Accounts.ui.config({
 
 AccountsTemplates.configure({
   texts: {
-      button: {
-          signIn: 'התחבר',
-          signUp: 'הירשם'
-      },
-      signUpLink_pre: '',
-      signUpLink_link: 'צריך להירשם?',
-      signInLink_pre: 'כבר רשום?',
-      signInLink_link: 'התחבר',
+    button: {
+        signIn: 'התחבר',
+        signUp: 'הירשם'
     },
+    signUpLink_pre: '',
+    signUpLink_link: 'צריך להירשם?',
+    signInLink_pre: 'כבר רשום?',
+    signInLink_link: 'התחבר',
+  },
 })
+function hideRegisterLink() {
+  AccountsTemplates.configure({
+    hideSignUpLink: true
+  })
+}
 
 AccountsTemplates.addFields([
     {

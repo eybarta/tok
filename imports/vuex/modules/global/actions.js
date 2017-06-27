@@ -1,6 +1,8 @@
 import * as types from './mutation-types.js';
 
-
+export const loadApp = ({commit}) => {
+    commit('LOAD_APP', true)
+}
 // UTIL
 export const downloadCSV = async ({commit}, csv) => {
     console.log("IN DOWNLOAD CSV >> ", csv)
@@ -24,3 +26,8 @@ export const callPopup = ({commit}, data) => {
     commit('CALL_POPUP', data)
 }
 
+// NOTE
+export const setNote = ({commit}, data) => {
+    console.log("SET NOTE  >> ", data);
+    commit('SET_NOTE', data)
+}

@@ -1824,9 +1824,24 @@
       "resolved": "https://registry.npmjs.org/vue-multiselect/-/vue-multiselect-2.0.0-beta.15.tgz",
       "integrity": "sha1-/CmvZ9m9+2gjEb34zS7YnViNc+E="
     },
+    "vue-paginate": {
+      "version": "3.5.0",
+      "resolved": "https://registry.npmjs.org/vue-paginate/-/vue-paginate-3.5.0.tgz",
+      "integrity": "sha1-yoSUMdqy9auuEJmNozhYtAq8YN4="
+    },
+    "vue-radial-progress": {
+      "version": "0.2.10",
+      "resolved": "https://registry.npmjs.org/vue-radial-progress/-/vue-radial-progress-0.2.10.tgz",
+      "integrity": "sha1-tAZMXQdQ2vDuap4yOz95vSvW3tw="
+    },
     "vue-router": {
       "version": "https://registry.npmjs.org/vue-router/-/vue-router-2.5.3.tgz",
       "integrity": "sha1-BzeD9WS2rs5silnGPimNwqq/tRs="
+    },
+    "vue2-animate": {
+      "version": "1.0.4",
+      "resolved": "https://registry.npmjs.org/vue2-animate/-/vue2-animate-1.0.4.tgz",
+      "integrity": "sha1-I/0e5O8uJWcvaoSjNj8wYWDzgDI="
     },
     "vuex": {
       "version": "https://registry.npmjs.org/vuex/-/vuex-2.3.1.tgz",

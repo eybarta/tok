@@ -1,44 +1,51 @@
-// import { isAdmin } from '/imports/vuex/getters'
-// import { mapGetters } from 'vuex'
+// vuex store
+import store from '/imports/vuex'
+console.log("store from router > ", store)
 // pages
-import Home from '/imports/client/ui/pages/Home.vue';
+import Home from '/client/ui/pages/Home.vue';
 // Admin
-import AdminHome from '/imports/client/ui/pages/admin/Home.vue';
-import ManageUsers from '/imports/client/ui/pages/admin/ManageUsers.vue';
-import CreateTest from '/imports/client/ui/pages/admin/CreateTest.vue';
-import AddQuestion from '/imports/client/ui/pages/admin/forms/AddQuestion.vue';
+import AdminHome from '/client/ui/admin/Home.vue';
+import ManageUsers from '/client/ui/admin/ManageUsers.vue';
+import CreateTest from '/client/ui/admin/CreateTest.vue';
+import AddQuestion from '/client/ui/admin/forms/AddQuestion.vue';
 // User
-import UserHome from '/imports/client/ui/pages/user/Home.vue';
-import ActiveTest from '/imports/client/ui/pages/user/partials/ActiveTest.vue'
+import UserHome from '/client/ui/user/Home.vue';
+import ActiveTest from '/client/ui/user/partials/ActiveTest.vue'
 // components
-import ItemMenu from '/imports/client/ui/components/ItemMenu.vue'
+import ItemMenu from '/client/ui/components/ItemMenu.vue'
+
+async function requireAuth(to,from,next) {
+	let destination = to.name;
+	let user = await store.dispatch('usersModule/initUser');
+	store.dispatch('globalStore/loadApp')
+	if (!user) {
+		destination==='login'
+		? next()
+		: next({ name: 'login' })
+	} else {
+		let isAdmin = store.getters['usersModule/isAdmin'];
+		if (!!isAdmin) {
+			destination==='home'
+			? next('/admin')
+			: next();
+		}
+		else {
+			console.log('ROUTE TO USER>> ', to, from);
+			destination==='home'
+			? next({ name: 'user', params: { username: user.username }})
+			: (to.path.indexOf('admin')>-1
+				? next('/')
+				: next());
+		}
+	}
+}
 
 export const routes = [
 	{
 		path: '/',
 		name: 'home',
 		component: Home,
-		beforeEnter: (to, from, next) => {
-			let userId = Meteor.userId();
-			if (!!userId) {
-				// let roles = Roles.getRolesForUser(userId);
-				// console.log("ROLES FOR USER >> ", roles);
-				if (Roles.userIsInRole(userId, 'admin')) {
-					console.log('Admin user');
-					// user is Admin
-					next('/admin')
-				} else {
-					console.log('User user');
-					let user = Meteor.user();
-					next({ name: 'user', params: { username: user.username }})
-					// { name: 'cart', params: { cartId: cart._id }}
-				}
-			}
-			else {
-				console.log('next in home route');
-				next()
-			}
-		}
+		beforeEnter: requireAuth,
 	},
 	{
 		path: '/admin',
@@ -62,44 +69,13 @@ export const routes = [
 			}
 
 		],
-		beforeEnter: (to, from, next) => {
-			console.log("ADMINHOME BEFORE ENTER");
-			let userId = Meteor.userId();
-			console.log("userId >> ", userId);
-			if (!!userId && Roles.userIsInRole(userId, 'user')) {
-				console.log('is user');
-				let username = Meteor.user().username;
-				next({ name: 'user', params: { username }})
-			}
-			else if (!!userId && Roles.userIsInRole(userId, 'admin')) {
-				console.log(' admin?');
-				next()
-			}
-			else {
-				next('/')
-			}
-		},	
+		beforeEnter: requireAuth,
 	},
 	{
 		path: '/user/:username',
 		name: 'userhome',
 		component: UserHome,
-		beforeEnter: (to, from, next) => {
-			console.log("USERHOME BEFORE ENTER");
-			let userId = Meteor.userId();
-			
-			if (!!userId && Roles.userIsInRole(userId, 'user')) {
-				console.log('is user');
-				next()
-			}
-			else if (!!userId && Roles.userIsInRole(userId, 'admin')) {
-				console.log(' admin?');
-				next('/admin')
-			}
-			else {
-				next('/')
-			}
-		},		
+		beforeEnter: requireAuth,
 		children: [
 
 			{
@@ -108,14 +84,19 @@ export const routes = [
 				component: ActiveTest
 			},
 			{
+				path: '/testhistory/:category/:name',
+				name: 'testhistory',
+				component: ActiveTest
+			},
+			{
 				path: '/fixedtest/:category/:name',
 				name: 'fixedtest',
 				component: ActiveTest
 			},
 			{
-				path: '/autotest/:category',
+				path: 'autotest/:category',
 				name: 'autotest',
-				component: ActiveTest
+				component: ActiveTest,
 			},
 			{
 				path: '/adaptivetest/:category',
@@ -126,41 +107,36 @@ export const routes = [
 				path: '/user/:username',
 				name: 'user',
 				component: ItemMenu,
+				// http://localhost:3000/user/03944123
 				children: [
 					{
-						path: ':type',
-						name: 'type',
+						path: ':format',
+						name: 'format',
+						// /user/03944123/autotest
 						children: [
 							{
 								path: ':category',
 								name: 'category',
+								// /user/03944123/autotest/series
 							}
 						]
 					},
-					// {
-					// 	path: '/fixedtest/',
-					// 	name: 'type',
-					// 	children: [
-					// 		{
-					// 			path: ':category',
-					// 			name: 'category',
-					// 		}
-					// 	]
-					// }
 				]
 			},
-			
-			
 			
 		]
 	},
 	{
+		path: '/login',
+		name: 'login',
+		component:Home,
+		beforeEnter: requireAuth,
+	},
+	{
 		path: '*',
 		name: 'NotFound',
-		components: Home,
-		beforeEnter: (to, from, next) => {
-			console.log('** Not found ?? wtf');
-		}		
+		component: Home,
+		beforeEnter: requireAuth
 	}
 ]
 

@@ -1,5 +1,6 @@
-
-
+/*
+[BLAZE TEMPLATE] Login (located @main.html)
+*/
 Template.login.helpers({
 	currentUser() {
 		return Meteor.user()
@@ -10,15 +11,28 @@ Template.login.helpers({
 	signed() {
 		return Accounts.userId()!=null;
 	},
-	username() {
-		let user = Accounts.user() && Accounts.user().profile ?  Accounts.user().profile.name : null;
-		return user;
-	}
-});
-
-Template.profile.events({
- 'click .logout-btn' (event) {
-	AccountsTemplates.logout();
 	
-  }
+});
+Template.login.onCreated(function() {
+	console.log("PROFILE TEMPLATE CREATED");
+	Meteor.call('users.isEmpty', null, function(err, result) {
+			if (!result) {
+				$("#at-signUp").remove();
+			}
+		});
+
+	
+
 })
+
+
+/*
+[BLAZE TEMPLATE] Profile (located @main.html)
+*/
+// Template.profile.events({
+//  'click .logout-btn' (event) {
+// 	AccountsTemplates.logout();
+	
+//   }
+// })
+

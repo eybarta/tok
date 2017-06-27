@@ -3,9 +3,34 @@ import { Tracker }from 'meteor/tracker'
 import * as types from './mutation-types';
 // USER ID
 export const initUser = async ({ commit }) => {
-    let user = Meteor.user();
-    console.log("initUser to vuex >> ", user);
-    commit('INIT_USER', user);
+    var trackuser, timeuser;
+    return new Promise((resolve, reject) => {
+        var user;
+        trackuser = Tracker.autorun((c) => {
+            user = Meteor.user();
+            console.log("initUser to vuex >> ", user);
+            console.log("Account user to vuex >> ", Accounts.user());
+            if (!!user) {
+                Meteor.clearTimeout(timeuser);
+                let roles = Roles.getRolesForUser(user);
+                console.log("got user.. now Roles> ", roles);
+                if (roles.length>0) {
+                    commit('INIT_USER', user);
+                    stop();
+                    resolve(user);
+                }
+            } 
+        })
+        timeuser = Meteor.setTimeout(function() {
+            if (!user) {
+                trackuser.stop();
+                commit('INIT_USER', null);
+                resolve(false);
+            }
+        }, 3000)
+    });
+        
+
 }
 
 // ALL USERS DATA ( Admin only subscription)
@@ -69,4 +94,9 @@ export const dirtifyUser = ({ commit, state }) => {
             resolve();
         })
     });
+}
+export const signOutUser = ({commit,rootState}) => {
+    AccountsTemplates.logout();
+    console.log(rootState);
+    commit("SIGN_OUT_USER");
 }

@@ -1,31 +1,29 @@
-console.log('global.Buffer > ', global.Buffer)
 import Vue from 'vue';
-import Vuex from 'vuex';
-import {Meteor} from 'meteor/meteor';
+import { Meteor } from 'meteor/meteor';
 import { Tracker }from 'meteor/tracker'
-import {Accounts} from 'meteor/accounts-base'
-
-Vue.use(Vuex);
+import { Accounts } from 'meteor/accounts-base'
 
 
-import VueMultiselect from '/imports/client/ui/components/vue-multiselect'
-Vue.component('Multiselect', VueMultiselect)
+
 // PLUGINS
+import VueMultiselect from 'vue-multiselect'
+Vue.component('Multiselect', VueMultiselect)
+import VuePaginate from 'vue-paginate'
+Vue.use(VuePaginate)
+
 import { sync } from 'vuex-router-sync';
 import '/imports/startup/client';
 import '/imports/startup/client/account-config.js';
 
-import {storeconfig} from '/imports/vuex/';
+import store from '/imports/vuex/';
 import { router } from '/imports/startup/client/router'
-
-console.log('storeconfig  ', storeconfig)
-const store = new Vuex.Store(storeconfig);
 
 
 
 sync(store, router);
 console.log("*****STORE >> ", store);
 // Global Guard
+/*
 router.beforeEach((to,from,next) => {
     console.log("TO:", to);
     let userState = store.state['usersModule'];
@@ -64,10 +62,11 @@ router.beforeEach((to,from,next) => {
         }
       }
 })
+*/
 // Libs
 _ = lodash;
 
-import App from '/imports/client/ui/App.vue';
+import App from './ui/App.vue';
 
 Vue.config.devtools = true;
 Vue.config.debug = true;
@@ -75,7 +74,7 @@ Vue.config.debug = true;
 // App start
 Meteor.startup(() => {
   //  process.env.MONGO_URL = "mongodb://webkit:webkit3e3@ds025772.mlab.com:25772/tok";
-  // process.env.NODE_ENV = "production";
+  process.env.NODE_ENV = "production";
   new Vue({
     router,
     render: h => h(App),

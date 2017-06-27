@@ -43,3 +43,4 @@ cfs:graphicsmagick
 dynamic-import
 juliancwirko:postcss
 akryum:postcss
+zuuk:stale-session

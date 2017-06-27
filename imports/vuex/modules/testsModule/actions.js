@@ -1,3 +1,5 @@
+import store from '/imports/vuex'
+
 import { FixedTests } from '/imports/api/collections/fixedtests'
 import { Questions } from '/imports/api/collections/questions'
 import { Images } from '/imports/api/collections/images'
@@ -32,11 +34,35 @@ export const initFixedTests = ({ commit }) => {
     })
 }
 
-export const saveFixedTestToDB = ({ commit, state}, testdata) => {
+export const saveFixedTestToDB = async ({ commit, state, dispatch}, testdata) => {
     console.log("save test to db >> ", testdata);
     return new Promise((resolve, reject) => {
         Meteor.call('fixedtest.save', testdata, result => {
-            resolve();
+            console.log("test saved..", result);
+            let message = "המבחן נשמר בהצלחה.";
+            let type = "success";
+            let data = { message, type, timer:3000, active:true}
+            
+            dispatch('globalStore/setNote', data, {root:true})
+            resolve(true);
+        })
+    });
+}
+
+export const removeFixedTest = ({commit,state,dispatch}, testdata) => {
+    console.log("remove test from db >> ", testdata);
+    return new Promise((resolve, reject) => {
+        Meteor.call('fixedtest.remove', testdata, result => {
+            console.log("test saved..", result);
+            if (!!result) {
+                let message = "המבחן נמחק בהצלחה.";
+                let type = "success";
+                let data = { message, type, timer:3000, active:true}
+                
+                dispatch('globalStore/setNote', data, {root:true})
+                resolve(true);
+            }
+            
         })
     });
 }
@@ -95,6 +121,7 @@ async function fetchQuestionList(category = null) {
     });
 }
 export const fetchTestQuestions = async ({commit, state, dispatch, rootState}) => {
+        console.log('fetchTestQuestions');
             let routename = rootState.route.name;
             let params = rootState.route.params;
             let questions;
@@ -107,11 +134,29 @@ export const fetchTestQuestions = async ({commit, state, dispatch, rootState}) =
                     return;
                 }
             }
-            console.log("CONTINUE!!!!!!!");
-            if (!!params.name) {
-                if (routename==='fixedtest') {
-                    let questions = fetchFixedTest(rootState.route.params, questionslist);
+            console.log("CONTINUE!!!!!!! >> ", params.name, " :: ", routename);
+                    
+            if (!!params.name || !isNaN(params.name)) {
+                if (routename==='testhistory') {
+                    console.log("store > ", store);
+                    let usertests = store.getters['usersModule/userCurrentCategoryTestHistory'];
+                    console.log('usertests >> ', usertests);
+                    if (!!usertests) {
+                        if (!isNaN(params.name)) {
+                            commit('UPDATE_TEST_QUESTIONS', usertests[params.name].questions);
+
+                        }
+                        else {
+                            let test = _.find(usertests, obj => obj.label===params.name)
+                            commit('UPDATE_TEST_QUESTIONS', test.questions);
+                        }
+                    }
+                }    
+                else if (routename==='fixedtest') {
+                    let questions = fetchFixedTest(rootState.route.params, questionslist, state.fixedtests);
+                    console.log('fixed q.. ', questions);
                     // return questions;
+                    commit('UPDATE_TEST_QUESTIONS', _.flatten(questions));
                 }
                 // else {
                 //     let category = this.activeCategory;
@@ -140,10 +185,15 @@ export const fetchTestQuestions = async ({commit, state, dispatch, rootState}) =
             // }
            
         }
-const fetchFixedTest  = (params, questionlist) =>  {
+const fetchFixedTest  = (params, questionlist, fixedtests) =>  {
+        console.log('in fetchFixedTest >> ', fixedtests);
         let type = params.category;
         let name = params.name;
-            let fixedTestByCategory = _.find(this.fixedtests, {type});
+            console.log('in fetchFixedTest, type >> ', type);
+            console.log('in fetchFixedTest, name >> ', name);
+            let fixedTestByCategory = _.find(fixedtests, {type});
+            console.log('in fetchFixedTest, fixedTestByCategory >> ', fixedTestByCategory);
+            
             if (!!fixedTestByCategory) {
                 let test = _.find(fixedTestByCategory.tests, { name});
                 return test.questions;

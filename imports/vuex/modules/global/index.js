@@ -7,10 +7,20 @@ const state = {
         type: null,
         data: null,
         title:null
-    }
+    },
+    note: {
+        active: false, 
+        type: null,
+        message: null,
+        timer: null
+    },
+    apploaded:false
 }
 
 const mutations = {
+    LOAD_APP (state, bool) {
+        state.apploaded = bool;
+    },
      // MISC
     CLOSE_POPUP (state) {
         state.popup.active = false //!state.popup.active
@@ -29,6 +39,21 @@ const mutations = {
         let menu = state.testeMenu
         // state.testMenu = Object.assign({}, menu, data)
         _.merge(state.testMenu, data);
+    },
+    // NOTE
+    SET_NOTE (state, data) {
+        if (!data) {
+            state.note = {
+                active: false,
+                title: null,
+                content: null,
+                timer: null,
+                position: null
+            }
+        }
+        else {
+            state.note = data;
+        }
     }
 }
 

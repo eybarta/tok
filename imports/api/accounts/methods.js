@@ -3,7 +3,7 @@ import { Random } from 'meteor/random';
 Meteor.methods({
     'users.isEmpty'() {
         const userCount = Meteor.users.find().count();
-        console.log("[server] Check if any users exist >> ", userCount);
+        // console.log("[server] Check if any users exist >> ", userCount);
         return userCount === 0;
     },
     'users.save'(data) {
@@ -57,7 +57,7 @@ Meteor.methods({
     },
     'user.savetest'(testinfo) {
         let userId = Meteor.userId();
-        console.log('savetest method >> ', testinfo);
+        // console.log('savetest method >> ', testinfo);
         Meteor.users.update(userId, {
             $push: {
                 'profile.tests': testinfo

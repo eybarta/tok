@@ -21,7 +21,7 @@ import { FixedTests } from './index'
     ]
 
 */
-if (Meteor.isServer) {
+// if (Meteor.isServer) {
 
 Meteor.methods({
     'fixedtest.save'(data) {
@@ -56,5 +56,17 @@ Meteor.methods({
         }
         
     },
+    'fixedtest.remove'(data) {
+        console.log("[fixedtests.remove] data >> ", data)
+        FixedTests.update(
+            { type: data.type}, 
+            { 
+                $pull: { 
+                    "tests": {
+                                name: data.name,
+                    }           
+                }
+        })
+    }
 })
-}
+// }

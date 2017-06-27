@@ -174,22 +174,69 @@ export const categories = [
     }
 ]
 
-export const testTypes = [
+const categoryMenu = {
+    key: 'category',
+    items: categories
+}
+
+export const testFormats = [
     // {
     //     label:'תרגול',
     //     value: 'practice'
     // },
     {
         label: 'מבחן',
-        value: 'autotest'
+        value: 'autotest',
+        menu: [{
+    key: 'category',
+    name: 'autotest',
+    items: categories
+}],
+        type: 'format'
+    },
+    {
+        label: 'מבחנים קודמים',
+        value: 'testhistory',
+        menu: [
+            {
+    key: 'category',
+    name: 'category',
+    items: categories
+},
+            {
+                key: 'namelist',
+                name:'testhistory',
+                items: "userTestHistory" // getter
+            }
+        ],
+        requirement: "userTestHistory"   // getter
     },
     {
         label: 'מבחנים קבועים',
-        value: 'fixedtest'
+        value: 'fixedtest',
+        menu: [
+            {
+                key: 'category',
+                name: 'category',
+                items: categories
+            },
+            {
+                key: 'namelist',
+                name:'fixedtest',
+                items: "fixedTestsList" // getter
+            }
+        ],
+        requirement: "hasFixedTestsList"
+         
     },
     {
         label: 'מבחן אדפטיבי',
-        value: 'adaptivetest'
+        value: 'adaptivetest',
+        menu: [{
+    key: 'category',
+    name: 'adaptivetest',
+    items: categories
+}]
     }
 ]
 

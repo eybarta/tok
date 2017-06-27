@@ -467,7 +467,7 @@ function getParameters(amount, type) {
         case 'fibonacci':
             return [{
                 operation: 'fibonacci',
-                firstNumeric: () => { return [generateNumber([0,9]), generateNumber([0,9])]},
+                firstNumeric: () => { return [generateNumber([0,9]), generateNumber([1,9])]},
                 partsAmount: 6,
                 answersAmount: 4,
             }]

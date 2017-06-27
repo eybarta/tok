@@ -1,9 +1,5 @@
 import { router } from '/imports/startup/client/router'
-Meteor.call('users.isEmpty', null, function(err, result) {
-  if (!result) {
-    $("#at-signUp").remove();
-  }
-});
+
 
 var email = AccountsTemplates.removeField('email');
 var pwd = AccountsTemplates.removeField('password');
@@ -30,33 +26,29 @@ AccountsTemplates.configure({
     signUpLink_link: 'צריך להירשם?',
     signInLink_pre: 'כבר רשום?',
     signInLink_link: 'התחבר',
+
   },
 })
-function hideRegisterLink() {
-  AccountsTemplates.configure({
-    hideSignUpLink: true
-  })
-}
 
 AccountsTemplates.addFields([
     {
         _id: 'name',
         type: 'text',
-        displayName: "Name",
+        displayName: "שם מלא",
         required: false,
     },
     {
       _id: "username",
       type: "text",
-      displayName: "Username",
+      displayName: "שם משתמש",
       required: true,
-      minLength: 9,
+      minLength: 5,
     },
     {
       _id: 'email',
       type: 'email',
       required: false,
-      displayName: "email",
+      displayName: "אימייל",
       re: /.+@(.+){2,}\.(.+){2,}/,
       errStr: 'Invalid email',
   },
@@ -75,10 +67,7 @@ Accounts.onLogin(() => {
       
       if (!!userId) {
         Meteor.clearInterval(interval)
-        console.log('finally logged in >> ', router, );
-        if (router.currentRoute.path=="/") {
-          router.push({ name: 'adminhome'})
-        }
+        router.push({ name: 'home'})
       }
       
     }, 100)

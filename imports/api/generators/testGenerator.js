@@ -1,4 +1,4 @@
-import { testTypes, categories } from '/imports/api/categories'
+import { categories } from '/imports/api/categories'
 import { questionGenerator } from './questionGenerator'
 import { Questions } from '/imports/api/collections/questions'
 

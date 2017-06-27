@@ -6,5 +6,11 @@
       "DEPLOY_HOSTNAME":"galaxy.meteor.com",  
       "MONGO_URL": "mongodb://webkit:webkit3e3@ds025772.mlab.com:25772/tok"
     }
+  },
+  "public": {
+    "staleSessionInactivityTimeout": 1800000,
+    "staleSessionHeartbeatInterval": 180000,
+    "staleSessionPurgeInterval": 60000,
+    "staleSessionActivityEvents": "mousemove click keydown"
   }
 }

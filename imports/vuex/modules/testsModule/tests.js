@@ -1,8 +1,8 @@
-import { testTypes, categories } from '/imports/api/categories/index.js'
+import { testFormats, categories } from '/imports/api/categories/index.js'
 import { Questions } from '/imports/api/collections/questions'
 import * as actions from './actions.js'
 const state = {
-    testTypes,
+    testFormats,
     // questionIndex: 0,
     fixedtests: null,
     testQuestions: [],
@@ -26,6 +26,7 @@ const mutations = {
         state.questionbank = questions;
     },
     UPDATE_TEST_QUESTIONS (state, questions) {
+        console.log('UPDATE_TEST_QUESTIONS << ', questions)
         state.testQuestions = questions;
     },
     INIT_IMAGES_COLLECTION (state, images) {
@@ -34,20 +35,34 @@ const mutations = {
 }
 
 const getters = {
+    fixedTestsList: (state, getters) => {
+        let category = !!getters.activeCategory ? getters.activeCategory.value : null;
+        if (!!category) {
+            let testsOfCategory = _.find(state.fixedtests, {type:category})
+            if (!!testsOfCategory) {
+                return testsOfCategory.tests;
+            }
+        }
+        return null;
+    },
+    hasFixedTestsList: (state) => {
+        return !!state.fixedtests
+    },
     currentMenuItems: (state,getters,rootState) => {
         console.log("rootState >> ", rootState.route);
         let params = rootState.route.params;
         let category = params.category;
         console.log("currentmenuItems >> ");
         console.log("params >> ", params);
-        console.log("category >> ", category);
+        console.log("#### category >> ", category);
         if (!!params.name) {
             // THIS WILL BE THE ACTUAL TEST...
             return [];            
         }
         if (!!params.category) {
-            if (params.type==='fixedtest') {
+            if (params.format==='fixedtest') {
                 let fixedTestByCategory = _.find(state.fixedtests, {type: params.category});
+                console.log('fixedTestByCategory >',fixedTestByCategory) ;
                 if (!!fixedTestByCategory) {
                     console.log('fixedTestByCategory .. ', fixedTestByCategory);
                     return _.map(fixedTestByCategory.tests, obj => {
@@ -59,15 +74,18 @@ const getters = {
                         }
                     })
                 }
+                else {
+                    return null;
+                }
             }
             let cat = _.find(categories, { value: category})
             return cat.children;
         }
-        else if (!!params.type) {
+        else if (!!params.format) {
             return categories;            
         }
         else {
-            return state.testTypes
+            return state.testFormats
         }
 
     },
@@ -99,9 +117,9 @@ const getters = {
                     name = 'user';
                     order = 0;
                 }
-                if (key=='type') {
+                if (key=='format') {
                     // cat = _.find(categories, {value});
-                    label = _.find(state.testTypes, {value}).label
+                    label = _.find(state.testFormats, {value}).label
                     name = key;
                     order = 1;
                 }

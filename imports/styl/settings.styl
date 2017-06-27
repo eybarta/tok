@@ -1,0 +1,91 @@
+$fa-font-path = "http://netdna.bootstrapcdn.com/font-awesome/4.7.0/fonts"
+@import "../../node_modules/font-awesome-stylus/index"
+@import './lib/rupture'
+@import './variables'
+@import './mixins'
+
+
+.vmid
+    &:before
+        content ''
+        display inline-block
+        vertical-align middle
+        height 100%
+    & > *
+        vertical-align middle
+        display inline-block
+
+.center
+    margin 0 auto
+.tcenter
+    text-align center
+.tright
+    text-align right
+.tleft
+    text-align left
+    
+.right
+    float right
+.left
+    float left
+
+.clear
+    clear both
+.clearfix
+    &:after
+        content ''
+        display table
+        clear both
+        visibility hidden
+.topleft
+    corner()
+.topright
+    corner(top, right)
+
+
+.inline
+    display inline-block
+.block
+    display block !important
+.txt-md
+    fontsizer(28px, 32px)
+
+.pb-0
+    padding-bottom 0 !important
+// margin 
+for alias, prop in $space
+    for size,value in margins
+        .{alias}-{size}
+            {prop} value
+            +below(breaks.tablet)
+                {prop} round((value/1.8))
+            +below(breaks.mobile)
+                {prop} round((value/2))
+
+
+.primary
+    color bluegreen
+.green
+    color green
+.red
+    color red
+.orange
+    color orange
+
+for $color, value in colormap
+        .{$color}
+            border-color rgba(darken(value, 5), 0.7)
+            color darken(value, 5)
+            &:hover
+                color darken(value, 1)
+                background rgba(darken(value, 5), 0.005)    
+
+
+
+// borders
+
+.b
+    &t-dashed
+        border-top 1px dashed bluegreen
+    &b-dashed
+        border-bottom 1px dashed bluegreen

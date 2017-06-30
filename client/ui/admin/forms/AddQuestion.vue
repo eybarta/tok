@@ -1,14 +1,14 @@
 <template>
 <div class="add-question">
     <ul class="submenu choose-category">
-        <li v-for="category in filteredCategories" :class="[!!activecat && activecat.value==category.value ? 'active' : '']">
+        <li v-for="category in filteredCategories" :class="[!!activecat && activecat.value==category.value ? 'active' : '']" :key="category">
             <a href="#p" @click.prevent="updateActiveCat(category)">{{category.label}}</a>
         </li>
     </ul>
     <div v-if="!!activecat" class="active-tab clearfix">
         <div v-if="!!log" class="log-msg">
             <h5 v-text="logMsg"></h5>
-            <button @click="log=false;logMsg=null" class="btn btn-success" v-text="'הוסף עוד שאלה או שאלות ב' + activecat.label"></button>
+            <button @click="log=false; logMsg=null" class="btn btn-success" v-text="'הוסף עוד שאלה או שאלות ב' + activecat.label"></button>
         </div>
         <div v-else>
             <multiselect v-if="!!activecat.children && activecat.children.length" class="dropdown w-elastic-30 maxw-300" v-model="activesubcat" track-by="value" label="label" placeholder="תבחר סוג שאלה"
@@ -20,12 +20,12 @@
             <button @click="save" :class="['btn', 'btn-success', 'mr-min', !validQuestionEntry ? 'disabled' : '']">שמור</button>
             <div class="form pt-big mt-med bt-dashed clear">
                 <div v-if="activecat.value==='matrices'">
-                    <div v-for="(item, itemindex) in list" :class="['qa', activeQuestionIndex===itemindex ? 'active' : '']">
+                    <div v-for="(item, itemindex) in list" :key="item" :class="['qa', activeQuestionIndex===itemindex ? 'active' : '']">
                         <button v-if="list.length>1" :class="[activeQuestionIndex===itemindex ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(itemindex)" ><span></span></button>
                         <transition name="fade-slide">
                             <div v-if="activeQuestionIndex===itemindex">
                                 <div class="form-full block">
-                                    <div v-for="(answer, index) in item.answers" class="field upload flb w-elastic-50 maxw-500" @click="uploadFile('answer', [itemindex, index], $event)">
+                                    <div v-for="(answer, index) in item.answers" :key="answer" class="field upload flb w-elastic-50 maxw-500" @click="uploadFile('answer', [itemindex, index], $event)">
                                         <img v-if="!!answer" :src="answer" alt="">
                                         <input :value="answer" type="text">
                                         <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
@@ -36,19 +36,23 @@
                     </div>
                 </div>
                 <div v-else>
-                    <div v-for="(item, index) in list" :class="['qa', activeQuestionIndex===index ? 'active' : '']">
+                    <div v-for="(item, index) in list" :key="item" :class="['qa', activeQuestionIndex===index ? 'active' : '']">
                         <button v-if="list.length>1" :class="[activeQuestionIndex===index ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(index)" ><span></span></button>
                         <transition name="fade-slide">
                             <div v-if="activeQuestionIndex===index">
                                 <div class="field flb w-elastic-50 maxw-500 pb-big">
-                                    <textarea id="question" class="reg w-100" v-model="item.question" type="text" required></textarea>
-                                    <label for="question">שאלה</label>
+                                    <textarea :id="'question'+index" class="reg w-100" v-model="item.question" type="text" required></textarea>
+                                    <label :for="'question'+index">שאלה</label>
                                 </div>
                                 <div class="form-full block">
-                                    <div v-for="(answer, index) in item.answers" class="field flb w-elastic-50 maxw-500">
+                                    <div v-for="(answer, index) in item.answers" :key="index" class="field flb w-elastic-50 maxw-500">
                                         <input :id="'answer'+index" class="reg w-100" v-model="item.answers[index]" type="text" required>
                                         <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
                                     </div>
+                                </div>
+                                <div class="field flb">
+                                    <input v-model="item.code" :id="'code'+index" type="text">
+                                    <label :for="'code'+index">קידוד</label>
                                 </div>
                             </div>
                         </transition>
@@ -82,6 +86,7 @@ import { mapActions, mapState } from 'vuex';
 
 const questionObj = {
     question: null,
+    code: null,
     answers: [
         null,
         null,

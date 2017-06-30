@@ -83,7 +83,7 @@ export default {
     innerStrokeColor: {
       type: String,
       required: false,
-      default: '#323232'
+      default: '#f4aeae'
     },
     fps: {
       type: Number,

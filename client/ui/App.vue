@@ -8,7 +8,7 @@
 		<side-menu v-if="!!user"></side-menu>
 	-->
 	   
-   	 	<preloader v-if="!apploaded && !!appCompReady"></preloader>
+   	 	<preloader v-if="(!apploaded || !!userloading) && !!appCompReady"></preloader>
 		<router-view></router-view>
 
 		<popup v-if="popup.active">
@@ -35,7 +35,6 @@ export default {
 	},
 	created() {
 		// console.log('app was created successfuly >> ', this.user);
-		// this.initUsers();
 		this.initFixedTests();
 		this.initImagesCollection();
 	},
@@ -51,11 +50,11 @@ export default {
 		Preloader
     },
 	methods: {
-		...mapActions('usersModule', [
-			'initUser',
-			'initUsers'
+		// ...mapActions('usersModule', [
+		// 	'initUser',
+		// 	'initUsers'
 			
-		]),
+		// ]),
 		...mapActions('testsModule', [
 			'initFixedTests',
 			//temp
@@ -65,7 +64,8 @@ export default {
 	computed: {
 		...mapState('usersModule', [
 			'user',
-			'isAdmin'
+			'isAdmin',
+			'userloading'
 		]),
 		...mapState('globalStore', [
 			'popup',

@@ -6,9 +6,9 @@
             </li>
         </ul>
         <h2 v-text="title"></h2>
-        <div class="block block-80">
-            <transition-group v-if="!!currentMenu && !!currentMenu.items.length" name="list-complete" class="waffle waffle-3" tag="div" mode="out-in" appear>
-                <router-link :class="['item', !calcRequirement(item) ? 'disabled' : '' ]" :key="item" v-for="(item, index) in currentMenu.items" :to="{ name: currentMenu.name, params: { [currentMenu.key]: item.value || item.name || index } }">
+        <div class="block block-60">
+            <transition-group v-if="!!currentMenu && !!currentMenu.items.length" name="list-complete" class="waffle waffle-3" tag="div" appear>
+                <router-link :class="['item', !calcRequirement(item) ? 'disabled' : '' ]" v-for="(item, index) in currentMenu.items" :to="{ name: currentMenu.name, params: { [currentMenu.key]: item.value || item.name || index } }"  :key="index">
                     <span><span v-html="!!item.label ? item.label : (!!item.name ? item.name : activeCategory.label + ' ' + (index+1)) "></span></span>
                 </router-link>
             </transition-group>                
@@ -40,7 +40,9 @@ import Popup from './Popup.vue'
                 'breadCrumbs',
                 'activeCategory',
                 'fixedTestsList',
-                'hasFixedTestsList'
+                'hasFixedTestsList',
+                'hasHebrew',
+                'hasMatrices'
             ]),
             ...mapGetters('usersModule', [
                 'userTestHistory',
@@ -97,18 +99,6 @@ import Popup from './Popup.vue'
                 console.log('wtffff');
                 return false;
             },
-            // userCurrentCategoryTestHistory() {
-            //     let _history = this.userTestHistory;
-            //     if (!!_history) {
-            //         let category = this.activeCategory;
-            //         console.log(" userCurrentCategoryTestHistory >> category >> ", category);
-            //         return _.filter(_history, test => {
-            //             return test.meta.category===category.value
-            //         })
-            //     } else {
-            //         return [];
-            //     }
-            // },  
             currentMenuType() {
                 console.log('current menu > ', this.route, " :: ", this.route.name);
                 let types = this.menuTypes,
@@ -142,7 +132,7 @@ import Popup from './Popup.vue'
             title() {
                 let menutype = this.currentMenuType,
                 label,
-                title = "כיצד ברצונך להתרגל?";
+                title = "כיצד ברצונך לתרגל?";
 
 
                 if (menutype==='category') {
@@ -169,12 +159,16 @@ import Popup from './Popup.vue'
             console.log("categories >> ", this.categories);
             console.log("currentMenuItems >> ", this.currentMenuItems);
         },
+        created() {
+            this.initQuestions();
+        },
         methods: {
             ...mapActions('usersModule', [
 			    'dirtifyUser'			
 		    ]),
             ...mapActions('testsModule', [
                 'updateTestMenu',
+                'initQuestions'
             ]),
             ...mapActions('globalStore', [
                 'callPopup'
@@ -184,6 +178,7 @@ import Popup from './Popup.vue'
                     return true;
                 }
                 else {
+                    console.log('item.requirement > ', item.requirement, " ;: ", this[item.requirement.toString()]);
                     return this[item.requirement];
                 }
             }
@@ -201,9 +196,10 @@ import Popup from './Popup.vue'
   margin-right: 10px;
 }
 .list-complete-enter, .list-complete-leave-to
-/* .list-complete-leave-active for <2.1.8 */ {
+{
   opacity: 0;
   transform: translateY(30px);
+  transition: all 1s;
 }
 .list-complete-leave-active {
   position: absolute;

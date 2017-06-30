@@ -4,6 +4,7 @@ import * as actions from './actions'
 
 const state = {
     user: null,
+    loadinguser: false,
     users: [],
     userLogins: null,
 }
@@ -20,6 +21,9 @@ const mutations = {
     },
     SIGN_OUT_USER (state) {
         state.user = null;
+    },
+    LOADING_USER(state, bool) {
+        state.loadinguser = bool;
     }
 }
 
@@ -35,7 +39,7 @@ const getters = {
     userTestHistory: (state, rootState) => {
         let user = state.user;
         let route = rootState.route;
-        if (!!user && !!user.profile.tests) {
+        if (!!user && !!user.length && !!user.profile.tests) {
             return user.profile.tests;
         }
         return false;

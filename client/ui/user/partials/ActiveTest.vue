@@ -135,8 +135,12 @@
                         </div>
                     </div>
                     <div class="links">
+                        
                         <button class="btn btn-warning block center mb-small" @click="mode='review'">חזרה על המבחן</button>
                         <router-link to="/" class="back-btn btn btn-primary vmid" exact><span>חזרה לעמוד הבית </span><i class="fa fa-chevron-left mr-min"></i></router-link>
+                    </div>
+                    <div class="check-field">
+                        <input id="historySave" v-model="testinfo.savedInHistory" type="checkbox"><label for="historySave">לשמור מבחן?</label>
                     </div>
                 </div>
             </div>
@@ -164,7 +168,7 @@ export default {
             withtimer: true,
             started: false,
             goodluck: false,
-            totalTime: 840000,
+            totalTimerTime: 840000,
             timer: 840000,
             totalTimerSteps:60,
             questiontimer: null,
@@ -187,7 +191,8 @@ export default {
                 percentComplete: 0,
                 timeToComplete: 0,
                 averageTimeOnQuestion: 0,
-                questions: []
+                questions: [],
+                savedInHistory: false
             },
         }
     },
@@ -262,7 +267,7 @@ export default {
                                 // }
                                 // angle += angle_increment;
 
-                                if (this.timer<=0) {
+                                if (this.mode==='test' && this.timer<=0) {
                                     Meteor.clearInterval(int);
                                     this.finish();
                                 }
@@ -352,13 +357,14 @@ export default {
             this.$set(this.testinfo, 'wrong', answered.length-correct.length);
             this.$set(this.testinfo, 'unanswered', this.testQuestions.length-answered.length);
             this.$set(this.testinfo, 'score', Math.round((correct.length/this.testQuestions.length)*100));
-            this.$set(this.testinfo, 'regulatoryScore',Math.max(1, Math.round(((correct.length-this.testinfo.wrong)/this.testQuestions.length)*8+1)));
+            this.$set(this.testinfo, 'regulatoryScore',Math.max(1, ((correct.length-this.testinfo.wrong)/this.testQuestions.length)*8+1).toFixed(1));
             this.$set(this.testinfo, 'percentComplete', (this.answeredSoFar/20)*100)
             this.$set(this.testinfo, 'timeToComplete', moment.duration(moment(840000).diff(this.timer)).asSeconds())
             this.$set(this.testinfo, 'averageTimeOnQuestion', this.getAverageTimeOnQuestion())
             this.$set(this.testinfo, 'meta', this.route.params)
-            this.$set(this.testinfo, 'meta.date', moment().format("D/M/YYYY"))
+            this.$set(this.testinfo.meta, 'date', moment().format("D/M/YYYY"))
             this.$set(this.testinfo, 'label', this.testTitle + ' ' + this.testinfo.meta.date);
+            this.$set(this.testinfo, 'savedInHistory', this.savedInHistory)
             
             console.log(correct.length, " questions were answered correctly");
             console.log((correct.length/this.testQuestions.length)*100, " is your score");
@@ -384,14 +390,14 @@ export default {
             'activeCategory'
         ]),
         calcStartcolor() {
-            return this.completedTimerSteps > this.totalTimerSteps/2 ? "#e7a255" : "#3c6c79";
+            return this.completedTimerSteps > this.totalTimerSteps/2 ? "#ea6b6b" : "#ea6b6b";
         },
         calcEndColor() {
-            return this.completedTimerSteps > this.totalTimerSteps/2 ? "#e7a255" : "#ea6b6b";
+            return this.completedTimerSteps > this.totalTimerSteps/2 ? "#ea6b6b" : "#ea6b6b";
         },
         completedTimerSteps() {
-            let stepIntervals = this.totalTime/60;
-            return Math.round((this.totalTime-this.timer)/stepIntervals);
+            let stepIntervals = this.totalTimerTime/60;
+            return Math.round((this.totalTimerTime-this.timer)/stepIntervals);
         },
         questionImageUrl() {
             let q = this.testQuestions[this.questionIndex];
@@ -518,6 +524,17 @@ wrong-color = lighten(red, 5);
         bottom 10vmin
         left 50%
         transform translateX(-50%)
+    .check-field
+        position absolute
+        bottom 5vmin
+        left 50%
+        transform translate(-50%,0)
+        & > *
+            display inline-block
+            vertical-align middle
+            &#historySave
+                margin-left 5px
+
 .green
     color green !important
 .red
@@ -801,10 +818,13 @@ wrong-color = lighten(red, 5);
     font-size 3vmin
     position relative
     z-index 103
+    transform scale(0.6)
     transition font-size 400ms ease
     .time-clock
         position absolute
         self-center()
+        font-size 4vmin
+        font-family 'Helvetica Thin'
     &.bigger
        font-size 6vmin
        z-index 105

@@ -48,6 +48,21 @@ const getters = {
     hasFixedTestsList: (state) => {
         return !!state.fixedtests
     },
+    hasMatrices: state => {
+        if (!!state.questionbank) {
+
+        }
+    },
+    hasHebrew: state => {
+        let questionbank = state.questionbank;
+        console.log("HAS HEBREW >>", questionbank);
+        if (!!questionbank) {
+            let questionsOfCat = _.filter(state.questionbank, obj => obj.category.value === 'hebrew');
+            console.log('questionsOfCat > ', questionsOfCat);
+            return !!questionsOfCat.length;
+        }
+        return false;
+    },
     currentMenuItems: (state,getters,rootState) => {
         console.log("rootState >> ", rootState.route);
         let params = rootState.route.params;

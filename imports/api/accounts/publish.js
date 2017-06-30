@@ -2,12 +2,16 @@ if (Meteor.isServer) {
     Meteor.publish('allusers', function() {
         var self = this;
         let userId = this.userId
-         if (Roles.userIsInRole(userId, 'admin')) {
-            self.ready();
+        if (Roles.userIsInRole(userId, 'admin')) {
+            // self.ready();
+            
             return Meteor.users.find({
                 _id: { $ne: this.userId }
             });
         } 
+        else if (Roles.userIsInRole(userId, 'user')) {
+            return Meteor.users.find({_id: this.userId });
+        }
         else {
             self.ready();
             return null

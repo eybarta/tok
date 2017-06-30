@@ -10,7 +10,7 @@ Meteor.methods({
         console.log("save_users ", data.userIds);
         let _users = [];
         _.each(data.userIds, function (id) {
-            let psw = Random.id(5)
+            let psw = Random.id(7).toLowerCase()
             let userData = {
                 username: id,
                 password: psw,

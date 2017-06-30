@@ -101,7 +101,8 @@ export const categories = [
     },
     {
         label: 'מטריצות',
-        value: 'matrices'
+        value: 'matrices',
+        requirement: 'hasMatrices'
     },
     {
         label: 'מילוי הוראות',
@@ -135,7 +136,8 @@ export const categories = [
                 label: 'קריאת נתונים',
                 value: 'analyze'
             },
-        ]
+        ],
+        requirement: 'hasInstruct'
     },
     {
         label: 'עברית',
@@ -162,7 +164,8 @@ export const categories = [
                 value: 'comprehension'
             }
             
-        ]
+        ],
+        requirement: 'hasHebrew'
     },
     {
         label: 'מכינה',

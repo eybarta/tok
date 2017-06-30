@@ -24,19 +24,14 @@
                         <th>טלפון</th>
                         <th>מייל</th>
                     </thead>
-                    <!-- TODO:: ADD PAGINATION 
                     <paginate
-                name="users"
+                name="parsedUsers"
                 :list="parsedUsers"
                 :per="usersPerPage"
                 tag="tbody"
                 class="table-row"
-                is="transition-group"
                 >
-                -->
-                
-                <tbody class="table-row" is="transition-group">
-                        <tr v-for="user in parsedUsers" :key="user.username" :class="[!!user.selected ? 'selected' : '', 'table-row-item']" @click="user.selected=!user.selected">
+                        <tr v-for="user in paginated('parsedUsers')" :key="user.username" :class="[!!user.selected ? 'selected' : '', 'table-row-item']" @click="user.selected=!user.selected">
                             <td v-html="user.username"></td>
                             <td v-html="user.profile.psw"></td>
                             <td v-html="user.profile.name"></td>
@@ -47,15 +42,14 @@
                             <td v-html="user.profile.phone"></td>
                             <td v-html="user.profile.email"></td>
                         </tr>
-                        </tbody>
-                    <!--</paginate>-->
+                    </paginate>
                 </table>
-                <!--
-                <div class="pager" v-if="parsedUsers.length > usersPerPage">
-                <paginate-links id="pager" ref="pager" for="users" :limit="4" 
+                <div class="table-pager" v-if="parsedUsers.length > usersPerPage">
+                <paginate-links :async="true" id="pager" ref="pager" for="parsedUsers" :limit="4" 
                 :show-step-links="true"
-                :step-links="{next: 'Next', prev: 'Prev'}"></paginate-links>
-                -->
+                :hide-single-page="true"
+                :step-links="{next: 'הבא', prev: 'קודם'}"></paginate-links>
+                </div>
             </div>
             <h4 v-else>לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
         </div>
@@ -112,7 +106,8 @@ export default {
     data() {
         return {
             userOptions,
-            usersPerPage:15,
+            usersPerPage:25,
+            paginate: ['parsedUsers'],
             sortby: {
                 keys: [],
                 dir: []
@@ -436,4 +431,28 @@ export default {
     transition all .5s
 .table-row-item
     backface-visibility hidden
+
+.table-pager
+    background lighten(darkblue, 55)
+    padding 10px
+    border-radius 0 0 4px 4px
+    ul
+        text-align right
+        li
+            display inline-block
+            padding 0 10px
+            cursor pointer
+            a
+                color lighten(gray, 10)
+                font-size 14px
+            &.number a
+                font-size 16px
+            &.disabled a
+                color lighten(gray, 40)
+                cursor default
+            &.active a
+                color darken(bluegreen, 10)
+                text-decoration underline
+
+
 </style>

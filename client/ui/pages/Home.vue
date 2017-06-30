@@ -1,6 +1,6 @@
 <template> 
 <main>
-    <div v-if="!!apploaded && (!user || !user._id)" v-blaze="'login'"></div>
+    <div v-if="!!apploaded && !user" v-blaze="'login'"></div>
      
     <router-view></router-view>
 </main>
@@ -8,11 +8,13 @@
 <script>
 import AdminHome from '/client/ui/admin/Home.vue'
 import UsersHome from '/client/ui/user/Home.vue'
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
     export default {
-        data() {
-            return {
+        created() {
+            console.log("this route ::: ", this.route)
+            if (this.route.name==='loggedout') {
+                this.loadApp();
             }
         },
         mounted() {
@@ -24,9 +26,17 @@ import { mapState, mapGetters } from 'vuex'
             AdminHome,
             UsersHome
         },
+        methods: {
+            ...mapActions('globalStore', [
+                'loadApp'
+            ])
+        },
         computed: {
+            ...mapState([
+                'route'
+            ]),
             ...mapState('globalStore', [
-                'apploaded'
+                'apploaded',
             ]),
             ...mapState('usersModule', [
                 'user'

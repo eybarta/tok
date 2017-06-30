@@ -98,7 +98,6 @@ function generateSequence(question, shift, params) {
     }
     /* Feed controls / shift back to questionObject for later processing */
     console.log("GENERATE SEQUENCE:: params >> ", params, " :: shift >> ", shift, " :: constants >> ",constants, " :: operations >> ", operations);
-    populateQuestionObj(question, _.clone(constants), shift, operations);
 
     powconstant = constants[operationIndex];
     for (var i=0; i< params.partsAmount; i++) {
@@ -119,9 +118,15 @@ function generateSequence(question, shift, params) {
                 if (Math.abs(constant) > Math.abs(lastpart)) {
                     fixoperation = (constant > lastpart) ? 'subtract' : 'add';
                 }
+                console.log('divide fix operation...before constant: ', constant);
                 constant = _[fixoperation](constant, 1);
+                console.log('divide fix operation...after constant: ', constant);
                 nextValue = _[operation](lastpart, constant);
+                console.log('divide fix operation...nextValue: ', nextValue);
+                
                 constants[operationIndex] = constant;
+                console.log('divide fix operation...constants: ', constants);
+                
             }
             sequenceparts.push(nextValue);
             if (shift==='power') {
@@ -134,6 +139,7 @@ function generateSequence(question, shift, params) {
             operationIndex = operationIndex===operations.length-1 ? 0 : ++operationIndex;
         }
     }
+    populateQuestionObj(question, _.clone(constants), shift, operations);
     console.log("sequenceparts >> ", sequenceparts);
     return sequenceparts;
 }

@@ -21,48 +21,6 @@ import { router } from '/imports/startup/client/router'
 
 
 sync(store, router);
-console.log("*****STORE >> ", store);
-// Global Guard
-/*
-router.beforeEach((to,from,next) => {
-    console.log("TO:", to);
-    let userState = store.state['usersModule'];
-
-      let userId =  Meteor.userId();
-      if (!!userId) {
-        console.log("has userId >> ", userId, userState.user);
-        if (!userState.user || !userState.user.roles.length) {
-          console.log('user not hoooked >> wait for user data')
-          // Don't go anywhere until you have the user object
-          Tracker.autorun((c) => {
-            let user = Meteor.user();
-            if (!!user) {
-              let roles = Roles.getRolesForUser(user);
-              if (roles.length>0) {
-                store.dispatch('usersModule/initUser');
-                next()
-                stop()
-              }        
-            }
-          })
-        }
-        else {
-            console.log('user hooked (has roles) >> ', userState.user.roles);
-            next()
-        }
-      }
-      else {
-        console.log('user not logged in >> go home');
-        store.dispatch('usersModule/initUser');
-        if (to.name!='home') {
-          next('/')
-        }
-        else {
-          next()
-        }
-      }
-})
-*/
 // Libs
 _ = lodash;
 

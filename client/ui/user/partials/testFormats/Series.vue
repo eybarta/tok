@@ -56,7 +56,7 @@
                 </div>
                 </transition>
                 <div ref="parts" class="parts ltr">
-                    <span v-for="part in question.parts">{{ part }}</span>
+                    <span v-for="part in question.parts" :key="part">{{ part }}</span>
                     <span v-if="mode==='review' && showsolution===index" class="next success">{{ question.answers.correct}}</span>
                     <span v-else class="next">?</span>
                 </div>
@@ -65,8 +65,8 @@
             <button v-if="mode=='review'" :class="['btn', showsolution===index ? 'btn-warning' : 'btn-primary', 'mb-small']" @click="toggleSolution()" v-text="showsolution===index ? 'החבא פתרון' : 'הצג פתרון'"></button>
                 <h5 class="rtl" v-text="mode==='test' ? 'נא לבחור אחת התשובות:' : 'תשובה שבחרת:'"></h5>
                 <ul class="rtl">
-                    <li v-for="(answer, answerIndex) in question.answers.list">
-                        <a href="#p" @click.prevent="updateChosenAnswer(question, answer);" 
+                    <li v-for="(answer, answerIndex) in question.answers.list" :key="answerIndex">
+                        <a href="#p" @click.prevent="updateChosenAnswer(question, answer)" 
                             :class="[
                                     question.chosenAnswer===answer ? 'chosen' : '', 
                                     mode==='review' && answer===question.answers.correct && showsolution===index ? 'correct' : '',
@@ -158,11 +158,11 @@ export default {
                 let i = fixedIndex>-1 ? fixedIndex : index%controls.length;
                 let oi = fixedIndex>-1 ? fixedIndex : index%operations.length;
                 let operation = operations[oi];
-                // if (questionIndex==13) {
-                //     console.log(">> controls >> ", controls);
-                //     console.log(">> operations >> ", operations);
-                // }
-                // console.log([questionIndex], "indexes[2] :: control :: shift ", i, " :: ", oi, " :: ", controls[i], " :: ", shifts[i]);
+                if (questionIndex==14) {
+                    console.log(">> controls >> ", controls);
+                    console.log(">> operations >> ", operations);
+                    console.log([questionIndex], "indexes[2] :: control :: shift ", i, " :: ", oi, " :: ", controls[i], " :: ", shifts[i]);
+                }
                 let operationIcon = function() {
                     switch(operation) {
                         case 'add':
@@ -179,9 +179,9 @@ export default {
                 }
                 // console.log([questionIndex]," >>> amount of parts: ", question.parts.length, " :: ",  question.type, " :: ", controls[i], " :: ", shifts[i]);
                 this.positionControlAndShift(index, questionIndex, !!shifts, question.type, question.parts.length, showother);
-                // if (questionIndex==13) {
-                //     console.log([questionIndex], " :: i= ", i, " :: control> ", controls[i], ' :: shift == ', shifts[i], ' :: index == ', index);
-                // }
+                if (questionIndex==14) {
+                    console.log([questionIndex], " :: i= ", i, " :: control> ", controls[i], ' :: shift == ', shifts[i], ' :: index == ', index);
+                }
                 let _control = 
                     isNaN(shifts[i])
                     ? parseInt(controls[i])

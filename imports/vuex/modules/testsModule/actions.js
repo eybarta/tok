@@ -16,6 +16,7 @@ export const updateTestMenu = ({commit}, data) => {
 
 // ACTIVE TEST
 export const saveTestToUser = ({ commit, state}, testinfo) => {
+    console.log("SAVE TEST >> ", testinfo);
     return new Promise((resolve, reject) => {
         Meteor.call('user.savetest', testinfo, result => {
             resolve();
@@ -25,11 +26,11 @@ export const saveTestToUser = ({ commit, state}, testinfo) => {
 
 export const initFixedTests = ({ commit }) => {
     Tracker.autorun((c) => {
-        Meteor.subscribe('fixedtests');
+        let fixedtestsSub = Meteor.subscribe('fixedtests');
         let fixedtests = FixedTests.find({}).fetch();
-        if (!!fixedtests) {
+        if (!!fixedtestsSub.ready()) {
             commit('INIT_FIXED_TESTS', fixedtests)
-            stop();
+            c.stop();
         }
     })
 }
@@ -70,12 +71,12 @@ export const removeFixedTest = ({commit,state,dispatch}, testdata) => {
 // QUESTION BANK :: ADMIN
 export const initQuestions = ({ commit }) => {
     Tracker.autorun((c) => {
-        Meteor.subscribe('questions');
+        let questionsSub = Meteor.subscribe('questions');
         let questions = Questions.find({}).fetch();
-        if (!!questions) {
+        if (questionsSub.ready()) {
             console.log("QUESTIONS >>> ", questions);
             commit('INIT_QUESTIONS', questions)
-            stop();
+            c.stop();
         }
     })
 }
@@ -102,7 +103,7 @@ export const initImagesCollection = ({commit}) => {
         if (!!images) {
             commit('INIT_IMAGES_COLLECTION', images)
             console.log("IMAGES >> ", images);
-            stop();
+            c.stop();
         }
     })   
 }
@@ -115,7 +116,7 @@ async function fetchQuestionList(category = null) {
             console.log("questionlist >> ", questionlist)
             if (!!questionlist.length) {
                 resolve(questionlist[0].questions);
-                stop();
+                c.stop();
             }
         })
     });

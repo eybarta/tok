@@ -8,9 +8,6 @@ Accounts.config({
 //   forbidClientAccountCreation: true, 
 //   loginExpirationDays: 30, 
 }); 
-// Accounts.ui.config({ 
-//   passwordSignupFields: 'USERNAME_AND_OPTIONAL_EMAIL', 
-// }); 
 
 Accounts.ui.config({
   passwordSignupFields: 'USERNAME_ONLY',
@@ -55,23 +52,18 @@ AccountsTemplates.addFields([
     pwd
 ]);
 
-// AccountsTemplates.addField(email);
-// AccountsTemplates.addField(pwd);
-const userId = Meteor.userId()
-// CALLBACKS
-Accounts.onLogin(() => {
-  console.log('login callback');
-  let interval = Meteor.setInterval(function() {
-      let userId = Meteor.userId()
-      console.log('useriddd ', userId);
-      
-      if (!!userId) {
-        Meteor.clearInterval(interval)
-        router.push({ name: 'home'})
-      }
-      
-    }, 100)
 
+const userId = Meteor.userId()
+Meteor.loggingIn(function(a,b,c) {
+  console.log('logging in...',a,b,c);
+
+})
+// CALLBACKS
+Accounts.onLogin(function() {
+  console.log("LOGIN!!!!");
+  if (!userId) {
+    router.push({ name: 'home'})
+  }
 })
 
 Accounts.onLogout(() => {
@@ -81,9 +73,10 @@ Accounts.onLogout(() => {
       console.log('useriddd ', userId);
       
       if (!userId) {
-        console.log('finally logged out');
+        console.log('finally logged out > ', router);
+        router.push('/loggedout')
+        console.log('2 finally logged out');
         clearInterval(interval)
-        router.push('/')
       }
       
     }, 100)

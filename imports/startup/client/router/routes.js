@@ -17,7 +17,7 @@ import ItemMenu from '/client/ui/components/ItemMenu.vue'
 async function requireAuth(to,from,next) {
 	let destination = to.name;
 	let user = await store.dispatch('usersModule/initUser');
-	store.dispatch('globalStore/loadApp')
+	console.log("USER (from router) >> ", user);
 	if (!user) {
 		destination==='login'
 		? next()
@@ -31,13 +31,15 @@ async function requireAuth(to,from,next) {
 		}
 		else {
 			console.log('ROUTE TO USER>> ', to, from);
-			destination==='home'
+			destination==='home' || destination==='login'// && !!store.state.globalStore.apploaded
 			? next({ name: 'user', params: { username: user.username }})
 			: (to.path.indexOf('admin')>-1
 				? next('/')
 				: next());
 		}
 	}
+	store.dispatch('globalStore/loadApp')
+	
 }
 
 export const routes = [
@@ -131,6 +133,16 @@ export const routes = [
 		name: 'login',
 		component:Home,
 		beforeEnter: requireAuth,
+	},
+	{
+		path: '/loggedout',
+		name: 'loggedout',
+		component:Home,
+		beforeEnter: (to,from,next) => {
+			console.log('before enter logout');
+			store.dispatch('usersModule/initUser', true);
+			next();
+		}
 	},
 	{
 		path: '*',

@@ -12,7 +12,6 @@
 </template>
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import Popup from '/client/ui/components/Popup.vue';
     export default {
         mounted() {
             let user = this.user;
@@ -35,9 +34,6 @@ import Popup from '/client/ui/components/Popup.vue';
                 'dirtifyUser',
                 'signOutUser'
             ]),
-        },
-        components: {
-            Popup
         }
     }
 </script>

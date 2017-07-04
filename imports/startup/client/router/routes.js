@@ -1,6 +1,6 @@
 // vuex store
 import store from '/imports/vuex'
-console.log("store from router > ", store)
+console.log("store from router > ", store, " :: ", store.state)
 // pages
 import Home from '/client/ui/pages/Home.vue';
 // Admin
@@ -14,31 +14,58 @@ import ActiveTest from '/client/ui/user/partials/ActiveTest.vue'
 // components
 import ItemMenu from '/client/ui/components/ItemMenu.vue'
 
-async function requireAuth(to,from,next) {
+function auth() {
+	return new Promise((resolve, reject) => {
+		let userId = Meteor.userId();
+		if (!userId) {
+			resolve(null);
+			return null;
+		}
+		Tracker.autorun((c) => {
+			var user = Meteor.user();
+			if (!!user) {
+				if (!!user && !!user.roles && !!user.roles.length) {
+					resolve(user);
+					c.stop();
+				}
+				else {
+					resolve(null);
+					c.stop();
+				}
+			}
+		});
+	});
+}
+function requireAuth(to,from,next) {
 	let destination = to.name;
-	let user = await store.dispatch('usersModule/initUser');
-	console.log("USER (from router) >> ", user);
-	if (!user) {
-		destination==='login'
-		? next()
-		: next({ name: 'login' })
-	} else {
-		let isAdmin = store.getters['usersModule/isAdmin'];
-		if (!!isAdmin) {
-			destination==='home'
-			? next('/admin')
-			: next();
+	store.dispatch('usersModule/loadingUser', true);
+	auth().then(user => {
+		console.log('auth response > ', user);
+		if (!user) {
+			destination === 'login'
+				? next()
+				: next({ name: 'login' })
+		} else {
+			let isAdmin = Roles.userIsInRole(user._id, 'admin');
+			if (!!isAdmin) {
+				console.log('[ROUTER] isAdmin >> ', isAdmin);
+				destination === 'home' || destination === 'login'
+					? next('/admin')
+					: next();
+			}
+			else {
+				destination === 'home' || destination === 'login'// && !!store.state.globalStore.apploaded
+					? next({ name: 'user', params: { username: user.username } })
+					: (to.path.indexOf('admin') > -1
+						? next('/')
+						: next());
+			}
 		}
-		else {
-			console.log('ROUTE TO USER>> ', to, from);
-			destination==='home' || destination==='login'// && !!store.state.globalStore.apploaded
-			? next({ name: 'user', params: { username: user.username }})
-			: (to.path.indexOf('admin')>-1
-				? next('/')
-				: next());
-		}
-	}
-	store.dispatch('globalStore/loadApp')
+		store.dispatch('usersModule/initUser');
+		store.dispatch('usersModule/loadingUser', false);
+		store.dispatch('globalStore/loadApp')
+	});
+	
 	
 }
 
@@ -135,13 +162,15 @@ export const routes = [
 		beforeEnter: requireAuth,
 	},
 	{
-		path: '/loggedout',
-		name: 'loggedout',
+		path: '/logout',
+		name: 'logout',
 		component:Home,
 		beforeEnter: (to,from,next) => {
-			console.log('before enter logout');
+			Meteor.logout();
 			store.dispatch('usersModule/initUser', true);
 			next();
+			// console.log('[ROUTER] logout >> go to login >>, ', next);
+			// console.log('[ROUTER] next????? ', to,from,next);
 		}
 	},
 	{

@@ -13,7 +13,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
     export default {
         created() {
             console.log("this route ::: ", this.route)
-            if (this.route.name==='loggedout') {
+            if (this.route.name==='logout') {
                 this.loadApp();
             }
         },
@@ -21,6 +21,11 @@ import { mapState, mapGetters, mapActions } from 'vuex'
             console.log('$("#at-field-username_and_email") >> ', $("#at-field-username_and_email"));
 	        $("#at-field-username_and_email").attr('placeholder', 'שם משתמש או אימייל')
             $("#at-field-password").attr('placeholder', 'סיסמא');
+
+            if (!!this.user) {
+                this.initFixedTests();
+                this.initImagesCollection();
+            }
         },
         components: {
             AdminHome,
@@ -29,6 +34,11 @@ import { mapState, mapGetters, mapActions } from 'vuex'
         methods: {
             ...mapActions('globalStore', [
                 'loadApp'
+            ]),
+            ...mapActions('testsModule', [
+                'initFixedTests',
+                //temp
+                'initImagesCollection'
             ])
         },
         computed: {

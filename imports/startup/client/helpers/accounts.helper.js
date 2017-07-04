@@ -14,7 +14,7 @@ Template.login.helpers({
 	
 });
 Template.login.onCreated(function() {
-	console.log("PROFILE TEMPLATE CREATED");
+	console.log("[ACCOUNTS-HELPER] login template created");
 	Meteor.call('users.isEmpty', null, function(err, result) {
 			if (!result) {
 				$("#at-signUp").remove();

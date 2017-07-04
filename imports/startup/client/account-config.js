@@ -60,7 +60,7 @@ Meteor.loggingIn(function(a,b,c) {
 })
 // CALLBACKS
 Accounts.onLogin(function() {
-  console.log("LOGIN!!!!");
+  console.log("[ACCOUNTS-CONFIG] login callback, userId >> ", userId);
   if (!userId) {
     router.push({ name: 'home'})
   }
@@ -74,7 +74,7 @@ Accounts.onLogout(() => {
       
       if (!userId) {
         console.log('finally logged out > ', router);
-        router.push('/loggedout')
+        router.push('/logout')
         console.log('2 finally logged out');
         clearInterval(interval)
       }

@@ -35,8 +35,8 @@ export default {
 	},
 	created() {
 		// console.log('app was created successfuly >> ', this.user);
-		this.initFixedTests();
-		this.initImagesCollection();
+		// this.initFixedTests();
+		// this.initImagesCollection();
 	},
 	mounted() {
 		console.log('app mounted');
@@ -55,11 +55,11 @@ export default {
 		// 	'initUsers'
 			
 		// ]),
-		...mapActions('testsModule', [
-			'initFixedTests',
-			//temp
-			'initImagesCollection'
-		])
+		// ...mapActions('testsModule', [
+		// 	'initFixedTests',
+		// 	//temp
+		// 	'initImagesCollection'
+		// ])
 	},
 	computed: {
 		...mapState('usersModule', [

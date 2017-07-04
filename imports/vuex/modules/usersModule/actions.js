@@ -2,63 +2,15 @@ import { Meteor } from 'meteor/meteor'
 import { Tracker }from 'meteor/tracker'
 import * as types from './mutation-types';
 // USER ID
-export const initUser = async ({ commit, dispatch }, loggingout) => {
-    var trackuser, timeuser;
-    dispatch('loadingUser', true);
+export const initUser = ({ commit, dispatch }, loggingout) => {
     if (!!loggingout) {
+        console.log('[ACTION::initUser] loggingout >> ', loggingout);
         commit('INIT_USER', null);
-        dispatch('loadingUser', false);
+        // dispatch('loadingUser', false);
     }
     else {
-        return new Promise((resolve, reject) => {
-            
-            Tracker.autorun((c) => {
-                let usersSub = Meteor.subscribe('allusers');
-                let user = Meteor.users.find({ '_id': Meteor.userId()}).fetch();
-                /*  Add 'selected' attribute for 
-                    client reactive Vue manipulations
-                */
-                if (usersSub.ready()) {
-                    console.log("users... ", user, ' :: ', user.length, " :: ", usersSub.ready());
-                    if (!!user && !!user.length) {
-                        commit('INIT_USER', user[0])
-                        dispatch('loadingUser', false);
-                        resolve(user[0])
-                    }
-                    else {
-                        commit('INIT_USER', null)
-                        dispatch('loadingUser', false);
-                        resolve(null)
-                        // c.stop();
-                    }
-                }
-            })
-        })
-        // return new Promise((resolve, reject) => {
-        //     var user;
-        //     trackuser = Tracker.autorun((c) => {
-        //         user = Meteor.user();
-        //         console.log("initUser to vuex >> ", user);
-        //         console.log("Account user to vuex >> ", Accounts.user());
-        //         if (!!user) {
-        //             Meteor.clearTimeout(timeuser);
-        //             let roles = Roles.getRolesForUser(user);
-        //             console.log("got user.. now Roles> ", roles);
-        //             if (roles.length > 0) {
-        //                 commit('INIT_USER', user);
-        //                 c.stop();
-        //                 resolve(user);
-        //             }
-        //         }
-        //     })
-        //     timeuser = Meteor.setTimeout(function () {
-        //         if (!user) {
-        //             trackuser.stop();
-        //             commit('INIT_USER', null);
-        //             resolve(false);
-        //         }
-        //     }, 8000)
-        // });
+        let user = Meteor.user();
+        commit('INIT_USER', user)
     }
         
 

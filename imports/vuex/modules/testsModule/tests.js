@@ -49,9 +49,13 @@ const getters = {
         return !!state.fixedtests
     },
     hasMatrices: state => {
-        if (!!state.questionbank) {
-
+        let questionbank = state.questionbank;
+        if (!!questionbank) {
+            let questionsOfCat = _.filter(state.questionbank, obj => obj.category.value === 'matrices');
+            console.log('questionsOfCat > ', questionsOfCat);
+            return !!questionsOfCat.length;
         }
+        return false;
     },
     hasHebrew: state => {
         let questionbank = state.questionbank;
@@ -62,47 +66,6 @@ const getters = {
             return !!questionsOfCat.length;
         }
         return false;
-    },
-    currentMenuItems: (state,getters,rootState) => {
-        console.log("rootState >> ", rootState.route);
-        let params = rootState.route.params;
-        let category = params.category;
-        console.log("currentmenuItems >> ");
-        console.log("params >> ", params);
-        console.log("#### category >> ", category);
-        if (!!params.name) {
-            // THIS WILL BE THE ACTUAL TEST...
-            return [];            
-        }
-        if (!!params.category) {
-            if (params.format==='fixedtest') {
-                let fixedTestByCategory = _.find(state.fixedtests, {type: params.category});
-                console.log('fixedTestByCategory >',fixedTestByCategory) ;
-                if (!!fixedTestByCategory) {
-                    console.log('fixedTestByCategory .. ', fixedTestByCategory);
-                    return _.map(fixedTestByCategory.tests, obj => {
-                        console.log('OBJ .. ', obj);
-                        return {
-                            label: obj.name,
-                            value: obj.name,
-                            questions: obj.questions
-                        }
-                    })
-                }
-                else {
-                    return null;
-                }
-            }
-            let cat = _.find(categories, { value: category})
-            return cat.children;
-        }
-        else if (!!params.format) {
-            return categories;            
-        }
-        else {
-            return state.testFormats
-        }
-
     },
     currentCategory: (state, getters, rootState) => {
         console.log(">>currentCategory >> ", rootState.route.params);

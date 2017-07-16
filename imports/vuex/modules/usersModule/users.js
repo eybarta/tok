@@ -5,8 +5,10 @@ import * as actions from './actions'
 const state = {
     user: null,
     loadinguser: false,
+    loadingusers: false,
+    loadingMoreUsers: false,
     users: [],
-    userLogins: null,
+    // userLogins: null,
 }
 
 const mutations = {
@@ -14,16 +16,20 @@ const mutations = {
         state.user = user;
     },
     INIT_USERS (state, users) {
+        state.loadingusers = false;
         state.users = users
     },
-    USER_LOGINS (state, users) {
-        state.userLogins = users;
-    },
+    // USER_LOGINS (state, users) {
+    //     state.userLogins = users;
+    // },
     SIGN_OUT_USER (state) {
         state.user = null;
     },
     LOADING_USER(state, bool) {
         state.loadinguser = bool;
+    },
+    LOADING_USERS(state, bool) {
+        state.loadingusers = bool;
     }
 }
 

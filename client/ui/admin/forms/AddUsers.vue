@@ -1,6 +1,6 @@
 <template>
 <div class="add-users-form">
-    <div v-if="!loading && !userLogins">
+    <div v-if="!loading">
         <div class="form">
             <input placeholder="הזן תאריך" ref="datepicker" v-model="date" @change="dateChange($event)" type="text">
             <textarea v-model="rawStringIds" cols="30" rows="10"></textarea>
@@ -42,7 +42,7 @@ export default {
             'saveUsers'
         ]),
         save() {
-            let date = this.date,
+            let date = new Date(moment(this.date, 'D/M/YYYY')),
                 userIds = this.userIds;
             this.$set(this, 'loading', true);
             this.saveUsers({date, userIds});
@@ -56,9 +56,9 @@ export default {
             let string = this.rawStringIds.replace(/\s/g, '');
             return string.split(',')
         },
-        ...mapState('usersModule', [
-            'userLogins'
-        ])
+        // ...mapState('usersModule', [
+        //     'userLogins'
+        // ])
     }
 }
 </script>

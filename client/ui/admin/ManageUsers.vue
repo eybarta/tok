@@ -1,17 +1,17 @@
 <template>
 <div class="manage-users">
-        <div v-if="!!users.length" class="user-list pt-med">
+        <div class="user-list pt-med">
             <div class="filters mb-med clearfix">
-                <div class="date-range right ">
+                <div class="date-range right">
                     <h5 class="label">פילטור לפי תאריך</h5>
                     <date-range v-model="filters.date"></date-range>
                 </div>
-                <div class="free-search">
+                <div v-if="!!users.length" class="free-search">
                     <h5 class="label inline">חיפוש:</h5>
                     <input-field class="search" v-model="filters.search"></input-field>
                 </div>
             </div>
-            <div class="data-table-wrapper"  v-if="parsedUsers.length>0">
+            <div class="data-table-wrapper"  v-if="!!users.length && parsedUsers.length>0">
                 <table class="data-table user-table">
                     <thead>
                         <th class="sortable" @click="sort('username')"> <i :class="['fa', sortClass('username')]"></i> שם משתמש</th>
@@ -35,7 +35,7 @@
                             <td v-html="user.username"></td>
                             <td v-html="user.profile.psw"></td>
                             <td v-html="user.profile.name"></td>
-                            <td v-html="user.profile.group"></td>
+                            <td v-html="parseDate(user.profile.group)"></td>
                             <td v-html="user.profile.age"></td>
                             <td v-html="user.profile.status.label" :class="[user.profile.status.value=='active' ? 'green' : 'red']"></td>
                             <td v-html="user.profile.city"></td>
@@ -45,18 +45,22 @@
                     </paginate>
                 </table>
                 <div class="table-pager" v-if="parsedUsers.length > usersPerPage">
-                <paginate-links :async="true" id="pager" ref="pager" for="parsedUsers" :limit="4" 
-                :show-step-links="true"
-                :hide-single-page="true"
-                :step-links="{next: 'הבא', prev: 'קודם'}"></paginate-links>
+                    <preloader :size="tiny" v-if="loadingMoreUsers"></preloader>
+                    <paginate-links :async="true" id="pager" ref="pager" for="parsedUsers" :limit="4" 
+                    :show-step-links="true"
+                    :hide-single-page="true"
+                    :step-links="{next: 'הבא', prev: 'קודם'}"></paginate-links>
                 </div>
             </div>
-            <h4 v-else>לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
+            <h4 class="else-msg" v-else-if="!!users.length && !loadingusers">לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
         </div>
+        <preloader :backdrop="false" pretitle="טוען משתמשים" v-if="!!loadingusers"></preloader>
+        <!--
         <p class="tcenter mt-big" v-else>אין משתמשים רשומים במערכת.. כדאי להוסיף!</p>
-        <div :class="[!!users.length ? 'tright' : 'tcenter', 'mt-small', 'actions']">
-            <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="btn btn-success">הוסף משתמשים</button>
-            <button @click="callPopup({ title:'פרטים אישיים', type:'UserProfile', data:selected[0]})" v-if="selected.length==1" class="btn btn-warning">עריכת משתמש</button>
+        -->
+        <div :class="[!!users.length ? 'tright' : 'tright', 'mt-small', 'actions']">
+            <button @click="callPopup({ title:'הוסף משתמשים', type:'AddUsers'})" class="right btn btn-success">הוסף משתמשים</button>
+            <button @click="callPopup({ title:'פרטים אישיים', type:'UserProfile', data:selected[0]})" v-if="selected.length==1" class="right mr-small btn btn-warning">עריכת משתמש</button>
             <div class="changers" v-if="selected.length>1">
                 <label class="orange" for="">שינוי גורף:</label>
                 <multiselect
@@ -98,6 +102,7 @@ console.log('Meteor.isClient > ', Meteor.isClient);
 if (Meteor.isClient) {
     var Pikaday = require('pikaday');
 }
+import Preloader from '/client/ui/components/Preloader.vue'
 import { userOptions } from '/imports/api/userConstants'
 import { mapState, mapActions } from 'vuex'
 import InputField from '/client/ui/components/form/InputField.vue'
@@ -159,7 +164,8 @@ export default {
     },
     components: {
         InputField,
-        DateRange
+        DateRange,
+        Preloader
     },
     methods: {
         ...mapActions('globalStore', [
@@ -291,10 +297,15 @@ export default {
 				this.$set(this.sortby.dir, sortindex, this.sortby.dir[sortindex]=='desc' ? 'asc' : 'desc')
 			}
 		},
+        parseDate(date) {
+            return moment(date).format('D/M/YYYY')
+        }
     },
     computed: {
         ...mapState('usersModule', [
-            'users'
+            'users',
+            'loadingusers',
+            'loadingMoreUsers'
         ]),
         groups() {
             return _.uniq(_.map(this.users, 'profile.group'))
@@ -325,15 +336,19 @@ export default {
                 users = _.filter(users, user => {
                     let condition = !this.filters.date.end ? 'isSame' : 'isSameOrBefore';
                     console.log("condiition> ", condition)
-                    return moment(start, dateformat)[condition](moment(user.profile.group, dateformat));
+                console.log('start > ', moment(start, dateformat), " :: group>> ", user.profile.group, " ::",  moment(user.profile.group));
+                    return moment(start, dateformat)[condition](moment(user.profile.group));
                 })
+                console.log('start users > ', users.length);
+                
             }
             if (!!this.filters.date.end) {
                 let end = this.filters.date.end;
                 users = _.filter(users, user => {
-                    let condition = !this.filters.date.start ? 'isSame' : 'isSameOrAfter';
-                    return !moment(end, dateformat)[condition](moment(user.profile.group, dateformat));
+                    let condition = !this.filters.date.start ? 'isSame' : 'isSameOrBefore';
+                    return moment(user.profile.group)[condition](moment(end, dateformat));
                 })
+                console.log('end users > ', users.length);
             }
             if (!!search) {
                 users = _.filter(users, user => {
@@ -346,6 +361,7 @@ export default {
                 console.log("sort..", users, " :: ", keys, " :: ", dir);
 				return _.orderBy(users, keys, dir)
 			}
+            console.log('final parsed users: ', users);
             return users;
         }
         
@@ -417,6 +433,10 @@ export default {
 .date-range
     h5
         padding-bottom 10px
+.fetch-btn
+    display inline-block
+    vertical-align bottom
+    margin-right 10px
 .actions
     .btn
         margin-left 20px
@@ -433,9 +453,14 @@ export default {
     backface-visibility hidden
 
 .table-pager
+    position relative
     background lighten(darkblue, 55)
     padding 10px
     border-radius 0 0 4px 4px
+    .preloader
+        left 5%
+        top 50%
+        transform translateY(-50%)
     ul
         text-align right
         li
@@ -453,6 +478,8 @@ export default {
             &.active a
                 color darken(bluegreen, 10)
                 text-decoration underline
-
+.else-msg
+    text-align center
+    margin-top 80px
 
 </style>

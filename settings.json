@@ -4,13 +4,8 @@
       "NODE_ENV": "production",
       "ROOT_URL": "http://www.ehc-test.com/",
       "DEPLOY_HOSTNAME":"galaxy.meteor.com",  
-      "MONGO_URL": "mongodb://webkit:webkit3e3@ds025772.mlab.com:25772/tok"
-    }
-  },
-  "public": {
-    "staleSessionInactivityTimeout": 1800000,
-    "staleSessionHeartbeatInterval": 180000,
-    "staleSessionPurgeInterval": 60000,
-    "staleSessionActivityEvents": "mousemove click keydown"
+      "MONGO_URL": "mongodb://webkit:webkit3e3@ds151352-a0.mlab.com:51352,ds151352-a1.mlab.com:51352/tok2?replicaSet=rs-ds151352",
+      "MONGO_OPLOG_URL": "mongodb://webkitop:webkitop3e3@ds151352-a0.mlab.com:51352,ds151352-a1.mlab.com:51352/local?replicaSet=rs-ds151352&authSource=admin"
+    } 
   }
 }

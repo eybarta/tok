@@ -138,8 +138,8 @@ function generateSequence(question, shift, params) {
             }
             operationIndex = operationIndex===operations.length-1 ? 0 : ++operationIndex;
         }
+        populateQuestionObj(question, _.clone(constants), shift, operations);
     }
-    populateQuestionObj(question, _.clone(constants), shift, operations);
     console.log("sequenceparts >> ", sequenceparts);
     return sequenceparts;
 }

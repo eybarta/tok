@@ -16,19 +16,23 @@ export const updateTestMenu = ({commit}, data) => {
 
 // ACTIVE TEST
 export const saveTestToUser = ({ commit, state}, testinfo) => {
-    console.log("SAVE TEST >> ", testinfo);
+    console.log("1 SAVE TEST >> ", testinfo);
     return new Promise((resolve, reject) => {
         Meteor.call('user.savetest', testinfo, result => {
+            console.log("2 SAVED TEST..", result);
             resolve();
         })
     });
 }
 
 export const initFixedTests = ({ commit }) => {
+    console.log("initFixedTests>>>>>>>>>>>>>>>>>>>>");
     Tracker.autorun((c) => {
         let fixedtestsSub = Meteor.subscribe('fixedtests');
         let fixedtests = FixedTests.find({}).fetch();
+        console.log('[ACTIONS:FixedTests] fixedtests sub.. ', fixedtestsSub, " :: ", fixedtests);
         if (!!fixedtestsSub.ready()) {
+            console.log("fixedtestsSub ready");
             commit('INIT_FIXED_TESTS', fixedtests)
             c.stop();
         }

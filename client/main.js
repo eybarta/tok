@@ -29,10 +29,17 @@ import App from './ui/App.vue';
 Vue.config.devtools = true;
 Vue.config.debug = true;
 
+
+Vue.filter('formatDate', function(value) {
+  if (value) {
+    return moment(String(value)).format('D/M/YYYY')
+  }
+})
 // App start
 Meteor.startup(() => {
   //  process.env.MONGO_URL = "mongodb://webkit:webkit3e3@ds025772.mlab.com:25772/tok";
   process.env.NODE_ENV = "production";
+  
   new Vue({
     router,
     render: h => h(App),

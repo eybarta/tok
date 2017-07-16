@@ -57,7 +57,7 @@ for num in (1..12)
 	.parent-{num}
 		& > *
 			lost-waffle 1/num num
-    .parent-col-{num}
+    .parent-col-{num} 
         & > *
             lost-column 1/num num
 	
@@ -91,9 +91,10 @@ main
     min-height 95vh
 footer
     position relative
-    height 50px
+    height 5vh
     width 100%
-    background rgba(#000, 0.8) url('img/congruent_pentagon.png') repeat
+    background rgba(#000, 0.8) 
+    //url('img/congruent_pentagon.png') repeat
     img
         width 50px
         position absolute
@@ -104,7 +105,7 @@ footer
     &:before
         content ''
         position absolute 0 0 0 0
-        background rgba(bluegreen, 0.45)
+        // background rgba(bluegreen, 0.45)
     small
         self-center()
         color #fff

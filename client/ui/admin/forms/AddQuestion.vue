@@ -20,15 +20,22 @@
             <button @click="save" :class="['btn', 'btn-success', 'mr-min', !validQuestionEntry ? 'disabled' : '']">שמור</button>
             <div class="form pt-big mt-med bt-dashed clear">
                 <div v-if="activecat.value==='matrices'">
-                    <div v-for="(item, itemindex) in list" :key="item" :class="['qa', activeQuestionIndex===itemindex ? 'active' : '']">
+                    <div v-for="(item, itemindex) in list" :key="item" :class="['qa', 'more', activeQuestionIndex===itemindex ? 'active' : '']">
                         <button v-if="list.length>1" :class="[activeQuestionIndex===itemindex ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(itemindex)" ><span></span></button>
                         <transition name="fade-slide">
                             <div v-if="activeQuestionIndex===itemindex">
                                 <div class="form-full block">
-                                    <div v-for="(answer, index) in item.answers" :key="answer" class="field upload flb w-elastic-50 maxw-500" @click="uploadFile('answer', [itemindex, index], $event)">
-                                        <img v-if="!!answer" :src="answer" alt="">
-                                        <input :value="answer" type="text">
-                                        <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
+                                    
+                                    <image-field 
+                                        v-for="(answer, index) in item.answers"
+                                        :key="index"
+                                        v-model="item.answers[index]"
+                                        :placeholder="index>0 ? 'העלת קובץ' : 'העלת קובץ תשובה נכונה'"
+                                        ></image-field>
+                                    
+                                    <div class="field flb mt-big">
+                                        <input v-model="item.code" :id="'code'+itemindex" type="text">
+                                        <label :for="'code'+itemindex">קידוד</label>
                                     </div>
                                 </div>
                             </div>
@@ -60,14 +67,15 @@
                     </div>
                 </div>
                 <div class="pt-small">
-                    <div v-if="!!uploader" class="dropzone" @click="uploadFile('uploader', null, $event)">
+                    <label v-if="!!uploader" class="dropzone">
+                        <input type="file" @change="uploadFile('uploader', null, $event)" hidden>
                         <img ref="preview" v-if="!!previewimage" class="preview-image" :src="previewimage" alt="">
                         <div class="upload" v-else>
                             <img v-if="!!uploading" class="loader-icon spinning-cog hidden" src="/img/cog-loader.svg" data-cog="cog02">
                             <i v-else :class="['fa', activecat.value==='matrices' ? ' fa-th' : 'fa-upload']"></i>
                             <span v-text="!!uploading ? 'מעלה קובץ...' : activecat.value==='matrices' ? 'העלת מטריצה' : 'להעלות תמונה'"></span>
                         </div>
-                    </div>
+                    </label>
                 </div>            
             </div>
             <div class="">
@@ -79,11 +87,12 @@
 </div>
 </template>
 <script>
+// import VueCoreImageUpload from '/imports/plugins/vue-core-image-upload/src/vue-core-image-upload.vue';
 import { ImageStore } from '/imports/api/collections/images';
 import {UploadFS} from 'meteor/jalik:ufs';
 import { categories } from '/imports/api/categories'
 import { mapActions, mapState } from 'vuex';
-
+import ImageField from '/client/ui/components/form/ImageField.vue'
 const questionObj = {
     question: null,
     code: null,
@@ -114,21 +123,37 @@ export default {
         console.log();
         
     },
+    components: {
+        ImageField
+    },
+    mounted() {
+        console.log("add q mounted >> ", this.list);
+    },
     watch: {
         'activecat'() {
             if (!!this.activecat && this.activecat.value==='matrices') {
                 this.$set(this, 'uploader', true);
                 let q = _.cloneDeep(questionObj);
                 q.answers = q.answers.concat([null,null,null,null]);
+                // this.list.push(q);
                 this.$set(this, 'list', [q]);
             }
             else {
                 this.$set(this, 'uploader', false);
             }
         },
+        list: {
+            handler() {
+                let list = this.list;
+                console.log("list answers changed >> ", this.list);
+                this.$set(this, 'list', list)
+
+            },
+            deep:true
+        },
         'activesubcat'() {
-            if (!!this.activesubcat && this.activesubcat.value==='comprehension') {
-                this.uploader = true;
+            if (!!this.activesubcat && /(analyze|comprehension)/.test(this.activesubcat.value)) {
+                this.$set(this, 'uploader', true);
                 this.$set(this, 'list', [_.merge({ imageUrl: null}, _.cloneDeep(questionObj))])
             }
             else {
@@ -141,6 +166,22 @@ export default {
             'saveQuestion',
             'initQuestions'
         ]),
+        imageuploaded(a,b,c) {
+            console.log(a,b,c)
+        },
+        uploadToCloud(e) {
+            let files = e.currentTarget.files;
+            console.log('target > ', e.currentTarget.files);
+
+            Cloudinary.upload(files, (err,res) => {
+                console.log('err.. ', err);
+                console.log('res.. ', res)
+            })
+        },
+        getAnswerImg(listindex, answerindex) {
+            console.log("get answer > ", this.list[listindex].answers[answerindex]);
+            return this.list[listindex].answers[answerindex];
+        },
         updateActiveCat(category) {
             this.$set(this, 'activecat', category);
         },
@@ -150,107 +191,20 @@ export default {
         },
         uploadFile(from, target, e) {
             let vm = this;
-            UploadFS.selectFiles(function (file) {
-            // Prepare the file to insert in database, note that we don't provide a URL,
-            // it will be set automatically by the uploader when file transfer is complete.
+            let files = e.currentTarget.files;
 
-                // Preview image in UI
-                // vm.previewimage = window.URL.createObjectURL(file);
-                // // Get image natural dimensions
-                // let dimensions = vm.imageDimensions;
-
-                
-                // console.log("dimensions >> ", dimensions);
-                // URL.createObjectURL(file);
-                let image = {
-                    name: file.name,
-                    size: file.size,
-                    type: file.type
-                };
-
-            // Create a new Uploader for this file
-            let uploader = new UploadFS.Uploader({
-                // This is where the uploader will save the file
-                // since v0.6.7, you can pass the store instance or the store name directly
-                store: ImageStore || 'photos',
-                // Optimize speed transfer by increasing/decreasing chunk size automatically
-                adaptive: true,
-                // Define the upload capacity (if upload speed is 1MB/s, then it will try to maintain upload at 80%, so 800KB/s)
-                // (used only if adaptive = true)
-                capacity: 0.8, // 80%
-                // The size of each chunk sent to the server
-                chunkSize: 1000 * 1024, // 8k
-                // The max chunk size (used only if adaptive = true)
-                maxChunkSize: 1000 * 1024, // 128k
-                // This tells how many tries to do if an error occurs during upload
-                maxTries: 5,
-                // The File/Blob object containing the data
-                data: file,
-                // The document to save in the collection
-                file: image,
-                // The error callback
-                onError(err, file) {
-                    console.error(err);
-                },
-                onAbort(file) {
-                    alert('הייתה תקלה... נסה שוב');
-                    vm.uploading = false;
-                    console.log(file.name + ' upload has been aborted');
-                },
-                onComplete(file) {
-                    console.log(JSON.stringify(file) + ' has been uploaded');
-                    setTimeout(function() {
-                        vm.$nextTick(function() {
-                            console.log("FROM ?? ", from);
-                            if (from==='uploader') {
-                                vm.$set(vm, 'previewimage', file.url);
-                            }
-                            else if (from==='answer') {
-                                console.log("target >> ", target);
-                                // let answers = vm.list[target[0]]['answers'];
-                                // answers[target[1]] = file.url;
-                                // let item = vm.list[target[0]];
-                                // item.answers = answers;
-                                let list = vm.list;
-                                list[target[0]]['answers'][target[1]] = file.url;
-                                vm.$set(vm, 'list', list);
-                                
-                            }
-                        })
-                        vm.$set(vm, 'uploading', false);
-                    }, 1000)
-
-                },
-                onCreate(file) {
-                    console.log(file.name + ' has been created with ID ' + file._id);
-                },
-                onProgress(file, progress) {
-                    console.log(file.name + ' ' + (progress*100) + '% uploaded');
-                },
-                onStart(file) {
-                    console.log(file.name + ' started');
-                    if (from=='uploader') {
-                        vm.$set(vm, 'uploading', true);
-                    }
-                    // else if(from=='answer') {
-
-                    // }
-                    
-                },
-                onStop(file) {
-                    console.log(file.name + ' stopped');
-                },
+            this.uploading = true;
+            Cloudinary.upload(files, {
+                eager: [{ width: 600, crop: "fit" }], 
+                use_filename: true,
+                unique_filename: false,
+                resource_type: 'image'    
+            }, (err,res) => {
+                console.log("cloudinary upload.>>", res);
+                vm.uploading = false;
+                vm.$set(vm, 'previewimage', res.url);
+                vm.list[vm.activeQuestionIndex].question = res.url;
             });
-
-            // Starts the upload
-            uploader.start();
-
-            // Stops the upload
-            // uploader.stop();
-
-            // Abort the upload
-            // uploader.abort();
-            })
         },
         fileDropped(res) {
             console.log("File dropped>> ", res);
@@ -261,15 +215,16 @@ export default {
                     label: this.activecat.label,
                     value: this.activecat.value
                 },
-                type: {
-                    label: this.activesubcat.label,
-                    value: this.activesubcat.value,
-                },
                 questions: this.list,
                 imageUrl: this.previewimage
                 // answers: this.answers
             }
-
+            if (!!this.activesubcat) {
+                data.type = {
+                    label: this.activesubcat.label,
+                    value: this.activesubcat.value,
+                }
+            }
             let result = this.saveQuestion(data);
 
             console.log("RESULT >> ", result)
@@ -303,8 +258,8 @@ export default {
         validQuestionEntry() {
             let firstQuestion = this.list[0];
             return !!firstQuestion.question 
-                && _.compact(firstQuestion.answers).length===firstQuestion.answers.length
-                && !!this.activesubcat && this.activesubcat.value;
+                // && _.compact(firstQuestion.answers).length===firstQuestion.answers.length
+                && this.activecat.value==='matrices' || (!!this.activesubcat && this.activesubcat.value);
         },
         imageDimensions() {
             if (!!this.previewimage) {
@@ -369,6 +324,8 @@ export default {
         cursor initial
         &:after
          content none
+        &.more
+            max-height 900px
     .min, .max
         position absolute
         right 0
@@ -408,6 +365,7 @@ export default {
                 background lighten(gray, 30)
                 border-radius 4px
 .dropzone
+    display block
     height 100%
     border-radius 9px
     text-align center
@@ -453,5 +411,7 @@ export default {
     text-align center
     h5
         font-size 26px
-        padding-bottom 30px    
+        padding-bottom 30px 
+.answer-img
+    height 40px
 </style>

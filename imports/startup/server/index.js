@@ -17,4 +17,6 @@ import '/imports/api/collections/questions/publish';
 // Images
 import '/imports/api/collections/images';
 import '/imports/api/collections/images/publish';
+// Cloudinary for images
+import '/imports/api/cloudinary/index'
 

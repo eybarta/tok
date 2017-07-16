@@ -9,12 +9,13 @@
             <input @focus="focus=true" @blur="focus=false" type="text" ref="end">
             <i v-if="!!range.end" class="fa fa-close" @click.prevent="reset('end')"></i>
         </div>
+        <button @click="initUsers({ type:'date', start:range.start, end:range.end})" class="mr-small fetch-btn btn btn-success">מצא</button>
     </div>
 </template>
 <script>
-if (Meteor.isClient) {
-    var Pikaday = require('pikaday');
-}
+import Pikaday from 'pikaday';
+// var Pikaday = require('pikaday');
+import { mapActions } from 'vuex'
 export default {
     data() {
         return {
@@ -31,10 +32,16 @@ export default {
         this.initFilterDatePickers();
     },
     methods: {
+        ...mapActions('usersModule', [
+            'initUsers'
+        ]),
         reset(who) {
             this.$set(this.range, who, '');
             this.$emit('input', this.range); 
             this[`${who}Picker`].setDate('')
+        },
+        fetch() {
+            
         },
         updateStartDate(date) {
             console.log('this.startPicker >> ', this.startPicker);

@@ -15,7 +15,9 @@
 		</popup>
 
 		<footer v-if="!!apploaded">
+		<!--
 			<img src="/img/logo-etz.svg" alt="">
+			-->
 			<small>  &copy; כל הזכויות שמורות עץ הדעת 2017 </small>
 		</footer>
 	</div>

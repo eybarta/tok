@@ -179,7 +179,7 @@ export default {
                 }
                 // console.log([questionIndex]," >>> amount of parts: ", question.parts.length, " :: ",  question.type, " :: ", controls[i], " :: ", shifts[i]);
                 this.positionControlAndShift(index, questionIndex, !!shifts, question.type, question.parts.length, showother);
-                if (questionIndex==14) {
+                if (questionIndex==4) {
                     console.log([questionIndex], " :: i= ", i, " :: control> ", controls[i], ' :: shift == ', shifts[i], ' :: index == ', index);
                 }
                 let _control = 

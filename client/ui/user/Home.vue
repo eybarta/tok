@@ -1,12 +1,10 @@
 <template>
 <div class="users-home">
-    <div v-if="!!user" class="profile">
+    <div v-if="!!user && !route.meta.test" class="profile">
         <a class="profile-link" href="#p" title="לחץ לעדכון פרטים" @click.prevent="callPopup({ title:'פרטים אישיים', type:'UserProfile'})"><span v-text="user.profile.name"></span><i class="fa fa-user"></i></a>
         <a class="signout" href="#p" @click.prevent="signOutUser">התנתק</a>
     </div>
-    <main>
-        <router-view></router-view>
-    </main>
+    <router-view></router-view>
     
 </div>
 </template>
@@ -19,12 +17,20 @@ import { mapState, mapActions, mapGetters } from 'vuex';
                 this.callPopup({ title:'פרטים אישיים', type:'UserProfile'})
                 this.dirtifyUser();
             }
+            console.log("USER HOME>> route.meta", this.route.meta.test)
+            if (!!user) {
+                this.initFixedTests();
+                this.initImagesCollection();
+            }
         },
         computed: {
             ...mapState('usersModule', [
                 'user',
                 'users'
             ]),
+            ...mapState([
+                'route'
+            ])
         },
         methods: {
             ...mapActions('globalStore', [
@@ -34,6 +40,11 @@ import { mapState, mapActions, mapGetters } from 'vuex';
                 'dirtifyUser',
                 'signOutUser'
             ]),
+            ...mapActions('testsModule', [
+                'initFixedTests',
+                //temp
+                'initImagesCollection'
+            ])
         }
     }
 </script>
@@ -52,4 +63,7 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 .list-complete-leave-active {
   position: absolute;
 }
+
+.users-home
+    min-height 95vh
 </style>

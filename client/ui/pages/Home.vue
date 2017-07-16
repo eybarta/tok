@@ -1,5 +1,6 @@
 <template> 
-<main>
+<main :class="[!!apploaded && !user ? 'login-bg' : '']">
+    <img class="home-logo" src="/img/etz-logo.svg" alt="עץ הדעת">
     <div v-if="!!apploaded && !user" v-blaze="'login'"></div>
      
     <router-view></router-view>
@@ -18,14 +19,10 @@ import { mapState, mapGetters, mapActions } from 'vuex'
             }
         },
         mounted() {
-            console.log('$("#at-field-username_and_email") >> ', $("#at-field-username_and_email"));
 	        $("#at-field-username_and_email").attr('placeholder', 'שם משתמש או אימייל')
             $("#at-field-password").attr('placeholder', 'סיסמא');
 
-            if (!!this.user) {
-                this.initFixedTests();
-                this.initImagesCollection();
-            }
+            
         },
         components: {
             AdminHome,
@@ -35,11 +32,11 @@ import { mapState, mapGetters, mapActions } from 'vuex'
             ...mapActions('globalStore', [
                 'loadApp'
             ]),
-            ...mapActions('testsModule', [
-                'initFixedTests',
-                //temp
-                'initImagesCollection'
-            ])
+            // ...mapActions('testsModule', [
+            //     'initFixedTests',
+            //     //temp
+            //     'initImagesCollection'
+            // ])
         },
         computed: {
             ...mapState([
@@ -61,7 +58,21 @@ import { mapState, mapGetters, mapActions } from 'vuex'
     }
 </script>
 <style lang="stylus">
+@import '~imports/styl/lib/rupture.styl'
 main
     padding 100px 0 0
-
+.login-bg
+    background url('/img/login-bg-2.jpg') no-repeat 50% 90% / cover
+    portrait()
+        background-position 50% 50%
+        background-size auto
+.home-logo
+    position absolute
+    top 2vh
+    left 2vh
+    width 18vmin
+    opacity 0.7
+    transition opacity 400ms ease
+    &:hover
+        opacity 1
 </style>

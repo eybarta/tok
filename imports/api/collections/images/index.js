@@ -1,7 +1,7 @@
 import {Mongo} from 'meteor/mongo';
 import {UploadFS} from 'meteor/jalik:ufs';
 import {GridFSStore} from 'meteor/jalik:ufs-gridfs';
-import {LocalStore} from 'meteor/jalik:ufs-local';
+// import {LocalStore} from 'meteor/jalik:ufs-local';
 
 export const Images = new Mongo.Collection('images');
 

@@ -1,5 +1,6 @@
 <template>
 <main class="admin-home">
+    <img class="page-logo" src="/img/etz-logo.svg" alt="עץ הדעת">
     <div v-if="!!user" class="profile">
         <span class="profile-link"><span v-text="user.profile.name"></span><i class="fa fa-user"></i></span>
         <a class="signout" href="#p" @click.prevent="signOutUser">התנתק</a>
@@ -37,6 +38,11 @@ export default {
         ]),
         ...mapActions('globalStore', [
             'setNote'
+        ]),
+        ...mapActions('testsModule', [
+            'initFixedTests',
+            //temp
+            'initImagesCollection'
         ])
     },
     computed: {
@@ -45,14 +51,24 @@ export default {
         ])
     },
     created() {
-        this.initUsers();
-        console.log("set note action <<< ", this.setNote);
+        // this.initUsers();
+        // console.log("set note action <<< ", this.setNote);
+    },
+    mounted() {
+         if (!!this.user) {
+            this.initFixedTests();
+            this.initImagesCollection();
+        }
     }
 }
 </script>
 <style lang="stylus">
 @import '~imports/styl/variables'
-
+.page-logo
+    position absolute
+    top 2vh
+    right 3vh
+    max-width 10vmin
 .admin-tabs
     text-align center
     word-spacing -4px   

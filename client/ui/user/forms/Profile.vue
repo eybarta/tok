@@ -74,7 +74,8 @@
             
         </ul>
     </div>
-    <button @click="saveUserProfile({profile, userId})" class="btn btn-success">שמור</button>
+    <span v-if="!profile.name" class="msg">* שם זה שדה חובה</span>
+    <button @click="saveUserProfile({profile, userId})" :class="['btn', 'btn-success', !profile.name ? 'disabled' : '']">שמור</button>
     <button v-if="!!isAdmin" @click="deleteUser(userId)" class="btn btn-danger mr-small">מחוק משתמש</button>
 
 </div>
@@ -128,9 +129,9 @@ export default {
         }
         else {
             // User is editing himself
-            
             _.merge(this.profile, this.user.profile)
         }
+        this.$set(this.profile, 'group', moment(this.profile.group).format('D/M/YYYY'));
 
         console.log('isAdmin > ', this.isAdmin);
     },
@@ -175,4 +176,9 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.msg
+    color darken(red, 13)
+    display block
+    padding-bottom 10px
+    font-size 13px
 </style>

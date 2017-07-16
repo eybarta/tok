@@ -38,7 +38,7 @@
                         <text v-text="countdown" text-anchor="middle" x="100" y="110" ></text>
                     </svg>
                 -->
-                    <radial-progress-bar :diameter="200"
+                    <radial-progress-bar :diameter="120"
                        :completed-steps="completedTimerSteps"
                        :total-steps="totalTimerSteps"
                        :start-color="calcStartcolor"
@@ -81,9 +81,6 @@
                     </li>
                 </ul>
             </div>
-            <div class="tcenter actions">
-                <button :class="['mt-small', 'mb-small', 'center', 'btn', 'btn-big', mode==='test' ? 'btn-success' : 'btn-warning']" @click="finish" v-text="mode==='test' ? 'סיימתי' : 'יציאה'"></button>
-            </div>
             <div v-if="mode==='test'" class="status">
                 <h4>ענית עד כה על 
                     <span>
@@ -92,6 +89,9 @@
                     </span>
                         
                 </h4>
+            </div>
+            <div class="tcenter actions">
+                <button :class="['mt-small', 'mb-small', 'center', 'btn', 'btn-big', mode==='test' ? 'btn-success' : 'btn-warning']" @click="finish" v-text="mode==='test' ? 'סיימתי' : 'יציאה'"></button>
             </div>
             </div>
             <div >
@@ -140,7 +140,7 @@
                         <router-link to="/" class="back-btn btn btn-primary vmid" exact><span>חזרה לעמוד הבית </span><i class="fa fa-chevron-left mr-min"></i></router-link>
                     </div>
                     <div class="check-field">
-                        <input id="historySave" v-model="testinfo.savedInHistory" type="checkbox"><label for="historySave">לשמור מבחן?</label>
+                        <input id="historySave" v-model="testinfo.savedInHistory" checked="checked" type="checkbox"><label for="historySave">לשמור מבחן?</label>
                     </div>
                 </div>
             </div>
@@ -162,20 +162,25 @@ import RadialProgressBar from '/client/ui/components/RadialProgressBar.vue'
 // Test Types
 import Series from './testFormats/Series.vue'
 import Hebrew from './testFormats/Hebrew.vue'
+import Matrices from './testFormats/Matrices.vue'
+
+const TOTAL_TEST_TIME = 840000;
+
 export default {
     data() {
         return {
             withtimer: true,
             started: false,
             goodluck: false,
-            totalTimerTime: 840000,
-            timer: 840000,
+            totalTimerTime: TOTAL_TEST_TIME,
+            timer: TOTAL_TEST_TIME,
             totalTimerSteps:60,
             questiontimer: null,
             questionIndex: 0,
             popImage: false,
             mode: 'test',
             idle: {
+                int: 0,
                 flag: false,
                 timer: 60000
             },
@@ -192,7 +197,7 @@ export default {
                 timeToComplete: 0,
                 averageTimeOnQuestion: 0,
                 questions: [],
-                savedInHistory: false
+                savedInHistory: true
             },
         }
     },
@@ -206,6 +211,7 @@ export default {
     components: {
         Series,
         Hebrew,
+        Matrices,
         RadialProgressBar
     },
     mounted() {
@@ -213,14 +219,10 @@ export default {
     },
     watch: {
         'questionIndex'() {
-            console.log('qindex watch %%%%%%%');
             this.timeQuestion(this.questionIndex)
         },
         'testQuestions'() {
-            console.log('1 tquestion watch %%%%%%%');
             this.$set(this.testinfo, 'questions', this.testQuestions);
-            console.log('2 tquestion watch %%%%%%%');
-            
         }
     },
     methods: {
@@ -243,46 +245,34 @@ export default {
             this.$set(this, 'questionIndex', index);
         },
         starttest() {
-            let ref = this;
             this.updateQuestionIndex(0)
             this.$set(this, 'goodluck', true);
-
-                console.log("testinfo >> ", this.testinfo);      
-                Meteor.setTimeout(function() {
-                    this.$set(this, 'started', true);
-
-                    this.$nextTick(function() {
-                        this.bindEvents();
-                        // var $circle = this.$refs.timerCircle;
-                        // let int,
-                        //     angle = 0,
-                        //     angle_increment = parseFloat((500/this.timer*1000).toFixed(2));
-                        //     console.log("circle > ", $circle, " :: ", this.$refs['timerCircle'], this.$refs);
-                        int = Meteor.setInterval(function() {
-                            if (this.withtimer) {
-                                this.$set(this, 'timer', this.timer-1000);
-                                // $circle.setAttribute("stroke-dasharray", angle + ", 20000");
-                                // if (angle>200) {
-                                //     $circle.setAttribute('stroke', 'red');
-                                // }
-                                // angle += angle_increment;
-
-                                if (this.mode==='test' && this.timer<=0) {
-                                    Meteor.clearInterval(int);
-                                    this.finish();
-                                }
+            Meteor.setTimeout(function() {
+                this.$set(this, 'started', true);
+                this.$nextTick(function () {
+                    this.bindEvents();
+                    this.idle.int = Meteor.setInterval(function () {
+                        if (this.withtimer) {
+                            if (this.timer<=0) {
+                                this.finish();
                             }
-                            // console.log('idle timer > ', this.idle.timer);
-                            this.$set(this.idle, 'timer', this.idle.timer-1000)
-                            if (this.idle.timer<=0) {
-                                this.flagIdle();
+                            else {
+                                this.$set(this, 'timer', this.timer - 1000);
                             }
-                        }.bind(this),1000)
-                        this.timeQuestion(0)
-                    })
-                        
-                }.bind(this), 3000)
-            
+                            if (this.mode === 'test' && this.timer <= 0) {
+                                Meteor.clearInterval(this.idle.int);
+                                this.finish();
+                            }
+                        }
+                        this.$set(this.idle, 'timer', this.idle.timer - 1000)
+                        if (this.idle.timer <= 0) {
+                            this.flagIdle();
+                        }
+                    }.bind(this), 1000)
+                    this.timeQuestion(0)
+                })
+                    
+            }.bind(this), 2000)
         },
         bindEvents() {
                 console.log("BIND EVENTS");
@@ -306,16 +296,8 @@ export default {
             }
         },
         timeQuestion(index) {
-            console.log('1 index', index);
-            console.log('1 this.questiontimer', this.questiontimer);
             Meteor.clearInterval(this.questiontimer)
-            console.log('2 this.questiontimer', this.questiontimer);
-            
-            console.log('2 question', this.testinfo.questions);
-            
             let question = this.testinfo.questions[index];
-            console.log('3 this.questiontimer', question);
-            
             question.timer = question.timer || 0;
             this.questiontimer = Meteor.setInterval(function() {
                 question.timer++;
@@ -341,6 +323,7 @@ export default {
             return Math.round(averageInSeconds);
         },
         finish() {
+            Meteor.clearInterval(this.idle.int);
             if (this.mode==='review') {
                 this.$router.push({ path: '/' });
                 return false;
@@ -364,7 +347,7 @@ export default {
             this.$set(this.testinfo, 'meta', this.route.params)
             this.$set(this.testinfo.meta, 'date', moment().format("D/M/YYYY"))
             this.$set(this.testinfo, 'label', this.testTitle + ' ' + this.testinfo.meta.date);
-            this.$set(this.testinfo, 'savedInHistory', this.savedInHistory)
+            // this.$set(this.testinfo, 'savedInHistory', this.testinfo.savedInHistory)
             
             console.log(correct.length, " questions were answered correctly");
             console.log((correct.length/this.testQuestions.length)*100, " is your score");
@@ -386,8 +369,7 @@ export default {
             'route',
         ]),
         ...mapGetters('testsModule', [
-            'currentCategory',
-            'activeCategory'
+            'currentCategory'
         ]),
         calcStartcolor() {
             return this.completedTimerSteps > this.totalTimerSteps/2 ? "#ea6b6b" : "#ea6b6b";
@@ -434,7 +416,10 @@ export default {
                 name = _.find(category.children, { value: params.name})
             }
             console.log("tst title, category", category, name, type);
-            return type.label + (!!category ? " ב" + category.label : '');
+            if (!!type && !!type.label && !!category && !!category.label)
+                return type.label + (!!category ? " ב" + category.label : '');
+            else
+                return 'מבחן';
             // return type.label + " : " + !!params.category ? category.label + " : " + name.label : '';
         }
     }
@@ -568,7 +553,7 @@ wrong-color = lighten(red, 5);
     border-bottom 1px solid #0bddbe
     transition width 200ms linear
     h4
-        padding 40px 0 0
+        padding 5vh 0 0
         font-size 25px
         letter-spacing 1px
         direction rtl
@@ -584,7 +569,7 @@ wrong-color = lighten(red, 5);
             display inline-block
             width 100%
             vertical-align top
-            padding 6% 14% 2%
+            padding 5vh 8vw
             margin 0
             @media screen and (max-width:740px)
                 padding-left 8%
@@ -628,7 +613,7 @@ wrong-color = lighten(red, 5);
                                 
         .answer
             text-align center
-            padding 75px 0
+            padding 5vh 0 0
             h5
                 padding-bottom 20px
             li
@@ -674,11 +659,15 @@ wrong-color = lighten(red, 5);
     min-height 50vh
     width 100%
     padding-bottom 75px
+    background rgba(lighten(bluegreen, 45), 0.04)
     h2
         text-align center
-        color lighten(gray, 40)
-        padding 20px 0 40px
+        text-decoration underline
+        height 14vh
+        line-height 14vh
+        color darken(bluegreen, 7)
         font-weight normal
+        font-size 28px
 
         
 /* 
@@ -727,7 +716,7 @@ wrong-color = lighten(red, 5);
         opacity 0.1
         pointer-events none
 .pager-progress
-    padding 30px 6%
+    padding 2vh 6vw
     ul
         text-align center
         li
@@ -802,7 +791,7 @@ wrong-color = lighten(red, 5);
 .status
     direction rtl
     text-align center
-    padding 30px 0
+    padding 0
     span
         text-align left
         display inline-block
@@ -813,17 +802,18 @@ wrong-color = lighten(red, 5);
 
 .countdown
     color red
-    margin 10px auto
+    position absolute
+    top 1vh
+    left 1vh
     text-align center
     font-size 3vmin
-    position relative
     z-index 103
-    transform scale(0.6)
+    // transform scale(0.8)
     transition font-size 400ms ease
     .time-clock
         position absolute
         self-center()
-        font-size 4vmin
+        font-size 22px
         font-family 'Helvetica Thin'
     &.bigger
        font-size 6vmin

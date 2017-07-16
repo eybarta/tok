@@ -42,5 +42,6 @@ jalik:ufs-local
 cfs:graphicsmagick
 dynamic-import
 juliancwirko:postcss
-zuuk:stale-session
 mdg:meteor-apm-agent
+tmeasday:publish-counts
+lepozepo:cloudinary

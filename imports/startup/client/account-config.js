@@ -6,7 +6,7 @@ var pwd = AccountsTemplates.removeField('password');
 
 Accounts.config({ 
 //   forbidClientAccountCreation: true, 
-//   loginExpirationDays: 30, 
+  // loginExpirationDays: 0.5
 }); 
 
 Accounts.ui.config({
@@ -15,6 +15,9 @@ Accounts.ui.config({
 
 AccountsTemplates.configure({
   texts: {
+    title: {
+      signIn: "התחבר למערכת"
+    },
     button: {
         signIn: 'התחבר',
         signUp: 'הירשם'
@@ -62,7 +65,7 @@ Meteor.loggingIn(function(a,b,c) {
 Accounts.onLogin(function() {
   console.log("[ACCOUNTS-CONFIG] login callback, userId >> ", userId);
   if (!userId) {
-    router.push({ name: 'home'})
+    router.push({ name: 'home', params: ''})
   }
 })
 

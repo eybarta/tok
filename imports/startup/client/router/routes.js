@@ -23,15 +23,10 @@ function auth() {
 		}
 		Tracker.autorun((c) => {
 			var user = Meteor.user();
-			if (!!user) {
-				if (!!user && !!user.roles && !!user.roles.length) {
-					resolve(user);
-					c.stop();
-				}
-				else {
-					resolve(null);
-					c.stop();
-				}
+			if (!!user && !!user.roles && !!user.roles.length) {
+				console.log('[AUTH] resolve user.. ', user, user.roles.length, user.profile);
+				resolve(user);
+				c.stop();
 			}
 		});
 	});
@@ -110,22 +105,27 @@ export const routes = [
 			{
 				path: '/practice/:category/:name',
 				name: 'practice',
-				component: ActiveTest
+				component: ActiveTest,
+				meta: { test:true}
 			},
 			{
 				path: '/testhistory/:category/:name',
 				name: 'testhistory',
-				component: ActiveTest
+				component: ActiveTest,
+				meta: { test:true}
+
 			},
 			{
 				path: '/fixedtest/:category/:name',
 				name: 'fixedtest',
-				component: ActiveTest
+				component: ActiveTest,
+				meta: { test:true}
 			},
 			{
 				path: 'autotest/:category',
 				name: 'autotest',
 				component: ActiveTest,
+				meta: { test:true}
 			},
 			{
 				path: '/adaptivetest/:category',
@@ -164,11 +164,11 @@ export const routes = [
 	{
 		path: '/logout',
 		name: 'logout',
-		component:Home,
 		beforeEnter: (to,from,next) => {
 			Meteor.logout();
 			store.dispatch('usersModule/initUser', true);
-			next();
+			location.reload();
+			next('/');
 			// console.log('[ROUTER] logout >> go to login >>, ', next);
 			// console.log('[ROUTER] next????? ', to,from,next);
 		}

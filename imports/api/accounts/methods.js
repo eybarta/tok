@@ -56,12 +56,15 @@ Meteor.methods({
         });
     },
     'user.savetest'(testinfo) {
+        this.unblock();
         let userId = Meteor.userId();
-        // console.log('savetest method >> ', testinfo);
+        console.log('[SAVETEST] before update>> ', userId);
         Meteor.users.update(userId, {
             $push: {
                 'profile.tests': testinfo
             }
+        }, function(res) {
+            console.log('[SAVETEST] update callback >> ', userId);
         });
     }
 });

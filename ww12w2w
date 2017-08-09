@@ -38,12 +38,35 @@ function generateQuestion(index, type, label, params) {
     question.parts = generateQuestionParts(question, params);
     return question;
 }
-function populateQuestionObj(question, constants, shift, operations) {
-    question.controls.push(...constants);
-    question.shifts.push(shift);
-    question.operations.push(...operations);
+function populateQuestionObj(constants, question, shift, operations) {
+    console.log("[POPULATE QUESTION] question: ", question);
+    console.log('[populateQuestionObj]>>> operations: ', operations);
+    console.log('populateQuestionObj>>> controls: ', constants);
+    // console.log('question.operations>>> 2operations: ', question.operations);
+    console.log('question.operations>>> shifts: ', shift);
+    // if (question.type==='add_multiply_shift_double') {
+
+    // }
+    if (!!question) {
+
+        if (!!constants) {
+            question.controls = constants;
+        }
+        if (!!shift) {
+            question.shifts = shift;
+        } 
+        if (!!operations) {
+            question.operations = operations;
+        }  
+    }
+    // if (question.type==='add_multiply_shift_double') {
+
+    // }
 }
 function generateQuestionParts(question, params) {
+    var questionControls = [];
+    console.log("params..", params)
+    // let _params = _.clone(params),
     let sequenceAmount = params.length,
     parts = [],
     shift = generateShifts(params),
@@ -54,39 +77,53 @@ function generateQuestionParts(question, params) {
     /*
         Generate sequence/s for series.
     */
+    console.log("MAYBE HERE SHOULD POPULATE QUESTION>>>>>>>");
+    console.log("[MAYBE] params: ", params);
+    console.log("[MAYBE] question: ", question);
+    console.log("[MAYBE] shifts: ", shift);
+    let operationsArray = _.flatMap(params, 'operation');
+    console.log("[MAYBE] operationsArray: ", operationsArray);
     let sequences = [];
     for (var i = 0; i< sequenceAmount; i++) {
         if (params[i].operation==='fibonacci') {
             sequences.push(generateFibonacciSequence(params[i]));
         }
         else {
-            sequences.push(generateSequence(question, shift[i],params[i]));
+            for (var o = 0; o< operationsArray.length; o++) {
+                questionControls.push(generateSequenceConstant(params[i].generateConstant))
+            }
+            sequences.push(generateSequence(question, shift[i],params[i], questionControls[i]));
         }
     }
+    populateQuestionObj(questionControls, question, shift, operationsArray)
     for (var k = 0;k<totalAmountOfParts;k++) {
             let index = k%sequenceAmount;
             parts.push(sequences[index][(k-index)/sequenceAmount])
     }
+    // populateQuestionObj(constants, question, shift, operations)
     return parts;
 }
 
 /* 
     GENERATE SEQUENCE: returns Array
 */
-function generateSequence(question, shift, params) {
+function generateSequence(question, shift, params, control) {
+    console.log("SHIFT << ", shift);
     let sequenceparts = [];
-    let constants = [],
+    let constants = _.clone(controls),
     // for power shifts
     powconstant = null;
 
     let operationIndex = 0,
     operations = params.operation;
-    for (var o = 0; o< operations.length; o++) {
-        constants.push(generateSequenceConstant(params.generateConstant))
-    }
-    let __constants = _.clone(constants);
+    console.log('[GENERATE SEQUENCE] operations: ', operations);
+    // for (var o = 0; o< operations.length; o++) {
+    //     constants.push(generateSequenceConstant(params.generateConstant))
+    // }
     /* Feed controls / shift back to questionObject for later processing */
+    console.log("[ADD CONSTANTS TO QUESTION] constants: ", constants);
     // console.log("GENERATE SEQUENCE:: params >> ", params, " :: shift >> ", shift, " :: constants >> ",constants, " :: operations >> ", operations);
+
     powconstant = constants[operationIndex];
     for (var i=0; i< params.partsAmount; i++) {
         let constant = constants[operationIndex],
@@ -97,7 +134,8 @@ function generateSequence(question, shift, params) {
         }
         else {
             let lastpart = _.last(sequenceparts);
-            let nextValue = _[operation](lastpart, constant)
+            let nextValue = _[operation](lastpart, constant);
+            console.log("[SEQUENCE] nextValue:operation:lastpart:constant", nextValue, " :: ", operation, " :: ", lastpart, " :: ", constant);
             /* 
                 Make sure DIVIDE operations don't create a mess
             */
@@ -106,28 +144,31 @@ function generateSequence(question, shift, params) {
                 if (Math.abs(constant) > Math.abs(lastpart)) {
                     fixoperation = (constant > lastpart) ? 'subtract' : 'add';
                 }
+                console.log('divide fix operation...before constant: ', constant);
                 constant = _[fixoperation](constant, 1);
+                console.log('divide fix operation...after constant: ', constant);
                 nextValue = _[operation](lastpart, constant);
+                console.log('divide fix operation...nextValue: ', nextValue);
+                
                 constants[operationIndex] = constant;
-                // Make sure constants for question population is
-                // updated when fixing for division...
-                __constants = _.clone(constants);
+                console.log('divide fix operation...constants: ', constants);
+                
             }
             sequenceparts.push(nextValue);
             if (shift==='power') {
+                console.log(constants[operationIndex], " :: ", powconstant);
                 constants[operationIndex] = _.multiply(constants[operationIndex], powconstant)
             }
             else {
-                if (operation==='subtract') {
-                    constants[operationIndex] -= shift;
-                } else {
-                    constants[operationIndex] += shift;
-                }
+                constants[operationIndex] += shift;
             }
             operationIndex = operationIndex===operations.length-1 ? 0 : ++operationIndex;
         }
+
+        // populateQuestionObj(_.clone(constants), question);
+        controls.push()
     }
-    populateQuestionObj(question, __constants, shift, operations);
+    console.log("sequenceparts >> ", sequenceparts);
     return sequenceparts;
 }
 function generateFibonacciSequence(params) {
@@ -162,7 +203,6 @@ function* constantGenerator(controls, range, exclude, amount, type, unique) {
         let _control = _.random(...range);
         if (exclude.indexOf(_control)<0 && !(!!unique && controls.indexOf(_control)>-1)) {
             control = _control;
-            
             let savedcontrol = yield control;
             controls.push( savedcontrol );
         }
@@ -182,16 +222,20 @@ function generateShifts(params) {
     GENERATE NUMBER: returns Number
 */
 function generateNumber(range, exclude = [], amount, operation, constant) {
+    console.log('get number constant >> ', constant)
     let number = _.random(...range);
     while (exclude.indexOf(number)>-1) {
         number = _.random(...range);
     }
+        console.log("OPERATION >", operation);
+    
     if (!!operation && operation.indexOf('divide')>-1) {
         // start from end.
         for (var i=0; i<amount; i++) {
             number = number*constant;
         }
     }
+    console.log('number: ', number);
     return number;
 }
 
@@ -217,8 +261,13 @@ function generateAnswers(parts, params) {
         // list = _.shuffle(list)
     }
     if (_.uniq(list).length !== list.length) {
+        console.log("correct < ", correct);
+        console.log("1 list < ", list);
+        
         list = _.uniq(list);
         list.push(_.min(list)-1);
+
+        console.log("2 list < ", list);
     }
     return {
         correct,
@@ -279,17 +328,6 @@ function getParameters(amount, type) {
                 answersAmount: 4,
             }]
         case 'add_shift':
-            return [{
-                operation,
-                firstNumeric: () =>  generateNumber([-100,100]),
-                controls: [],
-                get generateConstant() {
-                    return  constantGenerator(this.controls, [1,20], [], amount, type)
-                },
-                shift: () => generateNumber([-10,10], [0]),
-                partsAmount: 6,
-                answersAmount: 4,
-            }]
         case 'subtract_shift':
             return [{
                 operation,
@@ -298,7 +336,7 @@ function getParameters(amount, type) {
                 get generateConstant() {
                     return  constantGenerator(this.controls, [1,20], [], amount, type)
                 },
-                shift: () => generateNumber([-15,-1], [0]),
+                shift: () => generateNumber([-10,10], [0]),
                 partsAmount: 6,
                 answersAmount: 4,
             }]

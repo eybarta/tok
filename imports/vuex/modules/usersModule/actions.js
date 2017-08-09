@@ -19,16 +19,32 @@ export const loadingUser = ({commit}, bool) => {
     commit('LOADING_USER', bool);
 }
 // ALL USERS DATA ( Admin only subscription)
+export const getOnlineUsers = ({commit}) => {
+    Tracker.autorun((c) => {
+        let onlineUserTrackerSub;
+        console.log('[USERS|ACTIONS::getOnlineUsers] track online users');
+        onlineUserTrackerSub = Meteor.subscribe('userStatus');
+        if (onlineUserTrackerSub.ready()) {
+            let usersOnline = Meteor.users.find({'status.online':true, _id: {$ne: '9MrcW38w7CywChRco'}}, {fields: {'username':1}}).count()
+            console.log('usersOnline >>', usersOnline );
+            commit('USERS_ONLINE', usersOnline);
+        }
+    })  
+}
 export const initUsers = ({ commit }, filter) => {
     console.log("[ACTIONS:initUsers] :: ", filter);
     commit('LOADING_USERS', true)
 
+      
     Tracker.autorun((c) => {
         let usersSub;
         if (!!filter) {
             if (filter.type === 'date') {
                 usersSub = Meteor.subscribe('usersByDate', filter);    
                 
+            }
+            if (filter.type === 'free') {
+                usersSub = Meteor.subscribe('usersByText', filter.text);    
             }
         }
         else {
@@ -73,7 +89,14 @@ export const saveUsers = async ({ commit, dispatch }, data) => {
                 // commit('USER_LOGINS', result.users)
                 console.log('csvContent.. ', csvContent);
                 await dispatch('globalStore/downloadCSV', csvContent, {root:true})
+                let message = result.users.length>1 ? "משתמשים נשמרו בהצלחה" :"משתמש נשמר בהצלחה";
+                let type = "success";
+                dispatch('globalStore/setNote', { message, type, timer:3000, active:true}, {root:true})
                 dispatch('globalStore/closePopup', null, {root:true})
+
+                console.log("[ACTIONS:saveUsers] data: ", data);
+                let filter = ({ type:'date', start:data.date, end:null})
+                dispatch('initUsers', filter)
             } else {
                 dispatch('globalStore/closePopup', null, {root:true})
                 

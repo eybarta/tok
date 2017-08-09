@@ -1,11 +1,16 @@
 <template>
 <main class="admin-home">
+<!--
     <img class="page-logo" src="/img/etz-logo.svg" alt="עץ הדעת">
+    -->
     <div v-if="!!user" class="profile">
         <span class="profile-link"><span v-text="user.profile.name"></span><i class="fa fa-user"></i></span>
         <a class="signout" href="#p" @click.prevent="signOutUser">התנתק</a>
     </div>
-    <h2>מה נשמע בוס?</h2>
+    <div class="online-users">
+        <h5>מחוברים עכשיו: <strong v-text="usersOnline"></strong></h5>
+    </div>
+    <h2 v-text="greeting"></h2>
     <ul class="admin-tabs pt-bigger">
         <router-link :to="{ name:'manageUsers', exact: true }" tag="li">
             <a href="#p">ניהול משתמשים</a>
@@ -34,7 +39,8 @@ export default {
     methods: {
         ...mapActions('usersModule', [
             'initUsers',
-            'signOutUser'
+            'signOutUser',
+            'getOnlineUsers'
         ]),
         ...mapActions('globalStore', [
             'setNote'
@@ -47,8 +53,33 @@ export default {
     },
     computed: {
         ...mapState('usersModule', [
-            'user'
-        ])
+            'user',
+            'usersOnline'
+        ]),
+        greeting() {
+            return this.getGreetingTime + ' ירון';
+
+        },
+        getGreetingTime() {
+            let g = null,
+                m = moment();
+            if (!m || !m.isValid()) { return; } //if we can't find a valid or filled moment, we return.
+
+            var split_afternoon = 12 //24hr time to split the afternoon
+            var split_evening = 17 //24hr time to split the evening
+            var currentHour = parseFloat(m.format("HH"));
+
+            if (currentHour >= split_afternoon && currentHour <= split_evening) {
+                g = "צהריים טובים";
+            } else if (currentHour >= split_evening) {
+                g = "ערב טוב";
+            } else {
+                g = "בוקר טוב";
+            }
+
+            return g;
+        }
+
     },
     created() {
         // this.initUsers();
@@ -58,12 +89,15 @@ export default {
          if (!!this.user) {
             this.initFixedTests();
             this.initImagesCollection();
+            this.getOnlineUsers();
         }
     }
 }
 </script>
 <style lang="stylus">
 @import '~imports/styl/variables'
+.admin-home
+    background linear-gradient(to bottom, rgba(255,255,255,0.9) 5%, rgba(255,255,255,0.1) 100%)
 .page-logo
     position absolute
     top 2vh
@@ -81,15 +115,28 @@ export default {
         a
             color gray
         &.router-link-active
-            border-bottom 1px solid bluegreen
+            border-bottom 1px solid orange
             a
-                color darken(bluegreen, 8)
+                color lighten(orange, 8)
         &:hover a
-            color darken(bluegreen, 8)
+            color darken(orange, 8)
 .admin-part
-    padding-top 40px
-
+    margin-top -1px
+    background linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 20%)
+    min-height 71vh
+    box-shadow -10px -50px 50px rgba(255, 255, 255, 1)
 h2
     text-align center
     font-size responsive 24px 30px
+
+.online-users
+    position absolute
+    top 20px
+    right 30px
+    h5
+        font-size 14px
+        strong
+            font-weight bold
+            font-size 16px
+            color darken(primaryblue, 20)
 </style>

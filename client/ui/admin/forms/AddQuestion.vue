@@ -6,11 +6,29 @@
         </li>
     </ul>
     <div v-if="!!activecat" class="active-tab clearfix">
+        <button :class="['btn', !!showhistory ? 'btn-warning' : 'btn-primary']"
+        @click="showhistory=!showhistory" v-text="!!showhistory ? 'החבא שאלות קיימות' : 'הצג שאלות קיימות'"></button>
+        <div v-if="!!showhistory && categoryQuestions" class="question-list child-list">
+            <h4>שאלות בבנק:</h4>
+            <ul>
+                <li v-for="question in categoryQuestions" :key="question">
+                    <span class="q">שאלה: 
+                        <img v-if="activecat.value==='matrices'" :src="question.question">
+                        <span v-else v-text="question.question"></span>
+                    </span>
+                    <span class="a">תשובות: 
+                        <img v-if="activecat.value==='matrices'" v-for="answer in question.answers" :src="answer" :key="answer"> 
+                        <span v-else v-text="answer"></span>
+                    </span>
+                    <i class="fa fa-close" @click="removeQuestionFromDB(question)"></i>
+                </li>
+            </ul>
+        </div>
         <div v-if="!!log" class="log-msg">
             <h5 v-text="logMsg"></h5>
             <button @click="log=false; logMsg=null" class="btn btn-success" v-text="'הוסף עוד שאלה או שאלות ב' + activecat.label"></button>
         </div>
-        <div v-else>
+        <div class="pt-big mt-med bt-dashed clear" v-else>
             <multiselect v-if="!!activecat.children && activecat.children.length" class="dropdown w-elastic-30 maxw-300" v-model="activesubcat" track-by="value" label="label" placeholder="תבחר סוג שאלה"
                         :options="activecat.children"
                         :show-labels="false"
@@ -18,9 +36,9 @@
                         :close-on-select="true"
                         :allow-empty="false"></multiselect>
             <button @click="save" :class="['btn', 'btn-success', 'mr-min', !validQuestionEntry ? 'disabled' : '']">שמור</button>
-            <div class="form pt-big mt-med bt-dashed clear">
+            <div class="form">
                 <div v-if="activecat.value==='matrices'">
-                    <div v-for="(item, itemindex) in list" :key="item" :class="['qa', 'more', activeQuestionIndex===itemindex ? 'active' : '']">
+                    <div class="matrice-question" v-for="(item, itemindex) in list" :key="item" :class="['qa', 'more', activeQuestionIndex===itemindex ? 'active' : '']">
                         <button v-if="list.length>1" :class="[activeQuestionIndex===itemindex ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(itemindex)" ><span></span></button>
                         <transition name="fade-slide">
                             <div v-if="activeQuestionIndex===itemindex">
@@ -30,20 +48,24 @@
                                         v-for="(answer, index) in item.answers"
                                         :key="index"
                                         v-model="item.answers[index]"
-                                        :placeholder="index>0 ? 'העלת קובץ' : 'העלת קובץ תשובה נכונה'"
+                                        :placeholder="index>0 ? 'תשובה שגויה' : 'תשובה נכונה'"
                                         ></image-field>
                                     
                                     <div class="field flb mt-big">
-                                        <input v-model="item.code" :id="'code'+itemindex" type="text">
+                                        <input v-model="item.code" :id="'code'+itemindex" type="text" required>
                                         <label :for="'code'+itemindex">קידוד</label>
                                     </div>
+                                     <div class="field flb mt-small">
+                                        <textarea v-model="item.explanation" required></textarea>
+                                        <label :for="'explanation'+itemindex">הסבר תשובה</label>
+                                    </div> 
                                 </div>
                             </div>
                         </transition>
                     </div>
                 </div>
                 <div v-else>
-                    <div v-for="(item, index) in list" :key="item" :class="['qa', activeQuestionIndex===index ? 'active' : '']">
+                    <div v-for="(item, index) in list" :key="item" :class="['qa', 'more', activeQuestionIndex===index ? 'active' : '']">
                         <button v-if="list.length>1" :class="[activeQuestionIndex===index ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(index)" ><span></span></button>
                         <transition name="fade-slide">
                             <div v-if="activeQuestionIndex===index">
@@ -56,10 +78,14 @@
                                         <input :id="'answer'+index" class="reg w-100" v-model="item.answers[index]" type="text" required>
                                         <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
                                     </div>
-                                </div>
-                                <div class="field flb">
-                                    <input v-model="item.code" :id="'code'+index" type="text">
-                                    <label :for="'code'+index">קידוד</label>
+                                    <div class="field flb">
+                                        <input v-model="item.code" :id="'code'+index" type="text" required>
+                                        <label :for="'code'+index">קידוד</label>
+                                    </div>
+                                    <div class="field flb mt-small">
+                                        <textarea v-model="item.explanation" required></textarea>
+                                        <label :for="'explanation'+itemindex">הסבר תשובה</label>
+                                    </div>                               
                                 </div>
                             </div>
                         </transition>
@@ -96,6 +122,7 @@ import ImageField from '/client/ui/components/form/ImageField.vue'
 const questionObj = {
     question: null,
     code: null,
+    explanation: null,
     answers: [
         null,
         null,
@@ -114,7 +141,8 @@ export default {
             uploading:false,
             previewimage: null,
             log: null,
-            logMsg: null
+            logMsg: null,
+            showhistory: false
         }
     },
     created() {
@@ -145,9 +173,7 @@ export default {
         list: {
             handler() {
                 let list = this.list;
-                console.log("list answers changed >> ", this.list);
                 this.$set(this, 'list', list)
-
             },
             deep:true
         },
@@ -164,19 +190,16 @@ export default {
     methods: {
         ...mapActions('testsModule', [
             'saveQuestion',
-            'initQuestions'
+            'initQuestions',
+            'removeQuestion'
         ]),
-        imageuploaded(a,b,c) {
-            console.log(a,b,c)
-        },
-        uploadToCloud(e) {
-            let files = e.currentTarget.files;
-            console.log('target > ', e.currentTarget.files);
-
-            Cloudinary.upload(files, (err,res) => {
-                console.log('err.. ', err);
-                console.log('res.. ', res)
-            })
+        removeQuestionFromDB(question){
+            let category = {
+                label: this.activecat.label,
+                value: this.activecat.value
+            }
+            question.category = category;
+            this.removeQuestion(question)
         },
         getAnswerImg(listindex, answerindex) {
             console.log("get answer > ", this.list[listindex].answers[answerindex]);
@@ -203,13 +226,19 @@ export default {
                 console.log("cloudinary upload.>>", res);
                 vm.uploading = false;
                 vm.$set(vm, 'previewimage', res.url);
-                vm.list[vm.activeQuestionIndex].question = res.url;
+                if (this.activecat.value==='matrices') {
+                    vm.list[vm.activeQuestionIndex].question = res.url;
+                }
             });
         },
         fileDropped(res) {
             console.log("File dropped>> ", res);
         },
         save() {
+            _.each(this.list, function(obj) {
+                obj.answers = _.compact(obj.answers)
+            })
+            console.log('thislist  .. ', this.list);
             let data = {
                 category: {
                     label: this.activecat.label,
@@ -219,6 +248,7 @@ export default {
                 imageUrl: this.previewimage
                 // answers: this.answers
             }
+
             if (!!this.activesubcat) {
                 data.type = {
                     label: this.activesubcat.label,
@@ -231,6 +261,9 @@ export default {
 
             this.reset();
 
+            function compactList(list) {
+                
+            }
         },
         anotherQuestion() {
             console.log('add another question >> ', questionObj);
@@ -260,6 +293,17 @@ export default {
             return !!firstQuestion.question 
                 // && _.compact(firstQuestion.answers).length===firstQuestion.answers.length
                 && this.activecat.value==='matrices' || (!!this.activesubcat && this.activesubcat.value);
+        },
+        categoryQuestions() {
+            let questionsFromCategory,
+            category = !!this.activecat ? this.activecat.value : null;
+            if (!!category) {
+                questionsFromCategory = _.find(this.questionbank, obj => obj.category.value===category)
+                if (!!questionsFromCategory) {
+                    return questionsFromCategory.questions;
+                }
+                // console.log("questions form category .> ", questions);
+            }
         },
         imageDimensions() {
             if (!!this.previewimage) {
@@ -292,6 +336,17 @@ export default {
   opacity 0
   transform scale(1, 0)
 }
+
+.question-list
+    .q, .a 
+        span, img
+            display inline-block
+            vertical-align top
+            margin 0 0 0 10px
+        img
+            width 120px
+    .a img
+        width 40px
 .qa
     position relative
     padding 30px 40px 30px 20px
@@ -374,6 +429,7 @@ export default {
     cursor pointer
     background lighten(gray, 85)
     border 1px solid lighten(gray, 80)
+    overflow hidden
     &:hover
         border-style dashed
     .upload
@@ -406,12 +462,38 @@ export default {
             margin 5px auto
             font-size 30px
             color lighten(gray, 22)
+.matrice-question
+    label
+        display inline-block
+        width 45%
+        margin 0 0 0 5%
 .log-msg
-    self-center()
+    margin 5% auto
     text-align center
     h5
         font-size 26px
         padding-bottom 30px 
 .answer-img
     height 40px
+
+.question-list 
+    h4
+        border-bottom 1px solid rgba(lighten(primaryblue, 5), 75)
+        padding-bottom 10px
+        width 60%
+    ul
+        max-height 60vh
+        max-width 60%
+        overflow auto    
+        li
+            min-width 111px
+            width 95%
+            line-height 1.5
+            white-space normal
+            .fa-close
+                left -11px
+            .a
+                display block
+
+
 </style>

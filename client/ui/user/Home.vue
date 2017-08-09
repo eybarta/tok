@@ -1,5 +1,8 @@
 <template>
 <div class="users-home">
+<!--
+    <img class="page-logo" src="/img/etz-logo.svg" alt="עץ הדעת">
+    -->
     <div v-if="!!user && !route.meta.test" class="profile">
         <a class="profile-link" href="#p" title="לחץ לעדכון פרטים" @click.prevent="callPopup({ title:'פרטים אישיים', type:'UserProfile'})"><span v-text="user.profile.name"></span><i class="fa fa-user"></i></a>
         <a class="signout" href="#p" @click.prevent="signOutUser">התנתק</a>

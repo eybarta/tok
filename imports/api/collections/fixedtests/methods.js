@@ -39,6 +39,7 @@ Meteor.methods({
             FixedTests.upsert(identifier, { $set: { "tests": alltests[0].tests}});
         }
         else {
+            console.log('new test>> ', data);
             FixedTests.upsert(
             { type: data.type}, 
             { $push: { 
@@ -57,7 +58,7 @@ Meteor.methods({
         
     },
     'fixedtest.remove'(data) {
-        console.log("[fixedtests.remove] data >> ", data)
+        // console.log("[fixedtests.remove] data >> ", data)
         FixedTests.update(
             { type: data.type}, 
             { 
@@ -66,7 +67,13 @@ Meteor.methods({
                                 name: data.name,
                     }           
                 }
+        }, (err,res) => {
+            if (!err) {
+                return res;
+            }
+            console.log('fixedtest remove update callback >> ', err, " :: ", res);
         })
+        return true;
     }
 })
 // }

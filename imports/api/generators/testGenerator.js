@@ -129,7 +129,6 @@ export async function generateAutotest(categoryname, questionlist) {
     }).then(function(result) {
         return result;
     });
-    // return questions;
 }
 
 export function generateAdaptivetest(params, user) {

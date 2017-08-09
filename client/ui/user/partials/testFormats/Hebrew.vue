@@ -9,7 +9,7 @@
             <div class="answer">
                 <h5 class="rtl"> נא לבחור אחת התשובות:</h5>
                 <ul class="rtl">
-                    <li v-for="(answer, index) in question.answers.list" :key="answer">
+                    <li v-for="(answer, index) in question.answers" :key="answer">
                         <a href="#p" @click.prevent="chooseAnswer(question, answer)" :class="[question.chosenAnswer===answer ? 'chosen' : '']" v-text="answer"></a>
                         <span class="rtl" v-text="'.'+answerLabel[index]"></span>
                     </li>
@@ -48,6 +48,8 @@ export default {
 </script>
 <style lang="stylus" scoped>
 @import '~imports/styl/variables.styl'
+@import '~imports/styl/lib/rupture.styl'
+
 .hebrew-test
     h4
         padding 40px 0 0
@@ -75,9 +77,11 @@ export default {
                 h4
                     padding 0 0 2%
                     font-size 25px
+                    line-height 1.3
                     letter-spacing 1px
                     direction rtl
                     text-align center
+                    white-space normal
                 .parts
                     padding 2% 0
                     border-top 1px dashed rgba(darken(#0bddbe, 60), 0.2)
@@ -102,21 +106,32 @@ export default {
                 padding-bottom 20px
             ul
                 white-space normal
+                text-align right
             li
                 display inline-block
-                margin 0 2.2%
+                margin 2.2%
+                white-space nowrap
             li a
                 font-family 'Helvetica Thin'
                 display inline-block
+                vertical-align middle
                 padding 10px
+                max-width 90%
                 border-radius 9px
                 box-sizing border-box
                 text-decoration none
                 color lighten(darkblue, 20)
-                font-size 28px
+                font-size 26px
                 border 1px solid transparent
                 background transparent
-                transition border 400ms ease, background 400ms ease, color 400ms ease
+                white-space normal
+                transition border 400ms ease, background 400ms ease, color 400ms 
+                +below(1200px)
+                    font-size 24px
+                & + span
+                    vertical-align text-top
+                    display inline-block
+                    direction rtl
                 @media screen and (max-width:740px)
                     // margin 0 30px
                     font-size 22px

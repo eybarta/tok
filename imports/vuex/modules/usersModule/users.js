@@ -8,6 +8,8 @@ const state = {
     loadingusers: false,
     loadingMoreUsers: false,
     users: [],
+    usersOnline: null
+    
     // userLogins: null,
 }
 
@@ -18,6 +20,9 @@ const mutations = {
     INIT_USERS (state, users) {
         state.loadingusers = false;
         state.users = users
+    },
+    USERS_ONLINE(state, usersOnline) {
+        state.usersOnline = usersOnline;
     },
     // USER_LOGINS (state, users) {
     //     state.userLogins = users;

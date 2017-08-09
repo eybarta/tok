@@ -203,8 +203,11 @@ export default {
 }
 
 .item-menu
+    background linear-gradient(to bottom, rgba(lightgray,1) 0%,rgba(lightgray,1) 29%,rgba(lightgray,0) 68%,rgba(lightgray,0) 100%)
     h2
         color darken(blue,75)
+        +below(540px)
+            margin-top 6vh
 .menu-list
     text-align right
     display inline-block
@@ -214,17 +217,21 @@ export default {
         height @width
         border-radius unit(@width/2, 'vmin')
         margin 0 0 15px 15px
-        background linear-gradient(145deg, bluegreen 0%, bluegreen 50%, darken(bluegreen, 50) 90%)
-        box-shadow 4px 4px 12px rgba(darken(bluegreen, 75), 0.02)
+        background linear-gradient(145deg, primaryblue 0%, primaryblue 50%, darken(primaryblue, 50) 90%)
+        box-shadow 4px 4px 12px rgba(darken(primaryblue, 75), 0.02)
         text-align center
         position relative
         transition all 0.8s ease
         overflow hidden
+        +below(420px)
+            width 16vmax
+            height @width
+            border-radius unit(@width/2, 'vmax')
+
         &.disabled
             opacity 0.2
             pointer-events none
-        &:hover
-            background-position 100px
+
         & > span
             self-center()
             box-shadow 1px 1px 2px rgba(#fff, 0.5)
@@ -234,18 +241,25 @@ export default {
                 height 100%
                 vertical-align middle
             self-center()
-            color darken(bluegreen, 1)
-            font-size 22px
+            color darken(primaryblue, 1)
+            font-size 21px
             width 99%
             height @width
             border-radius 360px
-            background #fff
+            background mix(#fff, lightgray, 55)
+            transition background 300ms ease
+            +below(420px)
+                font-size 16px
             & > span
                 position absolute
                 top 50%
                 left 50%
                 transform translate(-50%, -50%)
                 text-align right
+        &:hover
+            background-position 100px
+            & > span
+                background mix(#fff, lightgray, 75)
 .breadcrumbs
     text-align center
     padding 5vmin
@@ -255,6 +269,9 @@ export default {
         margin 0 0 0 15px
         a
             color darken(blue, 45)
+            font-size 22px
+            +below(540px)
+                font-size 16px
             &:after
                 content: '>'
                 display inline-block

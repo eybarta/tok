@@ -6,9 +6,9 @@
                     <h5 class="label">פילטור לפי תאריך</h5>
                     <date-range v-model="filters.date"></date-range>
                 </div>
-                <div v-if="!!users.length" class="free-search">
+                <div class="free-search">
                     <h5 class="label inline">חיפוש:</h5>
-                    <input-field class="search" v-model="filters.search"></input-field>
+                    <input-field @change.native="freeTxtSearch" class="search" v-model="filters.search"></input-field>
                 </div>
             </div>
             <div class="data-table-wrapper"  v-if="!!users.length && parsedUsers.length>0">
@@ -17,7 +17,7 @@
                         <th class="sortable" @click="sort('username')"> <i :class="['fa', sortClass('username')]"></i> שם משתמש</th>
                         <th>סיסמא</th>
                         <th>שם מלא</th>
-                        <th>קבוצה</th>
+                        <th class="sortable" @click="sort('profile.group')"> <i :class="['fa', sortClass('profile.group')]"></i> קבוצה</th>
                         <th class="sortable" @click="sort('profile.dob')"> <i :class="['fa', sortClass('profile.dob')]"></i> גיל</th>
                         <th class="sortable" @click="sort('profile.status.label')"><i :class="['fa', sortClass('profile.status.label')]"></i> סטטוס</th>
                         <th>יישוב</th>
@@ -52,7 +52,7 @@
                     :step-links="{next: 'הבא', prev: 'קודם'}"></paginate-links>
                 </div>
             </div>
-            <h4 class="else-msg" v-else-if="!!users.length && !loadingusers">לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
+            <h4 class="else-msg" v-if="!!users.length && !loadingusers && parsedUsers.length<0">לא נמצאו משתמשים... נסה להרחיב את הפילטור</h4>
         </div>
         <preloader :backdrop="false" pretitle="טוען משתמשים" v-if="!!loadingusers"></preloader>
         <!--
@@ -172,8 +172,13 @@ export default {
             'callPopup'
         ]),
          ...mapActions('usersModule', [
-            'updateMultipleUserProfiles'
+            'updateMultipleUserProfiles',
+            'initUsers'
         ]),
+        freeTxtSearch() {
+            console.log('free text search');
+            this.initUsers({ type:'free', text:this.filters.search})
+        },
         updateStartDate(date) {
             console.log('this.startPicker >> ', this.startPicker);
             this.startPicker.setStartRange(date);
@@ -298,7 +303,7 @@ export default {
 			}
 		},
         parseDate(date) {
-            return moment(date).format('D/M/YYYY')
+            return moment(date).utc().format('D/M/YYYY')
         }
     },
     computed: {
@@ -320,7 +325,7 @@ export default {
             let search = this.filters.search;
             console.log("USERS >> ", users);
             _.each(users, user => {
-                if (!!user.profile.dob) {
+                if (!!user.profile && !user.profile.dob) {
                     user.profile.age = this.userAge(user.profile.dob);
                 }
             })
@@ -335,9 +340,12 @@ export default {
                 let start = this.filters.date.start;
                 users = _.filter(users, user => {
                     let condition = !this.filters.date.end ? 'isSame' : 'isSameOrBefore';
-                    console.log("condiition> ", condition)
-                console.log('start > ', moment(start, dateformat), " :: group>> ", user.profile.group, " ::",  moment(user.profile.group));
-                    return moment(start, dateformat)[condition](moment(user.profile.group));
+                    console.log("[START FILTER] condiition> ", condition)
+                    console.log("[START FILTER] date format > ", dateformat)
+                    console.log("[START FILTER] start date > ", start, " in moment: ", moment(start, dateformat))
+                    groupDateUTC = moment(moment(user.profile.group).utc().format('D/M/YYYY'), 'D/M/YYYY');
+                    console.log("[START FILTER] group ", user.profile.group, " in UTC: ", groupDateUTC);
+                    return moment(start, dateformat)[condition](groupDateUTC);
                 })
                 console.log('start users > ', users.length);
                 

@@ -31,6 +31,8 @@ export default {
 .bg
     min-height 35vh
     position relative
+    /.app-wrap > &
+        height 100vh
 .preloader
     position absolute
     width 210px

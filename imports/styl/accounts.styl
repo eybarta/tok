@@ -1,77 +1,83 @@
 @import './variables'
+.login-bg
+    portrait()
+        background-position 50% 50%
+        background-size auto
 .login-wrap
-	width 100%
-	height 100%
-	background url('img/bg.jpg') no-repeat 0 0 / cover
-.at-form
-	position fixed
-	width 50%
-	max-width 520px
-	box-shadow 8px -18px 32px rgba(darken(#00a4ab, 60), 0.55), inset 2px -2px 12px rgba(darken(#00a4ab, 60), 0.35)
-	border-radius 12px
-	top 50%
-	left 50%
-	padding 2% 2% 1%
-	background rgba(255,255,252,1)
-	transform translate(-50%,-50%)
-	z-index 999
-	.at-title
-		// display none
-	& + .backdrop
-		position fixed
-		width 100vw
-		height 100vh
-		background rgba(0,0,0,0.5)
-		z-index 1
-		top 0
-		left 0
-	.at-sep
-		border-top 1px solid #999
-		text-align center
-		margin 40px 0
-		strong
-			display block      
-			background #fff
-			margin -10px auto
-			width 15%
-			color #202020
-			font-size 16px
-	label
+	self-center()
+	.login-logo
+		margin 0 auto 5vh
 		display block
-		display none
-		font-size 22px
-	input
-		line-height normal
-		width 100%
-		height 52px
-		border 1px solid rgba(33,33,33,0.2)
-		border-radius 4px
-		padding 0 10px
-		margin 10px 0
-		background rgba(255,255,255,0.3)
-		font-size 20px
-	#at-facebook
-		width 100%
-		height 46px
-		font-size  22px
-		background rgba(#3B5998, 0.2)
-		color darken(#3B5998, 10)
-		border 2px solid darken(#3B5998, 10)
-	.submit
-		height 46px
-		font-size 26px
-		width 100%
-		margin-top 34px
-		background primaryblue
-		color white
-		border 0
-		border-radius 4px
-		cursor pointer
-		line-height 1
-	.at-signup-link, .at-signin-link
-		margin-top 10px
-	.at-link
-		color darken(blue, 55)
+		max-width 240px
+		width 25vmin
+
+	.at-form
+		display block
+		margin 0 auto
+		width 50vmax
+		max-width 520px
+		box-shadow 0 0 44px rgba(0,0,0,0.25) //0 0 32px rgba(darken(#00a4ab, 60), 0.55), inset 2px -2px 12px rgba(darken(#00a4ab, 60), 0.35)
+		border-radius 12px
+		padding 2vmax 2vmax 1vmax
+		background rgba(255,255,252,1)
+		z-index 999
+		.at-title
+			// display none
+		& + .backdrop
+			position fixed
+			width 100vw
+			height 100vh
+			background rgba(0,0,0,0.5)
+			z-index 1
+			top 0
+			left 0
+		.at-sep
+			border-top 1px solid #999
+			text-align center
+			margin 40px 0
+			strong
+				display block      
+				background #fff
+				margin -10px auto
+				width 15%
+				color #202020
+				font-size 16px
+		label
+			display block
+			display none
+			font-size 22px
+		input
+			line-height normal
+			width 100%
+			height 52px
+			border 1px solid rgba(33,33,33,0.2)
+			border-radius 4px
+			padding 0 10px
+			margin 10px 0
+			background rgba(255,255,255,0.3)
+			font-size 20px
+		#at-facebook
+			width 100%
+			height 46px
+			font-size  22px
+			background rgba(#3B5998, 0.2)
+			color darken(#3B5998, 10)
+			border 2px solid darken(#3B5998, 10)
+		.submit
+			height 46px
+			font-size 26px
+			width 100%
+			margin-top 34px
+			background primaryblue
+			color white
+			border 0
+			border-radius 4px
+			cursor pointer
+			line-height 1
+		.at-signup-link, .at-signin-link
+			margin-top 10px
+		.at-link
+			color darken(blue, 55)
 // .profile
 // 	relative 0 0 false false 
 // 	margin-top -20px

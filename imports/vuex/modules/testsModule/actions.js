@@ -25,18 +25,21 @@ export const saveTestToUser = ({ commit, state}, testinfo) => {
     });
 }
 
-export const initFixedTests = ({ commit }) => {
+export const initFixedTests = async ({ commit }) => {
     console.log("initFixedTests>>>>>>>>>>>>>>>>>>>>");
-    Tracker.autorun((c) => {
-        let fixedtestsSub = Meteor.subscribe('fixedtests');
-        let fixedtests = FixedTests.find({}).fetch();
-        console.log('[ACTIONS:FixedTests] fixedtests sub.. ', fixedtestsSub, " :: ", fixedtests);
-        if (!!fixedtestsSub.ready()) {
-            console.log("fixedtestsSub ready");
-            commit('INIT_FIXED_TESTS', fixedtests)
-            c.stop();
-        }
-    })
+    return new Promise((resolve, reject) => {
+        Tracker.autorun((c) => {
+            let fixedtestsSub = Meteor.subscribe('fixedtests');
+            let fixedtests = FixedTests.find({}).fetch();
+            console.log('[ACTIONS:FixedTests] fixedtests sub.. ', fixedtestsSub, " :: ", fixedtests);
+            if (!!fixedtestsSub.ready()) {
+                console.log("fixedtestsSub ready");
+                commit('INIT_FIXED_TESTS', fixedtests)
+                resolve();
+                c.stop();
+            }
+        })
+    });
 }
 
 export const saveFixedTestToDB = async ({ commit, state, dispatch}, testdata) => {
@@ -57,13 +60,13 @@ export const saveFixedTestToDB = async ({ commit, state, dispatch}, testdata) =>
 export const removeFixedTest = ({commit,state,dispatch}, testdata) => {
     console.log("remove test from db >> ", testdata);
     return new Promise((resolve, reject) => {
-        Meteor.call('fixedtest.remove', testdata, result => {
-            console.log("test saved..", result);
+        Meteor.call('fixedtest.remove', testdata, (err,result) => {
+            console.log("test saved..", err, result);
             if (!!result) {
                 let message = "המבחן נמחק בהצלחה.";
                 let type = "success";
                 let data = { message, type, timer:3000, active:true}
-                
+                dispatch('initFixedTests');
                 dispatch('globalStore/setNote', data, {root:true})
                 resolve(true);
             }
@@ -84,17 +87,35 @@ export const initQuestions = ({ commit }) => {
         }
     })
 }
-export const saveQuestion = ({commit, state}, questiondata) => {
+export const saveQuestion = ({commit, state, dispatch}, questiondata) => {
     console.log('save question to db >>', questiondata);
     return new Promise((resolve, reject) => {
-        Meteor.call('questions.save', questiondata, result => {
-            console.log("return from method call>> ", result);
+        Meteor.call('questions.save', questiondata, (err,result) => {
+            console.log("return from method call>> ", err, " :: ", result);
+            dispatch('initQuestions');
             resolve();
             if (typeof result === 'undefined') {
                 return true;
             } else {
                 return 'error'
             }
+        })
+    });
+}
+export const removeQuestion = ({commit,state,dispatch}, question) => {
+    console.log("remove question from db >> ", question);
+    return new Promise((resolve, reject) => {
+        Meteor.call('questions.remove', question, (err,result) => {
+            console.log("question removed..", err, result);
+            if (!!result) {
+                let message = "השאלה נמחק בהצלחה.";
+                let type = "success";
+                let data = { message, type, timer:3000, active:true}
+                dispatch('initQuestions');
+                dispatch('globalStore/setNote', data, {root:true})
+                resolve(true);
+            }
+            
         })
     });
 }
@@ -125,71 +146,73 @@ async function fetchQuestionList(category = null) {
         })
     });
 }
-export const fetchTestQuestions = async ({commit, state, dispatch, rootState}) => {
-        console.log('fetchTestQuestions');
-            let routename = rootState.route.name;
-            let params = rootState.route.params;
-            let questions;
-            let questionslist = null;
-            if (params.category!='series') {
-                questionslist = await fetchQuestionList(params.category)
-                console.log("222QUESTIONLIST > ", questionslist, questionslist.length);
-                if (!questionslist || !questionslist.length) {
-                    console.log("STOP!!!!!!!!!!!!");
-                    return;
-                }
-            }
-            console.log("CONTINUE!!!!!!! >> ", params.name, " :: ", routename);
-                    
-            if (!!params.name || !isNaN(params.name)) {
-                if (routename==='testhistory') {
-                    console.log("store > ", store);
-                    let usertests = store.getters['usersModule/userCurrentCategoryTestHistory'];
-                    console.log('usertests >> ', usertests);
-                    if (!!usertests) {
-                        if (!isNaN(params.name)) {
-                            commit('UPDATE_TEST_QUESTIONS', usertests[params.name].questions);
-
-                        }
-                        else {
-                            let test = _.find(usertests, obj => obj.label===params.name)
-                            commit('UPDATE_TEST_QUESTIONS', test.questions);
-                        }
-                    }
-                }    
-                else if (routename==='fixedtest') {
-                    let questions = fetchFixedTest(rootState.route.params, questionslist, state.fixedtests);
-                    console.log('fixed q.. ', questions);
-                    // return questions;
-                    commit('UPDATE_TEST_QUESTIONS', _.flatten(questions));
-                }
-                // else {
-                //     let category = this.activeCategory;
-                //     let subcategory = _.find(category.children, { value: params.name});
-                //     let questions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
-                //     return questions;
-                // }
-            }
-            else if (/test/gi.test(routename)) {
-                if (routename==='autotest') {
-                    questions = fetchAutoTest(rootState.route.params, questionslist);
-
-                    // return fetchAutoTest();
-                }
-                else if (routename==='adaptivetest') {
-                    console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
-                    
-                    questions = fetchAdaptivetest(rootState.route.params, questionslist);
-                }
-                
-                console.log("return questions  >", questions);
-                
-                commit('UPDATE_TEST_QUESTIONS', _.flatten(questions));
-                // return _.shuffle(_.flatten(questions));
-            }
-            // }
-           
+export const fetchTestQuestions = async ({ commit, state, dispatch, rootState }, data) => {
+    console.log('fetchTestQuestions');
+    let routename = rootState.route.name;
+    let params = rootState.route.params;
+    let questions;
+    let questionslist = null;
+    if (params.category != 'series') {
+        questionslist = await fetchQuestionList(params.category)
+        console.log("222QUESTIONLIST > ", questionslist, questionslist.length);
+        if (!questionslist || !questionslist.length) {
+            console.log("STOP!!!!!!!!!!!!");
+            return;
         }
+    }
+    console.log("CONTINUE!!!!!!! >> ", params.name, " :: ", routename);
+
+    if (!!params.name || !isNaN(params.name)) {
+        if (routename === 'testhistory') {
+            console.log("store > ", store);
+            let usertests = store.getters['usersModule/userCurrentCategoryTestHistory'];
+            console.log('usertests >> ', usertests);
+            if (!!usertests) {
+                if (!isNaN(params.name)) {
+                    commit('UPDATE_TEST_QUESTIONS', usertests[params.name].questions);
+
+                }
+                else {
+                    let test = _.find(usertests, obj => obj.label === params.name)
+                    commit('UPDATE_TEST_QUESTIONS', test.questions);
+                }
+            }
+        }
+        else if (routename === 'fixedtest') {
+            console.log('state.fixedtests > ', state.fixedtests)
+            if (!state.fixedtests) {
+                await dispatch('initFixedTests');
+            }
+            let questions = fetchFixedTest(rootState.route.params, questionslist, state.fixedtests);
+            console.log('fixed q.. ', questions);
+            // return questions;
+            commit('UPDATE_TEST_QUESTIONS', _.flatten(questions));
+        }
+        // else {
+        //     let category = this.activeCategory;
+        //     let subcategory = _.find(category.children, { value: params.name});
+        //     let questions = questionGenerator(category.value, subcategory.value, subcategory.label, 20);
+        //     return questions;
+        // }
+    }
+    else if (/test/gi.test(routename)) {
+        if (routename === 'autotest') {
+            questions = fetchAutoTest(rootState.route.params, questionslist);
+
+            // return fetchAutoTest();
+        }
+        else if (routename === 'adaptivetest') {
+            console.log("(params.adaptivetest) QUESTIONS GETTER >> params ", params);
+
+            questions = fetchAdaptivetest(rootState.route.params, questionslist);
+        }
+
+        console.log("return questions  >", questions);
+
+        commit('UPDATE_TEST_QUESTIONS', _.flatten(questions));
+        // return _.shuffle(_.flatten(questions));
+    }
+}
 const fetchFixedTest  = (params, questionlist, fixedtests) =>  {
         console.log('in fetchFixedTest >> ', fixedtests);
         let type = params.category;

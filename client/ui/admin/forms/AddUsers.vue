@@ -42,7 +42,7 @@ export default {
             'saveUsers'
         ]),
         save() {
-            let date = new Date(moment(this.date, 'D/M/YYYY')),
+            let date = new Date(moment.utc(this.date, 'D/M/YYYY')),
                 userIds = this.userIds;
             this.$set(this, 'loading', true);
             this.saveUsers({date, userIds});

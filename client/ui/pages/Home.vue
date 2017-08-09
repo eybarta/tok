@@ -1,6 +1,8 @@
 <template> 
 <main :class="[!!apploaded && !user ? 'login-bg' : '']">
+<!--
     <img class="home-logo" src="/img/etz-logo.svg" alt="עץ הדעת">
+    -->
     <div v-if="!!apploaded && !user" v-blaze="'login'"></div>
      
     <router-view></router-view>
@@ -61,17 +63,13 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 @import '~imports/styl/lib/rupture.styl'
 main
     padding 100px 0 0
-.login-bg
-    background url('/img/login-bg-2.jpg') no-repeat 50% 90% / cover
-    portrait()
-        background-position 50% 50%
-        background-size auto
+
 .home-logo
     position absolute
     top 2vh
     left 2vh
     width 18vmin
-    opacity 0.7
+    opacity 0.9
     transition opacity 400ms ease
     &:hover
         opacity 1

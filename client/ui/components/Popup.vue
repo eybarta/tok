@@ -3,13 +3,17 @@
     <div class="popup-content">
         <i @click="closePopup" class="lnr lnr-cross topleft"></i>
         <h4 v-if="!!popup.title" v-text="popup.title"></h4>
-        <component :is="popup.type" :moredata="popup.data"></component>
+        <component v-if="!!popup.type" :is="popup.type" :moredata="popup.data"></component>
+        <div class="msg" v-else v-html="popup.data"></div>
     </div>
 </div>
 </template>
 <script>
 import { mapState, mapActions } from 'vuex'
 // Available components
+
+// Generic
+// import GenericMessage from '/client/ui/components/'
 // Admin
 import AddUsers from '/client/ui/admin/forms/AddUsers.vue'
 

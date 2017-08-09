@@ -117,6 +117,7 @@ export default {
             if  (this.mode==='test') {
                  question.chosenAnswer=answer;
             }
+            this.$parent.updateQuestionIndex('next');
         },
         toggleSolution() {
             if (!!this.showsolution || this.showsolution===0) {
@@ -158,11 +159,11 @@ export default {
                 let i = fixedIndex>-1 ? fixedIndex : index%controls.length;
                 let oi = fixedIndex>-1 ? fixedIndex : index%operations.length;
                 let operation = operations[oi];
-                if (questionIndex==14) {
-                    console.log(">> controls >> ", controls);
-                    console.log(">> operations >> ", operations);
-                    console.log([questionIndex], "indexes[2] :: control :: shift ", i, " :: ", oi, " :: ", controls[i], " :: ", shifts[i]);
-                }
+                // if (questionIndex==14) {
+                //     console.log(">> controls >> ", controls);
+                //     console.log(">> operations >> ", operations);
+                //     console.log([questionIndex], "indexes[2] :: control :: shift ", i, " :: ", oi, " :: ", controls[i], " :: ", shifts[i]);
+                // }
                 let operationIcon = function() {
                     switch(operation) {
                         case 'add':
@@ -179,14 +180,20 @@ export default {
                 }
                 // console.log([questionIndex]," >>> amount of parts: ", question.parts.length, " :: ",  question.type, " :: ", controls[i], " :: ", shifts[i]);
                 this.positionControlAndShift(index, questionIndex, !!shifts, question.type, question.parts.length, showother);
-                if (questionIndex==4) {
-                    console.log([questionIndex], " :: i= ", i, " :: control> ", controls[i], ' :: shift == ', shifts[i], ' :: index == ', index);
-                }
-                let _control = 
+                // if (questionIndex==5) {
+                //     console.log([questionIndex], " :: i= ", i, " :: control> ", controls, ' :: shift == ', shifts[i], ' :: index == ', index);
+                // }
+                let _control = //controls[i];
                     isNaN(shifts[i])
                     ? parseInt(controls[i])
-                    : parseInt(controls[i] + shifts[i]*index);
-                return /(add|substract)/.test(operation) && _control<0 ? _control : `${operationIcon()}` + _control;
+                    : parseInt(controls[i] + (question.type==='subtract_shift'? Math.abs(shifts[i]*index) : shifts[i]*index));
+                let render = /(add|substract)/.test(operation) && _control<0 ? _control : `${operationIcon()}` + _control;
+                // if (questionIndex==11) {
+                
+                //     console.log("render control > ", render)
+                // }
+                
+                return render;
             }
             return ''
         },
@@ -270,7 +277,6 @@ export default {
                     color #0ac5a9
                     padding 3px 16px
                     border-radius 11px
-                    background #fff
                     z-index 5
                     
 

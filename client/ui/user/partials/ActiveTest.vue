@@ -38,6 +38,7 @@
                         <text v-text="countdown" text-anchor="middle" x="100" y="110" ></text>
                     </svg>
                 -->
+                        <!--
                     <radial-progress-bar :diameter="120"
                        :completed-steps="completedTimerSteps"
                        :total-steps="totalTimerSteps"
@@ -47,11 +48,14 @@
                     </radial-progress-bar>
                     <div class="time-clock">
                         <span v-text="countdown"></span>
-                        <!--
                         <i class="fa fa-clock-o"></i>
-                        -->
                     </div>
+                        -->
                 
+                </div>
+                <div class="time-bar">
+                    <span :class="['time-txt', timePassedPercent<1.5 ? 'at-start' : timePassedPercent>99 ? 'at-end' : '' ]" v-text="countdown" :style="`left:${timePassedPercent}%`"></span>
+                    <span class="bar" :style="`width:${timePassedPercent}%`"></span>
                 </div>
                 <div class="question-container">
                     
@@ -148,7 +152,8 @@
             <transition name="fade">
                 <div v-if="!!idle.flag" class="modal idle-modal">
                     <div class="inner">
-                        <h4>הלו תעורר!</h4>
+                        
+                        <h4><i class="fa fa-bullhorn"></i>הלו תתעורר!</h4>
                     </div>
                 </div>
             </transition>
@@ -164,7 +169,7 @@ import Series from './testFormats/Series.vue'
 import Hebrew from './testFormats/Hebrew.vue'
 import Matrices from './testFormats/Matrices.vue'
 
-const TOTAL_TEST_TIME = 840000;
+const TOTAL_TEST_TIME = 960000;
 
 export default {
     data() {
@@ -252,7 +257,7 @@ export default {
                 this.$nextTick(function () {
                     this.bindEvents();
                     this.idle.int = Meteor.setInterval(function () {
-                        if (this.withtimer) {
+                        if (!!this.idle.int && this.withtimer) {
                             if (this.timer<=0) {
                                 this.finish();
                             }
@@ -281,7 +286,6 @@ export default {
                 $(document.body).on('mousemove', this.notIdle)
         },
         keyupHandler(e) {
-            console.log("key up handler < ", e.keyCode);
             (e.keyCode==37) 
             ?   this.updateQuestionIndex('prev')
             :   (e.keyCode==39)
@@ -304,7 +308,7 @@ export default {
             }, 1000)
         },
         flagIdle() {
-            console.log('User has been idle for 2 minutes');
+            // console.log('User has been idle for 2 minutes');
             this.$set(this.idle, 'flag', true);
             $('body').on('mousemove', this.notIdle)
             $('body').on('keyup', this.notIdle)
@@ -324,6 +328,7 @@ export default {
         },
         finish() {
             Meteor.clearInterval(this.idle.int);
+            this.$set(this, 'idle.int', null);
             if (this.mode==='review') {
                 this.$router.push({ path: '/' });
                 return false;
@@ -371,6 +376,10 @@ export default {
         ...mapGetters('testsModule', [
             'currentCategory'
         ]),
+        timePassedPercent() {
+            let percent = 100 - (this.timer/this.totalTimerTime*100);
+            return percent.toFixed(2);
+        },
         calcStartcolor() {
             return this.completedTimerSteps > this.totalTimerSteps/2 ? "#ea6b6b" : "#ea6b6b";
         },
@@ -426,13 +435,18 @@ export default {
 }
 </script>
 <style lang="stylus">
+@import '~imports/styl/lib/rupture.styl'
 @import '~imports/styl/variables.styl'
 @import '~imports/styl/mixins'
 
 correct-color = darken(bluegreen, 5)
 wrong-color = lighten(red, 5);
 
-
+.idle-modal .fa-bullhorn
+    text-align center
+    font-size 7vmax
+    display block
+    margin 0 auto 20px
 .btn.disabled
     pointer-events none
     opacity 0.5
@@ -457,15 +471,21 @@ wrong-color = lighten(red, 5);
     padding 5vmin
     transform translate(-50%,-50%)
     overflow hidden
-    @media screen and (max-height:680px)
+    +below(680px)
         width 85vmin
         height @width
         border-radius unit(@width/2, 'vmin')
+    +below(540px)
+        width 100%
+        height 100%
+        border-radius 0
     h4
         font-size 30px
         text-align center
-        @media screen and (max-height:680px)
-            font-size 24px    
+        +below(680px)
+            font-size 24px
+        +below(540px)
+            font-size 18px
     .centerize
         self-center()
         width 100%
@@ -489,24 +509,30 @@ wrong-color = lighten(red, 5);
             color darken(bluegreen, 10)
             direction ltr
             font-size 4vmin
+            +below(540px)
+                font-size 6vmax
             span
                 font-size 2vmin
     .score
         padding 0 0 4%
-        @media screen and (max-height:680px)
+        +below(680px)
             padding 0 0 2%
+        +below(540px)
+            padding 0 0 15%
         .singlescore
             border-top 1px dotted bluegreen
             border-bottom 1px dotted bluegreen
             padding 5px 0
             width 20%
             margin 0 auto
+            +below(540px)
+                width 40%
         .label
             display inline-block
             padding-bottom 5px
     .links
         position absolute
-        bottom 10vmin
+        bottom 10vh
         left 50%
         transform translateX(-50%)
     .check-field
@@ -558,6 +584,8 @@ wrong-color = lighten(red, 5);
         letter-spacing 1px
         direction rtl
         text-align center
+        +below(540px)
+            font-size 18px
     & > div > ul
         width 100%
         word-spacing 0
@@ -576,6 +604,7 @@ wrong-color = lighten(red, 5);
                 padding-right 8%
             .question
                 text-align center
+                padding 4vmax 0 2vmax
                 h4
                     padding 0 0 2%
                     font-size 25px
@@ -591,9 +620,10 @@ wrong-color = lighten(red, 5);
                         margin 0 3.5vw
                         font-size 22px
                         font-family 'Helvetica Thin'
-                        @media screen and (max-width:740px)
-                            // margin 0 30px
+                        +below(740px)
                             font-size 22px
+                        +below(420px)
+                            font-size 16px
                         &.next
                             border-radius 4px
                             border 1px solid lighten(red, 15)
@@ -602,12 +632,17 @@ wrong-color = lighten(red, 5);
                             color lighten(red, 15)
                             min-width 60px
                             text-align center
+                            +below(420px)
+                                height 35px
+                                line-height 35px
+                                min-width 40px
                             &.success
                                 font-family 'Helvetica Md'
                                 line-height 50px
                                 border 1px solid darken(bluegreen, 5)
                                 background rgba(bluegreen, 0.1)
                                 color darken(bluegreen, 5)
+                                padding 0 1%
                                 
                                 
                                 
@@ -631,8 +666,11 @@ wrong-color = lighten(red, 5);
                     border 1px solid transparent
                     background transparent
                     transition border 400ms ease, background 400ms ease, color 400ms ease
-                    @media screen and (max-width:740px)
+                    +below(740px)
                         font-size 22px
+                    +below(540px)
+                        font-size 16px
+                        padding 5px
                     &:hover
                         border 1px solid lighten(#0bddbe, 25)
                         color darken(#0bddbe, 10)
@@ -644,7 +682,7 @@ wrong-color = lighten(red, 5);
                             color darken(#0bddbe, 5)
                     &.correct
                         border 1px solid correct-color
-                        background rgba(correct-color, 0.01)
+                        background rgba(#fff, 0.8)
                         color correct-color
                         & + span
                             color correct-color
@@ -659,15 +697,20 @@ wrong-color = lighten(red, 5);
     min-height 50vh
     width 100%
     padding-bottom 75px
-    background rgba(lighten(bluegreen, 45), 0.04)
+    // background rgba(lighten(bluegreen, 45), 0.04)
+    background linear-gradient(to bottom, rgba(lighten(lightgray, 20),1) 0%,rgba(lightgray,1) 29%,rgba(lightgray,0) 68%,rgba(lightgray,0) 100%)
     h2
         text-align center
-        text-decoration underline
+        // text-decoration underline
         height 14vh
         line-height 14vh
-        color darken(bluegreen, 7)
+        color darken(primaryblue, 7)
         font-weight normal
         font-size 28px
+        +below(540px)
+            text-align right
+            padding-right 4vw
+            font-size 22px
 
         
 /* 
@@ -791,7 +834,7 @@ wrong-color = lighten(red, 5);
 .status
     direction rtl
     text-align center
-    padding 0
+    padding 20px 0 0 0
     span
         text-align left
         display inline-block
@@ -852,6 +895,8 @@ wrong-color = lighten(red, 5);
     h4
         padding-bottom 40px
         font-size 26px
+        +below(540px)
+            font-size 18px
     .radio
         display inline-block
         vertical-align middle
@@ -869,6 +914,11 @@ wrong-color = lighten(red, 5);
                 border-radius @width
                 line-height @width
                 transition border 300ms ease-out, color 300ms ease-out
+                +below(540px)
+                    width 7vmax
+                    height @width
+                    border-radius @width
+                    line-height @width
                 &:after
                     content ''
                     width 0
@@ -952,6 +1002,7 @@ wrong-color = lighten(red, 5);
     position relative
     z-index 104
     background rgba(#fff, 0.7)
+    margin-bottom 20px
     & > *
         word-spacing initial
         letter-spacing initial
@@ -965,10 +1016,12 @@ wrong-color = lighten(red, 5);
     border-top 1px solid bluegreen
     border-right 1px dotted bluegreen
     mid(top)   
-    padding-bottom 5%
+    padding 5% 0
+    text-align center
     img
         position relative
         width 100%
+        max-width 30vmin
 .overlayed
     background rgba(0,0,0,0.7);
     padding 4px 4px 4px 0
@@ -1008,5 +1061,36 @@ wrong-color = lighten(red, 5);
     left -100%
     width 1%
     transform translateX(-100%)
-    
+
+.time-bar
+    position relative
+    width 100%
+    .time-txt
+        position absolute
+        left 0
+        bottom 10px
+        font-size 14px
+        color darken(red, 5)
+        transform translateX(-50%)
+        transition left 300ms ease, transform 400ms ease-out
+        &.at-start
+            transform translateX(20%)
+        &.at-end
+            transform translateX(-120%)
+    .bar
+        height 1px
+        background lighten(red, 5)
+        position absolute
+        bottom -1px
+        left 0
+        z-index 999
+        transition left 300ms ease
+        &:after
+            position absolute
+            right 0
+            bottom 0
+            content ''
+            height 10px
+            width 1px
+            border-left 1px dotted red
 </style>

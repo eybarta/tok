@@ -44,6 +44,7 @@ export default {
             this.$set(this, 'inprogress', true);
             
             Cloudinary.upload(files, {
+                eager: [{ width: 600, crop: "fit" }], 
                 use_filename: true,
                 unique_filename: false,
                 resource_type: 'image'    
@@ -78,7 +79,7 @@ export default {
 label
     position relative
     overflow hidden
-    border-bottom 1px solid rgba(bluegreen, 0.4)
+    border-bottom 1px solid rgba(primaryblue, 0.4)
     padding-left 50px
     height 50px
     margin-bottom 10px !important

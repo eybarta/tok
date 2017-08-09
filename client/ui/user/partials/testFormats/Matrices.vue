@@ -2,10 +2,12 @@
 <div class="hebrew-test">
     <ul :style="sliderTransform">
         <li v-for="(question, index) in questions" :key="question" :data-index="index" class="list-item">
-
-            <div class="question">
-                <h4 v-text="question.question"></h4>            
+            
+            <div ref="solution" v-if="mode=='review' && !!question.explanation && showsolution===index" class="solution">
+                <p v-text="question.explanation"></p>
             </div>
+            <button v-if="mode=='review' && !!question.explanation" :class="['btn', showsolution===index ? 'btn-warning' : 'btn-primary', 'mb-small']" @click="callPopup({ data:question.explanation})" v-text="showsolution===index ? 'החבא פתרון' : 'הצג פתרון'"></button>
+
             <div class="answer">
                 <h5 class="rtl"> נא לבחור אחת התשובות:</h5>
                 <ul class="rtl">
@@ -22,21 +24,33 @@
 </div>
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 export default {
-    props: ['questions', 'questionIndex'],
+    props: ['mode', 'questions', 'questionIndex'],
     data() {
         return {
-            answerLabel: ['א','ב','ג','ד']
+            answerLabel: ['א','ב','ג','ד'],
+            showsolution: false
         }
     },  
     created() {
         console.log('in hebrew questions > ', this.questions)
     },
     methods: {
+        ...mapActions('globalStore', [
+            'callPopup'
+        ]),
         chooseAnswer(question, answer) {
-            this.$set(question, 'chosenAnswer', answer)
+            if (this.mode==='test') {
+                this.$set(question, 'chosenAnswer', answer)
+
+            }
             // this.$forceUpdate();
+        }
+        ,
+        toggleSolution(question) {
+            this.$set(this, 'showsolution', !!this.showsolution ? false :  this.questionIndex);
+            this.callPopup({ data:this.question.explanation})
         }
     },
     computed: {
@@ -50,6 +64,9 @@ export default {
 </script>
 <style lang="stylus" scoped>
 @import '~imports/styl/variables.styl'
+.answer
+    img
+        width 160px
 .hebrew-test
     h4
         padding 40px 0 0

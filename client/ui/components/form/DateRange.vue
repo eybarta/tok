@@ -9,7 +9,7 @@
             <input @focus="focus=true" @blur="focus=false" type="text" ref="end">
             <i v-if="!!range.end" class="fa fa-close" @click.prevent="reset('end')"></i>
         </div>
-        <button @click="initUsers({ type:'date', start:range.start, end:range.end})" class="mr-small fetch-btn btn btn-success">מצא</button>
+        <button @click="initUsers({ type:'date', start:range.start, end:range.end})" class="mr-small fetch-btn btn btn-primary">חפש</button>
     </div>
 </template>
 <script>

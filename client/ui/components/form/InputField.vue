@@ -1,7 +1,7 @@
 <template>
     <div :class="['field', type, focus ? 'valid' : '', !!value ? 'valid' : '']">
         <input ref="field" :value="value" type="text" @focus="focus=true" @blur="focus=false" @input="$emit('input', $event.target.value)" required>
-        <i v-if="!!value" class="fa fa-close" @click.prevent="$emit('input', '')"></i>
+        <i v-if="!!value" class="fa fa-close x-btn" @click.prevent="$emit('input', '')"></i>
     </div>
 </template>
 <script>

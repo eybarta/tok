@@ -8,21 +8,25 @@
     <div v-if="!!activecat" class="active-tab clearfix">
         <button :class="['btn', !!showhistory ? 'btn-warning' : 'btn-primary']"
         @click="showhistory=!showhistory" v-text="!!showhistory ? 'החבא שאלות קיימות' : 'הצג שאלות קיימות'"></button>
-        <div v-if="!!showhistory && categoryQuestions" class="question-list child-list">
+        <div v-if="!!showhistory && !!questionsGroupedByType" class="question-list child-list">
             <h4>שאלות בבנק:</h4>
-            <ul>
-                <li v-for="question in categoryQuestions" :key="question">
+            <div class='qcat' v-for="(questions,key,index) in questionsGroupedByType" :key="key">
+                <h5 v-text="questions[0].type.label"></h5>
+                <ul>
+                    <li v-for="(question, index) in questions" :key="index">
                     <span class="q">שאלה: 
                         <img v-if="activecat.value==='matrices'" :src="question.question">
                         <span v-else v-text="question.question"></span>
                     </span>
                     <span class="a">תשובות: 
-                        <img v-if="activecat.value==='matrices'" v-for="answer in question.answers" :src="answer" :key="answer"> 
+                        <img v-if="activecat.value==='matrices'" v-for="answer in question.answers.list" :src="answer" :key="answer"> 
                         <span v-else v-text="answer"></span>
                     </span>
-                    <i class="fa fa-close" @click="removeQuestionFromDB(question)"></i>
-                </li>
-            </ul>
+                    <i class="fa fa-close x-btn" @click="removeQuestionFromDB(question)"></i>
+                    </li>
+                </ul>
+            </div>
+            
         </div>
         <div v-if="!!log" class="log-msg">
             <h5 v-text="logMsg"></h5>
@@ -45,13 +49,13 @@
                                 <div class="form-full block">
                                     
                                     <image-field 
-                                        v-for="(answer, index) in item.answers"
+                                        v-for="(answer, index) in item.answers.list"
                                         :key="index"
                                         v-model="item.answers[index]"
                                         :placeholder="index>0 ? 'תשובה שגויה' : 'תשובה נכונה'"
                                         ></image-field>
                                     
-                                    <div class="field flb mt-big">
+                                    <div :class="['field', 'flb', 'mt-big']">
                                         <input v-model="item.code" :id="'code'+itemindex" type="text" required>
                                         <label :for="'code'+itemindex">קידוד</label>
                                     </div>
@@ -65,22 +69,22 @@
                     </div>
                 </div>
                 <div v-else>
-                    <div v-for="(item, index) in list" :key="item" :class="['qa', 'more', activeQuestionIndex===index ? 'active' : '']">
-                        <button v-if="list.length>1" :class="[activeQuestionIndex===index ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(index)" ><span></span></button>
+                    <div v-for="(item, itemindex) in list" :key="itemindex" :class="['qa', 'more', activeQuestionIndex===itemindex ? 'active' : '']">
+                        <button v-if="list.length>1" :class="[activeQuestionIndex===itemindex ? 'min' : 'max' ]" @click="changeActiveQuestionIndex(itemindex)" ><span></span></button>
                         <transition name="fade-slide">
-                            <div v-if="activeQuestionIndex===index">
+                            <div v-if="activeQuestionIndex===itemindex">
                                 <div class="field flb w-elastic-50 maxw-500 pb-big">
-                                    <textarea :id="'question'+index" class="reg w-100" v-model="item.question" type="text" required></textarea>
-                                    <label :for="'question'+index">שאלה</label>
+                                    <textarea :id="'question'+itemindex" class="reg w-100" v-model="item.question" type="text" required></textarea>
+                                    <label :for="'question'+itemindex">שאלה</label>
                                 </div>
                                 <div class="form-full block">
-                                    <div v-for="(answer, index) in item.answers" :key="index" class="field flb w-elastic-50 maxw-500">
-                                        <input :id="'answer'+index" class="reg w-100" v-model="item.answers[index]" type="text" required>
-                                        <label :for="'answer'+index" class="dots" v-text="index===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
+                                    <div v-for="(answer, answerindex) in item.answers.list" :key="answerindex" class="field flb w-elastic-50 maxw-500">
+                                        <input :id="'answer'+answerindex" class="reg w-100" v-model="item.answers.list[answerindex]" type="text" required>
+                                        <label :for="'answer'+answerindex" class="dots" v-text="answerindex===0 ? 'תשובה נכונה' : 'עוד תשובה'"></label>
                                     </div>
-                                    <div class="field flb">
-                                        <input v-model="item.code" :id="'code'+index" type="text" required>
-                                        <label :for="'code'+index">קידוד</label>
+                                    <div :class="['field', 'flb', !!questionAsImage&&itemindex>0 ? 'disabled' : '']">
+                                        <input v-model="item.code" :id="'code'+itemindex" type="text" :disabled="!!questionAsImage&&itemindex>0" required>
+                                        <label v-if="!questionAsImage||!!questionAsImage&&itemindex<1" :for="'code'+itemindex">קידוד</label>
                                     </div>
                                     <div class="field flb mt-small">
                                         <textarea v-model="item.explanation" required></textarea>
@@ -123,12 +127,16 @@ const questionObj = {
     question: null,
     code: null,
     explanation: null,
-    answers: [
-        null,
-        null,
-        null,
-        null
-    ],
+    answers: {
+        correct: null,
+        list: [
+            null,
+            null,
+            null,
+            null
+        ]
+    }
+        
 }
 export default {
     data() {
@@ -162,7 +170,7 @@ export default {
             if (!!this.activecat && this.activecat.value==='matrices') {
                 this.$set(this, 'uploader', true);
                 let q = _.cloneDeep(questionObj);
-                q.answers = q.answers.concat([null,null,null,null]);
+                q.answers.list = q.answers.list.concat([null,null,null,null]);
                 // this.list.push(q);
                 this.$set(this, 'list', [q]);
             }
@@ -177,13 +185,16 @@ export default {
             },
             deep:true
         },
+        
         'activesubcat'() {
-            if (!!this.activesubcat && /(analyze|comprehension)/.test(this.activesubcat.value)) {
+            this.$set(this, 'activeQuestionIndex', 0)
+            if (!!this.questionAsImage) {
                 this.$set(this, 'uploader', true);
                 this.$set(this, 'list', [_.merge({ imageUrl: null}, _.cloneDeep(questionObj))])
             }
             else {
                 this.$set(this, 'uploader', false);
+                this.$set(this, 'list', [_.cloneDeep(questionObj)])
             }
         }
     },
@@ -235,9 +246,18 @@ export default {
             console.log("File dropped>> ", res);
         },
         save() {
+            let valid = true;
             _.each(this.list, function(obj) {
-                obj.answers = _.compact(obj.answers)
+                obj.answers.correct = obj.answers.list[0];
+                obj.answers.list = _.shuffle(_.compact(obj.answers.list));
+
+                valid = !!obj.answers.correct && obj.answers.list.length>1
             })
+
+            if (!valid) {
+                alert('יש שדות שחייבים למלא..')
+                return false;
+            }
             console.log('thislist  .. ', this.list);
             let data = {
                 category: {
@@ -267,7 +287,13 @@ export default {
         },
         anotherQuestion() {
             console.log('add another question >> ', questionObj);
-            this.list.push(_.cloneDeep(questionObj));
+            let qo = _.cloneDeep(questionObj)
+            if (this.questionAsImage) {
+                // use same code for all question attached to an image.
+                qo.code = this.list[0].code;
+            }
+            this.list.push(qo)
+            // this.list.push(_.cloneDeep(questionObj));
             this.$set(this, 'activeQuestionIndex', this.list.length-1);
         },
         reset() {
@@ -285,6 +311,9 @@ export default {
         }   
     },
     computed: {
+        questionAsImage() {
+            return !!this.activesubcat && /(analyze|comprehension)/.test(this.activesubcat.value);
+        },
         filteredCategories() {
             return _.filter(categories, category => { return category.value!='series'} )
         },
@@ -304,6 +333,13 @@ export default {
                 }
                 // console.log("questions form category .> ", questions);
             }
+        },
+        questionsGroupedByType() {
+            let questions = this.categoryQuestions;
+            if (!!questions) {
+                return _.groupBy(questions, 'type.value')
+            }
+            return null;
         },
         imageDimensions() {
             if (!!this.previewimage) {
@@ -337,16 +373,7 @@ export default {
   transform scale(1, 0)
 }
 
-.question-list
-    .q, .a 
-        span, img
-            display inline-block
-            vertical-align top
-            margin 0 0 0 10px
-        img
-            width 120px
-    .a img
-        width 40px
+
 .qa
     position relative
     padding 30px 40px 30px 20px
@@ -477,13 +504,29 @@ export default {
     height 40px
 
 .question-list 
+    .qcat
+        margin 10px 0
+        padding 5px 0
+        border-bottom 1px dotted primaryblue
+        max-width 60%
+        ul
+            max-height 200px
+            overflow auto
+    .q, .a 
+        span, img
+            display inline-block
+            vertical-align top
+            margin 0 0 0 10px
+        img
+            width 120px
+    .a img
+        width 40px
     h4
         border-bottom 1px solid rgba(lighten(primaryblue, 5), 75)
         padding-bottom 10px
         width 60%
     ul
         max-height 60vh
-        max-width 60%
         overflow auto    
         li
             min-width 111px

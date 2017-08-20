@@ -21,19 +21,9 @@ if (Meteor.isServer) {
     });
     Meteor.publish('usersByDate', function(date) {
         console.log("[SERVER|usersByDate] date: ", date);
-        let cond = {}
         if (Roles.userIsInRole(this.userId, 'admin')) {
-            cond['$gte'] = () => { return new Date(moment(date.start, 'D/M/YYYY'))};
-                cond['$lt'] = () => { 
-                    return !!date.end 
-                    ? new Date(moment(date.end, 'D/M/YYYY'))
-                    : new Date(moment(date.start, 'D/M/YYYY').add(1, 'day'))
-                }
-            console.log("condition >> ", cond.$gte(), cond.$lt());
-            let find = Meteor.users.find({ 'profile.group': { $gte: cond.$gte(), $lt: cond.$lt() } }, { fields: {'profile.tests':0}});
-            console.log("found> ", find.fetch());
-            // this.ready();
-            return find; //Meteor.users.find({ 'profile.group': cond});
+            return fetchUsersByDate(date);
+            
         } 
         else {
             this.stop();
@@ -54,6 +44,47 @@ if (Meteor.isServer) {
             return null
         }
     })
+    Meteor.publish('usersStatistics', function(filter) {
+            console.log("[SERVER:usersStatistics] filter > ", filter, this.userId, " :: ", Roles.userIsInRole(this.userId, 'admin'));
+           if (Roles.userIsInRole(this.userId, 'admin')) {
+                if (!!filter.all) {
+                    let find =  Meteor.users.find(
+                        {
+                            _id: { $ne: this.userId },
+                            'profile.tests': {$exists: true}
+                        },
+                        {
+                            fields: { 'profile.tests': 1, 'username': 1 }
+                        }
+                    )
+                    console.log("FOUND: ", find.fetch());
+                    return find;
+                }
+                else if (!!filter.date) {
+                    return fetchUsersByDate(filter.date, true);
+                }
+                else if (!!filter.users) {
+                    console.log('WTF');
+                    let usernames = _.map(filter.users, obj => obj.value);
+                    console.log("USERNAMES>> ", usernames);
+                    let find =  Meteor.users.find(
+                        {
+                            username: { $in: usernames },
+                            'profile.tests': {$exists: true}
+                        },
+                        {
+                            fields: { 'profile.tests': 1, 'username':1 }
+                        }
+                    )
+                    console.log("FOUND: ", find.fetch());
+                    return find;
+                }
+            }
+            else {
+                this.stop();
+                return null
+            } 
+    })
     Meteor.publish('usercount', function() {
         if (Roles.userIsInRole(this.userId, 'admin')) {
             return Meteor.users.find({
@@ -65,4 +96,23 @@ if (Meteor.isServer) {
             return null
         }
     })
+}
+
+
+function fetchUsersByDate(date, statistics) {
+    let cond = {}
+    cond['$gte'] = () => { return new Date(moment(date.start, 'D/M/YYYY'))};
+        cond['$lt'] = () => { 
+            return !!date.end 
+            ? new Date(moment(date.end, 'D/M/YYYY'))
+            : new Date(moment(date.start, 'D/M/YYYY').add(1, 'day'))
+        }
+        let find;
+        if (statistics) {
+            find = Meteor.users.find({'profile.tests': {$exists: true}, 'profile.group': { $gte: cond.$gte(), $lt: cond.$lt() } }, { fields: {'profile.tests':1, 'username': 1}});
+        }
+        else {
+            find = Meteor.users.find({ 'profile.group': { $gte: cond.$gte(), $lt: cond.$lt() } }, { fields: {'profile.tests':0}});
+        }
+    return find; 
 }

@@ -33,8 +33,8 @@ Meteor.methods({
         for (var i = 0 ; i < questions.length ; i++) {
             if (!!data.imageUrl) {
                 questions[i].imageUrl = data.imageUrl
-                questions[i].id = Random.id(12);
             }
+            questions[i].id = Random.id(12);
             questions[i].type = data.type
         }
         Questions.upsert(identifier, { $push: { "questions": {$each:questions}}});

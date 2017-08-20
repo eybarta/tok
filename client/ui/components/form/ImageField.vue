@@ -1,7 +1,7 @@
 <template>
     <label :class="['field', type, focus ? 'valid' : '', !!value ? 'valid' : '']">
         <input ref="field" type="file" @focus="focus=true" @blur="focus=false" @change="uploadToCloud($event)" required>
-        <i v-if="!!value" class="fa fa-close" @click.prevent="deleteFromCloud()"></i>
+        <i v-if="!!value" class="fa fa-close x-btn" @click.prevent="deleteFromCloud()"></i>
         <span class="placeholder" v-text="placeholder"></span>
 
         <div class="preview">

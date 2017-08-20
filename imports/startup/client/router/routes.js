@@ -5,9 +5,12 @@ console.log("store from router > ", store, " :: ", store.state)
 import Home from '/client/ui/pages/Home.vue';
 // Admin
 import AdminHome from '/client/ui/admin/Home.vue';
+import Statistics from '/client/ui/admin/Statistics.vue';
+
 import ManageUsers from '/client/ui/admin/ManageUsers.vue';
 import CreateTest from '/client/ui/admin/CreateTest.vue';
 import AddQuestion from '/client/ui/admin/forms/AddQuestion.vue';
+
 // User
 import UserHome from '/client/ui/user/Home.vue';
 import ActiveTest from '/client/ui/user/partials/ActiveTest.vue'
@@ -76,6 +79,11 @@ export const routes = [
 		name: 'adminhome',
 		component: AdminHome,
 		children: [
+			{
+				path: 'statistics',
+				name: 'statistics',
+				component: Statistics
+			},
 			{
 				path: 'manageUsers',
 				name: 'manageUsers',

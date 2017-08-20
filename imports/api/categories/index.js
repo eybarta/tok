@@ -172,9 +172,13 @@ export const categories = [
         value: 'prepare'
     },
     {
-        label: 'מבחן מלא',
-        value: 'fulltest'
-    }
+        label: 'דפ״ר',
+        value: 'dapar'
+    },
+    // {
+    //     label: 'מבחן מלא',
+    //     value: 'fulltest'
+    // }
 ]
 
 const categoryMenu = {

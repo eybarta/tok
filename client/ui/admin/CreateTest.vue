@@ -5,12 +5,17 @@
                 <a href="#p" @click.prevent="activecat=category">{{category.label}}</a>
             </li>
         </ul>
+        
         <div class="active-tab" v-if="!!activecat">
             <preloader v-if="!!saving"></preloader>
             <div>
-                <button v-if="!showpasttest && !!testlist.length" :class="['btn','btn-primary', 'mb-big']" @click="showpasttest = true">הצג מבחנים קודמים</button>
+                <button 
+                    v-if="!!testlist.length" 
+                    :class="['btn', !!showpasttest ? 'btn-warning' : 'btn-primary']" 
+                    @click="showpasttest = !showpasttest"
+                    v-text="!!showpasttest ? 'הסתר מבחנים' : 'הצג מבחנים קודמים'"></button>
                 <div v-if="showpasttest" class="test-list child-list">
-                    <h4>מבחנים קיימים: <button @click="showpasttest=false" class="btn btn-warning">הסתר מבחנים</button></h4>
+                    <h4>מבחנים קיימים: </h4>
                     <ul>
                         <li v-for="test in testlist" :key="test">
                             {{test.name}}
@@ -21,30 +26,45 @@
                 <!--
                     CREATE TEST
                 -->
-                <div class="create-test-form">
+                <div class="create-test-form pt-small mt-small">
                     <input :class="['reg', invalid&&!activetestdata.name.length ? 'invalid' : '']" v-model="activetestdata.name" type="text" placeholder="שם למבחן" required>
                     <button class="btn btn-primary-inverse mr-small"  @click="activecat.value==='series' ? generateSeriesTest() : generateTest()">צור מבחן אוטומטי</button>
-                    <button v-if="activecat.value!='series'" @click="manualAmountsSelection=!manualAmountsSelection" :class="['btn', !!manualAmountsSelection ? 'btn-warning' : 'btn-primary', 'mr-min']">{{ !!manualAmountsSelection ? 'בטל בחירה ידנית' : 'בחירת שאלות ידנית' }}</button>
+                    <button @click="manualAmountsSelection=!manualAmountsSelection" :class="['btn', !!manualAmountsSelection ? 'btn-warning' : 'btn-primary', 'mr-min']">{{ !!manualAmountsSelection ? 'בטל בחירה ידנית' : 'בחירת שאלות ידנית' }}</button>
                     <button @click="save" v-if="activetestdata.questions.length===20" :class="['btn', 'btn-success-inverse', 'mr-min', !activetestdata.name.length ? 'disabled' : '']">שמור</button>
                 </div>
                 <h5 class="pt-med" v-if="!!totalAmountForCategory"><span v-text="'סה״כ שאלות ב'+activecat.label+':'"></span><strong v-text="totalAmountForCategory"></strong></h5>
                 <ul v-if="!!manualAmountsSelection" class="child-list">
-                    <li v-for="(child, key, index) in manualChildList" :key="index" :class="[!!child.active || !!child.amount ? 'active' : '']">
-                        <i @click="removeFromManualSelection(child)" class="fa fa-close"></i>
-                        <strong v-text="child.label"></strong>: <input @focus="activateChild(child,index)"  @blur="deactivateChild(child,index)" v-model.number="child.amount" min="0" type="number">
-                        <span class="total-amount" v-text="'(' + (!!child.value ? totalAmountOfType(child.value) : child.totalAmount) +')'"></span>
+                    <li v-for="(child, index) in manualChildList" :key="index" :class="[!!child.active || !!child.amount ? 'active' : '']">
+                        <i @click="removeFromManualSelection(child)" class="fa fa-close x-btn"></i>
+                        <strong v-text="child.label"></strong>: 
+                        <input
+                            type="number"
+                            v-model.number="child.amount" 
+                            @focus="activateChild(child,index)"
+                            @blur="deactivateChild(child,index)"
+                            min="0"
+                            :max="totalAmountOfType(child)"
+                            :tabindex="index">
+                        <span v-if="activecat.value!='series'" class="total-amount" v-text="'(' + totalAmountOfType(child) +')'"></span>
 
-                        <div v-if="hasCodesInCategory(child.value)" :class="['code-selection', !!child.activeCodes ? 'active' : '']">
-                            <h5>לפי קידוד</h5>
+                        <h6 class="code-active-title" v-if="!!child.codes && !!child.codes.active">לפי קידוד</h6>
+                        <div v-if="hasCodesInCategory(child.value)" :class="['code-selection', !!child.codes.open ? 'open' : '']">
                             <ul>
                                 <li v-for="(value, key, i) in categoryQuestionsByType[child.value]" :key="i">
                                     <span v-text="key+':'"></span>
-                                    <input type="text" @change="updateAmount(child, index)" v-model.number="child.codes[i].amount">
+                                <input type="text" @input="updateAmount(child, index)" v-model.number="child.codes.list[i].amount" :disabled="!!value[0].imageUrl">
                                     <span class="total-amount" v-text="'('+totalAmountOfCode(child.value, key)+')'"></span>
+                                    <i v-if="!!value[0].imageUrl" @click="switchOnCode(child,totalAmountOfCode(child.value, key), i, index)" :class="['toggle', child.codes.list[i].amount>0 ? 'active' : '', 'fa', 'fa-check']"></i>
                                 </li>
                             </ul>
+
                         </div>
-                        <button v-if="hasCodesInCategory(child.value)" class="more" @click="toggleActiveCodes(child, index)"><i :class="['fa', !child.activeCodes ? 'fa-chevron-down' : 'fa-chevron-up']"></i></button>
+                        <button
+                            :class="['more', !!child.codes.active ? 'active' : '']"
+                            v-if="hasCodesInCategory(child.value)"
+                            @click="toggleActiveCodes(child, index)">
+                            <i :class="['fa', !child.codes.open ? (!!child.codes.active ? 'fa-close' : 'fa-chevron-down') : 'fa-chevron-up']"></i>
+                        </button>
                     </li>
                 </ul>
                 <table class="data-table mt-big" v-if="!!activetestdata.type && activetestdata.type==='series'">
@@ -80,10 +100,13 @@
                     <tbody>
                         <tr class="ltr tright" v-for="(question, index) in activetestdata.questions" :key="index">
                             <td v-text="index+1" class="tcenter"></td>
-                            <td v-text="question.type.label + (!!question.code ? ': ' + question.code : '')"></td>
-                            <td v-text="question.question"></td>
-                            <td v-text="question.answers.join(' | ')"></td>
-                            <td v-text="question.answers[0]"></td>
+                            <td>
+                                <strong class="cat-label" v-if="!!question.type && !!question.type.label" v-text="question.type.label"></strong>
+                                <span class="code-label" v-if="!!question.code" v-text="`${question.code} <`"></span>
+                            </td>
+                            <td v-html="activetestdata.type==='matrices' ? `<img src='${question.question}'>` : question.question"></td>
+                            <td v-html="parseTableAnswers(question.answers)"></td>
+                            <td v-html="activetestdata.type==='matrices' ? `<img src='${question.answers[0]}'>` : question.answers[0]"></td>
                             <td class="tcenter"><i class="regen fa fa-repeat" @click="regenerateQuestion(question, index)"></i></td>
                         </tr>
                     
@@ -135,10 +158,10 @@ export default {
             if (!!this.manualAmountsSelection) {
                 let list, keys;
                 if (this.activecat.value === 'matrices') {
-                    console.log('this.codedQuestions > ', this.codedQuestions);
+                    // console.log('this.codedQuestions > ', this.codedQuestions);
                     list = _.map(this.codedQuestions, (value, key) => { 
-                        console.log("key > ", key);
-                        console.log("value > ", value);
+                        // console.log("key > ", key);
+                        // console.log("value > ", value);
                         return {
                             active:false,
                             label: key,
@@ -153,10 +176,10 @@ export default {
                     _.forEach(list, obj => {
                         // for Coded questions list
                         if (!!keys && keys.indexOf(obj.value) > -1) {
-                            obj.codes = [];
+                            obj.codes = { open:false, active:false, list:[]};
                             _.each(this.categoryQuestionsByType[obj.value], (value, key, i) => {
-                                console.log('in amount selection >> ', value, key, i);
-                                obj.codes.push(
+                                // console.log('in amount selection >> ', value, key, i);
+                                obj.codes.list.push(
                                     {
                                         code: key,
                                         amount: null
@@ -164,16 +187,16 @@ export default {
                                 )
                             })
 
-                            obj.activeCodes = false;
+                            // obj.activeCodes = false;
                         }
                         obj.amount = 1;
                         obj.active = false;
                     })
                 }                 
-                console.log("LIST >> ", list);   
+                // console.log("LIST >> ", list);   
                 this.$set(this, 'manualChildList', list);
-                console.log(">> manual list: ", this.manualChildList)
-                console.log(">>", this.categoryQuestionsByType)
+                // console.log(">> manual list: ", this.manualChildList)
+                // console.log(">>", this.categoryQuestionsByType)
             }
         },
         'activecat.value'() {
@@ -190,20 +213,55 @@ export default {
             'setNote'
         ]),
         toggleActiveCodes(child, index) {
-            child.activeCodes= !child.activeCodes;
+            // console.log('[toggleActiveCodes] child, index: ', child, index);
+            if (!!child.codes.active) {
+                if (!!child.codes.open) {
+                    child.codes.open = false;
+                    let sum = _.sumBy(child.codes.list, 'amount');
+                    if (sum<1) {
+                        child.codes.active = false;
+                    }
+                } else {
+                    child.codes.active = false;
+                }
+            }
+            else {
+                _.forEach(this.manualChildList, child=> {child.codes.open=false});
+                child.codes.active = true;
+                child.codes.open = true; 
+            }
+
             this.$set(this.manualChildList, index, child);
         },
         updateAmount(child, index) {
-            child.amount = _.sumBy(child.codes, 'amount')
+            child.amount = _.sumBy(child.codes.list, 'amount')
             this.$set(this.manualChildList, index, child)
+        },
+        parseTableAnswers(answers) {
+            if (this.activetestdata.type==='matrices') {
+                let template = '';
+                for (var i = 0; i < answers.list.length; i++) {
+                    template += `<img src='${answers.list[i]}'> `
+                }
+                return template;
+            }
+            else {
+                return answers.list.join(' | ');
+            }
         },
         hasCodesInCategory(val) {
             let keys = _.keysIn(this.categoryQuestionsByType);
             return keys.indexOf(val)>-1
         },
-        totalAmountOfType(val) {
-            let grouped = this.groupedByType;
-            return grouped.hasOwnProperty(val) ? grouped[val].length : 0;
+        totalAmountOfType(child) {
+            if (this.activecat.value==='series') {
+                return 20;
+            }
+            if (!!child.value) {
+                let grouped = this.groupedByType;
+                return grouped.hasOwnProperty(child.value) ? grouped[child.value].length : 0;
+            }
+            return child.totalAmount;
         },
         totalAmountOfCode(val, key) {
             return this.categoryQuestionsByType[val][key].length;
@@ -212,19 +270,21 @@ export default {
             console.log('generate test');
             this.$set(this.activetestdata, 'type', this.activecat.value);
             let categoryQuestionsInBank = _.find(this.questionbank, cat => cat.category.value === this.activecat.value)
-            console.log('categoryQuestionsInBank >> ',this.questionbank, " :: ", categoryQuestionsInBank);
+            // console.log('categoryQuestionsInBank >> ',this.questionbank, " :: ", categoryQuestionsInBank);
             let questions = [];
             if (!!this.manualAmountsSelection) {
                 this.manualChildList = _.orderBy(this.manualChildList, [obj => parseInt(obj.amount)], ['desc'])
                 this.manualChildList.forEach(child => {
-                    console.log(child.value, " AMOUNT: ", child.amount);
+                    // console.log(child.value, " AMOUNT: ", child.amount);
 
                     /*
                         amount is either an Integer
                         or an object of codes with amounts
                     */
-                    let amount = child.codes || parseInt(child.amount)
+                    let amount = (!!child.codes && !!child.codes.active) ? child.codes : parseInt(child.amount)
+                    // console.log("manual child amount >>> ", child.label, " :: ", amount);
                     questions.push(...questionGenerator(this.activecat.value, child.value, child.label, amount, categoryQuestionsInBank))
+                    console.log("questions > ", questions);
                 })
             }
             this.activetestdata.questions = questions;
@@ -235,7 +295,7 @@ export default {
                 let questions = [];
                     this.manualChildList = _.orderBy(this.manualChildList, [obj => parseInt(obj.amount)], ['desc'])
                     this.manualChildList.forEach(child => {
-                        console.log(child.value, " AMOUNT: ", child.amount);
+                        // console.log(child.value, " AMOUNT: ", child.amount);
                             questions.push(...questionGenerator(this.activecat.value, child.value, child.label, parseInt(child.amount)))
                     })
                     
@@ -250,7 +310,7 @@ export default {
                         }
                     })
                 }
-                console.log("QUESTIONS > ", questions);
+                // console.log("QUESTIONS > ", questions);
                 this.activetestdata.questions = questions;
             }
             else {
@@ -258,19 +318,36 @@ export default {
             }
         },
         regenerateQuestion(question, index) {
-            this.$set(this.activetestdata.questions, index, questionGenerator(this.activecat.value, question.type, question.label, 1)[0])
+            console.log('regen question > ', question);
+            if (this.activecat.value==='series') {
+                this.$set(this.activetestdata.questions, index, questionGenerator(this.activecat.value, question.type, question.label, 1)[0])
+            }       
+            else {
+                let categoryQuestionsInBank = _.find(this.questionbank, cat => cat.category.value === this.activecat.value)
+                let amount = (!!question.code)
+                ? { list: [{code: question.code, amount:1}]}
+                : 1
+                this.$set(this.activetestdata.questions, index, questionGenerator(this.activecat.value, question.type.value, question.type.label, amount, categoryQuestionsInBank)[0])
+            }     
         },
         removeFromManualSelection(child) {
             this.$set(this, 'manualChildList', this.manualChildList.filter(_child => _child.value!=child.value))
         },
         activateChild(child, index) {
             child.active = true;
+            if (!!child.codes) child.codes.open = false;
             this.$set(this.manualChildList, index, child);
-            console.log('CODED QUESTION <<', this.codedQuestions)
+            // console.log('CODED QUESTION <<', this.codedQuestions)
         },
         deactivateChild(child,index) {
             child.active = false;
+            if (!!child.codes) child.codes.active = false;
             this.$set(this.manualChildList, index, child);
+        },
+        switchOnCode(child, total, codeindex, index) {
+            child.codes.list[codeindex].amount=total;
+            this.updateAmount(child, index)
+            // this.$set(this.manualChildList, index, child);
         },
         removeTest(test) {
             let testdata = _.merge({type:this.activecat.value}, test)
@@ -383,6 +460,7 @@ export default {
     li
         position relative
         display inline-block
+        vertical-align top
         margin 10px 0 10px 36px
         white-space nowrap
         padding 10px
@@ -404,8 +482,11 @@ export default {
             width auto
             max-width 40px
             display inline-block
-.test-list ul
-    padding 10px 0 30px
+.test-list 
+    h4
+        padding-bottom 5px
+    ul
+        padding 0
 
 button.more
     background rgba(#fff, 0.8)
@@ -423,7 +504,9 @@ button.more
     cursor pointer
     outline 0
     z-index 11
-    .active + &
+    &.active
+        background-color rgba(lighten(bluegreen, 46), 0.9)
+    .open + &
         z-index 9992
     &:focus,
     &:active
@@ -435,6 +518,10 @@ button.more
     &:hover i
         opacity 1
 
+.code-active-title
+    padding-top 8px
+    color darken(red, 5);
+    font-size 14px
 .code-selection
     position absolute
     min-width 100%
@@ -449,7 +536,7 @@ button.more
     transform translate(0, -100%)
     transition opacity 200ms ease-out, transform 600ms ease-out
     z-index -1
-    &.active
+    &.open
         opacity 1
         z-index 9991
         transform translate(0,0)
@@ -457,7 +544,6 @@ button.more
     h5
         font-size 14px
     ul
-        padding-top 10px
         li
             display list-item
             border 0
@@ -469,8 +555,35 @@ button.more
                 min-width 28px
             input
                 margin-right 5px
+            .toggle
+                cursor pointer
+                font-size 13px
+                color lighten(gray, 30)
+                padding 1%
+                &.active,
+                &:hover
+                    color darken(bluegreen, 10)
 
+
+
+.test-table
+    img
+        max-height 50px
+        max-width 50px
+        vertical-align middle
+        margin 0 0 0 5px
+    .cat-label
+        font-weight bold
+        font-size 13px
+    .code-label
+        padding 4% 1% 0
+        white-space nowrap
+        color orange
+        font-size 12px
+        display block
 .total-amount
     color darken(lightgray, 20)
     font-size 13px
+.create-test-form
+    border-top 1px dotted primaryblue
 </style>

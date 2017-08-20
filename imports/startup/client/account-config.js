@@ -1,5 +1,12 @@
 import { router } from '/imports/startup/client/router'
 
+T9n.map('en', {
+  error: {
+    accounts: {
+      'Login forbidden': 'שם או סיסמא לא נכונים. נסו שוב.'
+    }
+  }
+});
 
 var email = AccountsTemplates.removeField('email');
 var pwd = AccountsTemplates.removeField('password');
@@ -16,7 +23,7 @@ Accounts.ui.config({
 AccountsTemplates.configure({
   texts: {
     title: {
-      signIn: "התחבר למערכת"
+      signIn: "כניסה למערכת"
     },
     button: {
         signIn: 'התחבר',
@@ -26,7 +33,9 @@ AccountsTemplates.configure({
     signUpLink_link: 'צריך להירשם?',
     signInLink_pre: 'כבר רשום?',
     signInLink_link: 'התחבר',
-
+    errors: {
+      loginForbidden: "error.accounts.myDescriptiveError"
+    }
   },
 })
 
@@ -62,26 +71,22 @@ Meteor.loggingIn(function(a,b,c) {
 
 })
 // CALLBACKS
+Accounts.onLoginFailure(function(a,b,c) {
+  $('.at-btn').removeClass('loading');
+  
+})
 Accounts.onLogin(function() {
-  console.log("[ACCOUNTS-CONFIG] login callback, userId >> ", userId);
   if (!userId) {
     router.push({ name: 'home', params: ''})
   }
 })
 
 Accounts.onLogout(() => {
-    console.log('logout callback');
     let interval = Meteor.setInterval(function() {
       let userId = Meteor.userId()
-      console.log('useriddd ', userId);
-      
       if (!userId) {
-        console.log('finally logged out > ', router);
         router.push('/logout')
-        console.log('2 finally logged out');
         clearInterval(interval)
       }
-      
     }, 100)
-
 })

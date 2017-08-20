@@ -18,7 +18,7 @@
 		<!--
 			<img src="/img/logo-etz.svg" alt="">
 			-->
-			<small>  &copy; כל הזכויות שמורות עץ הדעת 2017 </small>
+			<small>  &copy; עץ הדעת - פיתוח ארגוני בע"מ</small>
 		</footer>
 	</div>
 </template>

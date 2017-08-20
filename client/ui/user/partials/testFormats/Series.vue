@@ -1,6 +1,6 @@
 <template>
 <div class="series-test">
-    <h4>מה הספרה הבאה בסדרה?</h4>
+    <h4 dir="rtl">מהו המספר הבא בסדרה?</h4>
     <ul :style="sliderTransform">
         <li v-for="(question, index) in questions" :key="question" :data-index="index" class="list-item">
             

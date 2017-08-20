@@ -4,7 +4,7 @@
             <div class="filters mb-med clearfix">
                 <div class="date-range right">
                     <h5 class="label">פילטור לפי תאריך</h5>
-                    <date-range v-model="filters.date"></date-range>
+                    <date-range v-model="filters.date" withsubmit></date-range>
                 </div>
                 <div class="free-search">
                     <h5 class="label inline">חיפוש:</h5>

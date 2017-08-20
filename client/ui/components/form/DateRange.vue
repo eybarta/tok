@@ -2,14 +2,14 @@
     <div class="date-range">
         <div :class="['field','date', focus ? 'valid' : '', !!range.start ? 'valid' : '']">
             <input @focus="focus=true" @blur="focus=false" type="text" placeholder="תאריך התחלה" ref="start">
-            <i v-if="!!range.start" class="fa fa-close" @click.prevent="reset('start')"></i>
+            <i v-if="!!range.start" class="fa fa-close x-btn" @click.prevent="reset('start')"></i>
         </div>
         <span> - </span>
         <div :class="['field','date', focus ? 'valid' : '', !!range.end ? 'valid' : '']">
             <input @focus="focus=true" @blur="focus=false" type="text" ref="end">
-            <i v-if="!!range.end" class="fa fa-close" @click.prevent="reset('end')"></i>
+            <i v-if="!!range.end" class="fa fa-close x-btn" @click.prevent="reset('end')"></i>
         </div>
-        <button @click="initUsers({ type:'date', start:range.start, end:range.end})" class="mr-small fetch-btn btn btn-primary">חפש</button>
+        <button v-if="withsubmit" @click="initUsers({ type:'date', start:range.start, end:range.end})" class="mr-small fetch-btn btn btn-primary">חפש</button>
     </div>
 </template>
 <script>
@@ -17,6 +17,12 @@ import Pikaday from 'pikaday';
 // var Pikaday = require('pikaday');
 import { mapActions } from 'vuex'
 export default {
+    props: {
+       withsubmit: {
+           type: Boolean,
+           default: false
+       } 
+    },
     data() {
         return {
             focus: false,

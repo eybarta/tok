@@ -8,8 +8,9 @@ const state = {
     loadingusers: false,
     loadingMoreUsers: false,
     users: [],
-    usersOnline: null
-    
+    usersOnline: null,
+    loadingstatistics: false,
+    statisticsData: null
     // userLogins: null,
 }
 
@@ -35,6 +36,12 @@ const mutations = {
     },
     LOADING_USERS(state, bool) {
         state.loadingusers = bool;
+    },
+    LOADING_STATISTICS(state, bool) {
+        state.loadingstatistics = bool;
+    },
+    STATISTICS_DATA(state, data) {
+        state.statisticsData = data;
     }
 }
 

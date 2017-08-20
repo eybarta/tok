@@ -61,18 +61,11 @@ export const initUsers = ({ commit }, filter) => {
         //     console.log('userCount > ', userCount);
         // }
         if (usersSub.ready()) {
-            console.log("[ACTIONS:initUsers]>>> userssub ready: ", usersSub.ready());
             let users = Meteor.users.find({ '_id': { $ne: Meteor.userId() }}).fetch();
-            console.log("[ACTIONS:initUsers]>>> users: ", users);
-            
             if (!!users) {
                 _.each(users, obj => { obj.selected = false;})
-                
             }
-            console.log("[ACTIONS:initUsers]>>> users to commit: ", users);
-            // console.log("users... ", users, ' :: ', users.length, " :: ", usersSub.ready());
             commit('INIT_USERS', users);
-            // c.stop();
         }
     })
 }
@@ -138,4 +131,25 @@ export const signOutUser = ({commit,rootState}) => {
     AccountsTemplates.logout();
     console.log(rootState);
     commit("SIGN_OUT_USER");
+}
+
+
+// STATISTICS
+export const loadingStatistics = ({commit}, bool) => {
+    commit('LOADING_STATISTICS', bool);
+}
+export const fetchStatistics = ({commit, dispatch}, filter) => {
+    Tracker.autorun((c) => {
+            let usersSub = Meteor.subscribe('usersStatistics', filter);    
+            dispatch('loadingStatistics', true);
+            if (!!usersSub.ready()) {
+                console.log("usersSub ready... >> ");
+                let users = Meteor.users.find({ '_id': { $ne: Meteor.userId() }}).fetch();
+                console.log('fetched users > ', users);
+                if (!!users) {
+                    dispatch('loadingStatistics', false);
+                    commit('STATISTICS_DATA', users)
+                }
+            }
+    })
 }

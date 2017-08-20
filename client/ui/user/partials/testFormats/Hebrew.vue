@@ -9,8 +9,10 @@
             <div class="answer">
                 <h5 class="rtl"> נא לבחור אחת התשובות:</h5>
                 <ul class="rtl">
-                    <li v-for="(answer, index) in question.answers" :key="answer">
-                        <a href="#p" @click.prevent="chooseAnswer(question, answer)" :class="[question.chosenAnswer===answer ? 'chosen' : '']" v-text="answer"></a>
+                    <li v-for="(answer, index) in question.answers.list" 
+                        :key="answer"
+                        @click.prevent="chooseAnswer(question, answer)">
+                        <a href="#p" :class="[question.chosenAnswer===answer ? 'chosen' : '']" v-text="answer"></a>
                         <span class="rtl" v-text="'.'+answerLabel[index]"></span>
                     </li>
                 </ul>
@@ -34,7 +36,7 @@ export default {
     methods: {
         chooseAnswer(question, answer) {
             this.$set(question, 'chosenAnswer', answer)
-            // this.$forceUpdate();
+            this.$parent.updateQuestionIndex('next');
         }
     },
     computed: {
@@ -82,10 +84,6 @@ export default {
                     direction rtl
                     text-align center
                     white-space normal
-                .parts
-                    padding 2% 0
-                    border-top 1px dashed rgba(darken(#0bddbe, 60), 0.2)
-                    border-bottom 1px dashed rgba(darken(#0bddbe, 60), 0.4)
                     span
                         display inline-block
                         margin 0 5%
@@ -109,15 +107,17 @@ export default {
                 text-align right
             li
                 display inline-block
+                vertical-align text-top
                 margin 2.2%
                 white-space nowrap
+                cursor pointer
             li a
                 font-family 'Helvetica Thin'
                 display inline-block
-                vertical-align middle
-                padding 10px
+                vertical-align text-top
+                padding 0 10px 5px
                 max-width 90%
-                border-radius 9px
+                // border-radius 9px
                 box-sizing border-box
                 text-decoration none
                 color lighten(darkblue, 20)
@@ -129,7 +129,7 @@ export default {
                 +below(1200px)
                     font-size 24px
                 & + span
-                    vertical-align text-top
+                    vertical-align baseline
                     display inline-block
                     direction rtl
                 @media screen and (max-width:740px)

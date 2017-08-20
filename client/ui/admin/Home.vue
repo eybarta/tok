@@ -12,16 +12,18 @@
     </div>
     <h2 v-text="greeting"></h2>
     <ul class="admin-tabs pt-bigger">
+        <router-link :to="{ name:'statistics', exact: true }" tag="li">
+            <a href="">סטטיסטיקות</a>
+        </router-link>
         <router-link :to="{ name:'manageUsers', exact: true }" tag="li">
             <a href="#p">ניהול משתמשים</a>
         </router-link>
         <router-link :to="{ name:'addQuestion', exact: true }" tag="li">
-            <a href="#p">יצירת שאלה</a></li>
+            <a href="#p">יצירת שאלה</a>
         </router-link>
         <router-link :to="{ name:'createTest', exact: true }" tag="li">
-            <a href="#p">יצירת מבחן</a></li>
+            <a href="#p">יצירת מבחן</a>
         </router-link>
-        <li><a href="">סטטיסטיקות</a></li>
         <!--
         <router-link tag="li">
             <a href="#p" class="tab-link">סטטיסטיקות</a>            
@@ -57,7 +59,7 @@ export default {
             'usersOnline'
         ]),
         greeting() {
-            return this.getGreetingTime + ' ירון';
+            return `שלום ירון, ${this.getGreetingTime}`;
 
         },
         getGreetingTime() {
@@ -123,12 +125,11 @@ export default {
 .admin-part
     margin-top -1px
     background linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 20%)
-    min-height 71vh
+    min-height 73vh
     box-shadow -10px -50px 50px rgba(255, 255, 255, 1)
 h2
     text-align center
-    font-size responsive 24px 30px
-
+    color darken(primaryblue, 5)
 .online-users
     position absolute
     top 20px

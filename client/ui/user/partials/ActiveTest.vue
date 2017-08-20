@@ -3,10 +3,10 @@
         <transition v-if="mode==='test'" name="fade">
             <transition-group  v-if="!started" class="welcome" name="fade-slide" tag="div">
                 <div v-if="!goodluck" key="0">
-                    <h2 class="pb-big" v-text="'מולך מבחן 20 שאלות ב' + categoryName"></h2>
-                    <!--
-                    <h2 class="pb-big">יש לך 14 דקות לסיים.</h2>
-                    -->
+                    <h2 class="pb-small" v-text="testTitle"></h2>
+                    <div v-if="!!testDescription" class="description pb-med">
+                        <p v-for="line in testDescription" v-text="line" :key="line"></p>
+                    </div>
                     <div class="radio-group">
                         <h4>האם תרצה לתרגל על זמן?</h4>
                         <div class="radio">
@@ -31,8 +31,8 @@
         <div v-if="!!started && !!testQuestions && !!testQuestions.length" class="test-wrap">
             <div class="test">
                 <h2 v-text="testTitle"></h2>
-                <div :class="['countdown', !!idle.flag ? 'bigger' : '']" v-if="mode==='test' && withtimer">
                 <!--
+                <div :class="['countdown', !!idle.flag ? 'bigger' : '']" v-if="mode==='test' && withtimer">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 300 300" preserveAspectRatio="none" style="width:300; height:300; top:0; left:0;">
                         <circle ref="timerCircle" cx="100" cy="100" r="57" fill="none" stroke="#00CC33" stroke-width="1" stroke-dasharray="0,20000" transform="rotate(-90,100,100)" style="transition: stroke-dasharray 300ms cubic-bezier(0.125, 0.585, 0.22, 1.1)" />
                         <text v-text="countdown" text-anchor="middle" x="100" y="110" ></text>
@@ -50,11 +50,11 @@
                         <span v-text="countdown"></span>
                         <i class="fa fa-clock-o"></i>
                     </div>
-                        -->
                 
                 </div>
-                <div class="time-bar">
-                    <span :class="['time-txt', timePassedPercent<1.5 ? 'at-start' : timePassedPercent>99 ? 'at-end' : '' ]" v-text="countdown" :style="`left:${timePassedPercent}%`"></span>
+                        -->
+                <div class="time-bar" v-if="mode==='test' && withtimer">
+                    <span :class="['time-txt', timePassedPercent<2 ? 'at-start' : timePassedPercent>98 ? 'at-end' : '' ]" v-text="countdown" :style="`left:${timePassedPercent}%`"></span>
                     <span class="bar" :style="`width:${timePassedPercent}%`"></span>
                 </div>
                 <div class="question-container">
@@ -95,7 +95,7 @@
                 </h4>
             </div>
             <div class="tcenter actions">
-                <button :class="['mt-small', 'mb-small', 'center', 'btn', 'btn-big', mode==='test' ? 'btn-success' : 'btn-warning']" @click="finish" v-text="mode==='test' ? 'סיימתי' : 'יציאה'"></button>
+                <button :class="['mt-small', 'mb-small', 'center', 'btn', mode==='test' ? 'btn-success' : 'btn-warning']" @click="finish" v-text="mode==='test' ? 'סיימתי' : 'יציאה'"></button>
             </div>
             </div>
             <div >
@@ -190,6 +190,7 @@ export default {
                 timer: 60000
             },
             testinfo: {
+                timestamp: null,
                 label: null,
                 type: null,
                 correct: null,
@@ -340,6 +341,7 @@ export default {
             correct = _.filter(answered, question => {
                 return question.chosenAnswer == question.answers.correct;
             })
+            this.$set(this.testinfo, 'timestamp', moment().format());
             this.$set(this.testinfo, 'type', this.$route.params.format);
             this.$set(this.testinfo, 'correct', correct.length);
             this.$set(this.testinfo, 'wrong', answered.length-correct.length);
@@ -413,16 +415,29 @@ export default {
             console.log("name > ", name);
             return _.find(categories, { value: name}).label;
         },
+        testDescription() {
+            if (this.categoryName==='סדרות') {
+                return ["לפניך מבחן הכולל 20 סדרות חשבוניות. ", "לכל סדרה יש תשובה אחת נכונה בלבד.", " בחר את התשובה הנראית לך הנכונה ביותר."]
+            }
+            return null;
+        },
         testTitle() {
             console.log("params >>", this.route.params)
             let params, type, category, name;
             
             params = this.route.params;
             type = _.find(this.testFormats, {value: this.route.name});
+            if (!!params.name) {
+                return params.name;
+            }
             if (!!params.category) {
-                console.log(" >> ", params.category);
+                if (params.category==='series') {
+                    return "מבחן סדרות חשבוניות"
+                }
                 category = _.find(categories, { value: params.category });
-                name = _.find(category.children, { value: params.name})
+                name = _.find(category.children, { value: params.name});
+                console.log(" >> ", params.category);
+                console.log(" >> ", params.name);
             }
             console.log("tst title, category", category, name, type);
             if (!!type && !!type.label && !!category && !!category.label)
@@ -613,8 +628,11 @@ wrong-color = lighten(red, 5);
                     text-align center
                 .parts
                     padding 2% 0
-                    border-top 1px dashed rgba(darken(#0bddbe, 60), 0.2)
-                    border-bottom 1px dashed rgba(darken(#0bddbe, 60), 0.4)
+                    border-top 1px dashed rgba(darken(orange, 5), 0.7)
+                    border-bottom 1px dashed rgba(darken(orange, 15), 0.7)
+                    transition border 200ms
+                    &:hover
+                        border-color orange
                     span
                         display inline-block
                         margin 0 3.5vw
@@ -741,8 +759,8 @@ wrong-color = lighten(red, 5);
         opacity 0.9
     &:before
         content ''
-        border-left 2px solid #c2c2c2
-        border-top 2px solid #c2c2c2
+        border-left 2px solid bluegreen
+        border-top 2px solid bluegreen
         width 30%
         padding-top 30%
         position absolute
@@ -881,6 +899,11 @@ wrong-color = lighten(red, 5);
         left 50%
         transform translate(-50%,-50%)
         min-width 65%
+    .description
+        p
+            font-size 16px
+            padding-bottom 3px
+            color darken(orange, 10)
     .back-btn
         display block
         width 120px
@@ -1072,7 +1095,8 @@ wrong-color = lighten(red, 5);
         font-size 14px
         color darken(red, 5)
         transform translateX(-50%)
-        transition left 300ms ease, transform 400ms ease-out
+        transition left 140ms ease-out, transform 140ms ease-out
+        z-index 999
         &.at-start
             transform translateX(20%)
         &.at-end
@@ -1084,7 +1108,7 @@ wrong-color = lighten(red, 5);
         bottom -1px
         left 0
         z-index 999
-        transition left 300ms ease
+        transition left 180ms ease-out
         &:after
             position absolute
             right 0
